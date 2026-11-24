@@ -1,5 +1,7 @@
 # SimStagecraft
 
+[Go to the nicely rendered website](https://richelbilderbeek.github.io/SimStagecraft/).
+
 Branch|[![Travis CI logo](pics/TravisCI.png)](https://travis-ci.org)
 ---|---
 `master`|[![Build Status](https://travis-ci.org/richelbilderbeek/SimStagecraft.svg?branch=master)](https://travis-ci.org/richelbilderbeek/SimStagecraft)
