@@ -80,6 +80,8 @@ jobs:
           playwright install --with-deps chromium
           python3 scripts/check_wasm_in_browser.py site
 
+      # TEMPORARY: deploy without the app, to find the cause of HTTP 500
+      - run: rm -rf site/app
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
