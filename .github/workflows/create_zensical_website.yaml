@@ -15,6 +15,7 @@ on:
       - zensical.toml
       - 'code/**'
       - CMakeLists.txt
+      - scripts/check_wasm_in_browser.py
 
 permissions:
   contents: read
