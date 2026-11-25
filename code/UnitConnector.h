@@ -3,7 +3,7 @@
 #ifndef UnitConnectorH
 #define UnitConnectorH
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitMachine.h"
 //---------------------------------------------------------------------------
 // Every Machine has at least one Connector
@@ -23,10 +23,9 @@ struct Connector
   const bool IsConnected() const { return (mConnectedTo!=0); }
 
   protected:
-  //Connector can only be deleted by boost::shared_ptr
-  //or descendants
+  public:
   virtual ~Connector() {}
-  friend boost::checked_delete(Connector *);
+  protected:
 
 
   private:
@@ -41,9 +40,9 @@ struct CinchRedFemale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //CinchRedFemale can only be deleted by boost::shared_ptr
+  public:
   ~CinchRedFemale() {}
-  friend boost::checked_delete(CinchRedFemale *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -54,9 +53,9 @@ struct CinchRedMale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //CinchRedMale can only be deleted by boost::shared_ptr
+  public:
   ~CinchRedMale() {}
-  friend boost::checked_delete(CinchRedMale *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -67,9 +66,9 @@ struct CinchWhiteFemale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //CinchWhiteFemale can only be deleted by boost::shared_ptr
+  public:
   ~CinchWhiteFemale() {}
-  friend boost::checked_delete(CinchWhiteFemale *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -80,9 +79,9 @@ struct CinchWhiteMale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //CinchWhiteMale can only be deleted by boost::shared_ptr
+  public:
   ~CinchWhiteMale() {}
-  friend boost::checked_delete(CinchWhiteMale *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -93,9 +92,9 @@ struct DmxFemale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //DmxFemale can only be deleted by boost::shared_ptr
+  public:
   ~DmxFemale() {}
-  friend boost::checked_delete(DmxFemale *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -106,9 +105,9 @@ struct DmxMale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //DmxMale can only be deleted by boost::shared_ptr
+  public:
   ~DmxMale() {}
-  friend boost::checked_delete(DmxMale *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -119,9 +118,9 @@ struct EuroFemale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //EuroFemale can only be deleted by boost::shared_ptr
+  public:
   ~EuroFemale() {}
-  friend boost::checked_delete(EuroFemale *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -132,9 +131,9 @@ struct EuroMale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //EuroMale can only be deleted by boost::shared_ptr
+  public:
   ~EuroMale() {}
-  friend boost::checked_delete(EuroMale *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -147,9 +146,9 @@ struct InternalConnection : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //InternalConnection can only be deleted by boost::shared_ptr
+  public:
   ~InternalConnection() {}
-  friend boost::checked_delete(InternalConnection *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -160,9 +159,9 @@ struct JackFemale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //JackFemale can only be deleted by boost::shared_ptr
+  public:
   ~JackFemale() {}
-  friend boost::checked_delete(JackFemale *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -174,9 +173,9 @@ struct JackXlrFemale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //JackXlrFemale can only be deleted by boost::shared_ptr
+  public:
   ~JackXlrFemale() {}
-  friend boost::checked_delete(JackXlrFemale *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -187,9 +186,9 @@ struct JackMale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //JackMale can only be deleted by boost::shared_ptr
+  public:
   ~JackMale() {}
-  friend boost::checked_delete(JackMale *);
+  private:
 };
 //---------------------------------------------------------------------------
 struct Plug220 : public Connector
@@ -199,9 +198,9 @@ struct Plug220 : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //Plug220 can only be deleted by boost::shared_ptr
+  public:
   ~Plug220() {}
-  friend boost::checked_delete(Plug220 *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -212,9 +211,9 @@ struct SpeakonFemale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //SpeakonFemale can only be deleted by boost::shared_ptr
+  public:
   ~SpeakonFemale() {}
-  friend boost::checked_delete(SpeakonFemale *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -225,9 +224,9 @@ struct SpeakonMale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //SpeakonMale can only be deleted by boost::shared_ptr
+  public:
   ~SpeakonMale() {}
-  friend boost::checked_delete(SpeakonMale *);
+  private:
 };
 //---------------------------------------------------------------------------
 struct SocketPowerMale : public Connector
@@ -237,9 +236,9 @@ struct SocketPowerMale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //SocketPowerMale can only be deleted by boost::shared_ptr
+  public:
   ~SocketPowerMale() {}
-  friend boost::checked_delete(SocketPowerMale *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -250,9 +249,9 @@ struct Socket220 : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //Socket220 can only be deleted by boost::shared_ptr
+  public:
   ~Socket220() {}
-  friend boost::checked_delete(Socket220 *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -263,9 +262,9 @@ struct SocketPowerFemale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //SocketPowerFemale can only be deleted by boost::shared_ptr
+  public:
   ~SocketPowerFemale() {}
-  friend boost::checked_delete(SocketPowerFemale *);
+  private:
 };
 //---------------------------------------------------------------------------
 struct XlrFemale : public Connector
@@ -275,9 +274,9 @@ struct XlrFemale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //XlrFemale can only be deleted by boost::shared_ptr
+  public:
   ~XlrFemale() {}
-  friend boost::checked_delete(XlrFemale *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -288,9 +287,9 @@ struct XlrMale : public Connector
     const Connector * const otherConnector) const;
 
   private:
-  //XlrMale can only be deleted by boost::shared_ptr
+  public:
   ~XlrMale() {}
-  friend boost::checked_delete(XlrMale *);
+  private:
 
 };
 //---------------------------------------------------------------------------

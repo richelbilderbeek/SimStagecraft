@@ -1,90 +1,73 @@
 //---------------------------------------------------------------------------
-
 #ifndef UnitFormSimStagecraftMainH
 #define UnitFormSimStagecraftMainH
 //---------------------------------------------------------------------------
-#include <Classes.hpp>
-#include <Controls.hpp>
-#include <StdCtrls.hpp>
-#include <Forms.hpp>
-#include <ExtCtrls.hpp>
-#include <Graphics.hpp>
-#include <Buttons.hpp>
-//---------------------------------------------------------------------------
+#include <memory>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+
+#include <QDialog>
+#include <QRect>
+
 #include "UnitEnumDisplayMode.h"
-//#include "UnitConnectorState.h"
 #include "UnitFormMachine.h"
-//#include "UnitMachine.h"
-//#include "UnitCable.h"
-//struct TFormSoundTable;
-//struct Connector;
+#include "ui/UiFormSimStagecraftMain.h"
+//---------------------------------------------------------------------------
+class QCheckBox;
+class QPushButton;
+class QTimer;
+class QWidget;
+class SurfaceWidget;
 struct ConnectorControl;
 //---------------------------------------------------------------------------
-class TFormSimStagecraftMain : public TForm
+//The screen the game is played in
+class FormSimStagecraftMain : public QDialog, private UiFormSimStagecraftMain
 {
-__published:	// IDE-managed Components
-  TImage *ImageBuffer;
-  TImage *ImageBackground;
-  TTimer *TimerMain;
-  TPanel *PanelBottom;
-  TSpeedButton *ButtonView;
-  TSpeedButton *ButtonUse;
-  TSpeedButton *ButtonConnect;
-  TImage *ImageQuit;
-  TCheckBox *CheckBoxAutoMove;
-  void __fastcall TimerMainTimer(TObject *Sender);
-  void __fastcall OnButtonClick(TObject *Sender);
-  void __fastcall FormKeyDown(TObject *Sender, WORD &Key,
-          TShiftState Shift);
-  void __fastcall ImageQuitMouseDown(TObject *Sender, TMouseButton Button,
-          TShiftState Shift, int X, int Y);
-  void __fastcall FormMouseDown(TObject *Sender, TMouseButton Button,
-          TShiftState Shift, int X, int Y);
-  void __fastcall FormMouseMove(TObject *Sender, TShiftState Shift, int X,
-          int Y);
-  void __fastcall FormMouseUp(TObject *Sender, TMouseButton Button,
-          TShiftState Shift, int X, int Y);
-  void __fastcall FormResize(TObject *Sender);
-private:	// User declarations
+public:
+  FormSimStagecraftMain(QWidget * const parent, const int selectedLevel);
+  ~FormSimStagecraftMain();
+
+  typedef std::vector<std::shared_ptr<FormMachine> >::iterator MachineIterator;
+  typedef std::vector<std::shared_ptr<FormMachine> >::const_iterator ConstMachineIterator;
+  void DrawScreen();
+  void OnConnectorClick(ConnectorControl * const connector);
+  void OnControllerClick();
+
+protected:
+  void keyPressEvent(QKeyEvent * e) override;
+
+private:
+  //Widgets
+  SurfaceWidget * const mSurface;
+  QWidget * const PanelBottom;
+  QCheckBox * const CheckBoxAutoMove;
+  QPushButton * const ButtonView;
+  QPushButton * const ButtonConnect;
+  QPushButton * const ButtonUse;
+  QPushButton * const ButtonQuit;
+  QTimer * const TimerMain;
   //Variables
-  std::vector<boost::shared_ptr<TFormMachine> > mMachines;
+  std::vector<std::shared_ptr<FormMachine> > mMachines;
   ConnectorControl * mConnector1;
   ConnectorControl * mConnector2;
   EnumDisplayMode mDisplayMode;
-  TFormMachine * mDragMachine;
+  FormMachine * mDragMachine;
   int mDragX;
   int mDragY;
   //Methods
   void PaintBackground();
-  void TickBackground();
   void SetDisplayModes(const EnumDisplayMode mode);
   void UpdateBuffers();
   void AutoMove();
-  void MoveAway(TRect& r1, TRect& r2);
   const int GetDrawingSurfaceHeight() const;
   const int GetDrawingSurfaceWidth() const;
   const bool OnFormMachine(const int x, const int y,
-    const TFormMachine * const form) const;
+    const FormMachine * const form) const;
   void TileMachines();
-
-public:		// User declarations
-  __fastcall TFormSimStagecraftMain(TComponent* Owner, const String selectedLevel);
-
-  typedef std::vector<boost::shared_ptr<TFormMachine> >::iterator MachineIterator;
-  typedef std::vector<boost::shared_ptr<TFormMachine> >::const_iterator ConstMachineIterator;
-
-  void DrawScreen();
-  void OnConnectorClick(ConnectorControl * const connector);
-  void OnControllerClick();
+  void TimerMainTimer();
+  void FormMouseDown(const int x, const int y);
+  void FormMouseMove(const int x, const int y);
+  void FormMouseUp(const int x, const int y);
+  void FormResize();
 };
 //---------------------------------------------------------------------------
-const bool InRect(const int x, const int y, const TRect& r);
-//---------------------------------------------------------------------------
-extern PACKAGE TFormSimStagecraftMain *FormSimStagecraftMain;
-//---------------------------------------------------------------------------
-
-
-
 #endif

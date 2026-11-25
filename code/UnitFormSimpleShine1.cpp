@@ -1,92 +1,86 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
 
+#include <cassert>
 #include "UnitConnectorControl.h"
 #include "UnitControllerControl.h"
 #include "UnitDisplayControl.h"
 #include "UnitLightTable.h"
 #include "UnitFormSimpleShine1.h"
-#include "UnitVcl.h"
+#include "UnitImage.h"
 #include "UnitFormSimStagecraftMain.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma resource "*.dfm"
-TFormSimpleShine1 *FormSimpleShine1;
-//---------------------------------------------------------------------------
-__fastcall TFormSimpleShine1::TFormSimpleShine1(TComponent* Owner,
-    TFormSimStagecraftMain * const formParent)
-  : TFormMachine(Owner,formParent),
-  mSimpleShine1(boost::shared_ptr<SimpleShine1>(new SimpleShine1))
+FormSimpleShine1::FormSimpleShine1(FormSimStagecraftMain * const formParent)
+  : FormMachine(formParent,DesignClientWidth,DesignClientHeight),
+  mSimpleShine1(std::shared_ptr<SimpleShine1>(new SimpleShine1))
 {
   //Control
-  mFaderControl1 = boost::shared_ptr<FaderControl>(
+  mFaderControl1 = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine1->mFaders[0],ImageFader1));
-  mFaderControl2 = boost::shared_ptr<FaderControl>(
+  mFaderControl2 = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine1->mFaders[1],ImageFader2));
-  mFaderControl3 = boost::shared_ptr<FaderControl>(
+  mFaderControl3 = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine1->mFaders[2],ImageFader3));
-  mFaderControl4 = boost::shared_ptr<FaderControl>(
+  mFaderControl4 = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine1->mFaders[3],ImageFader4));
-  mFaderControl5 = boost::shared_ptr<FaderControl>(
+  mFaderControl5 = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine1->mFaders[4],ImageFader5));
-  mFaderControl6 = boost::shared_ptr<FaderControl>(
+  mFaderControl6 = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine1->mFaders[5],ImageFader6));
-  mFaderControl7 = boost::shared_ptr<FaderControl>(
+  mFaderControl7 = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine1->mFaders[6],ImageFader7));
-  mFaderControl8 = boost::shared_ptr<FaderControl>(
+  mFaderControl8 = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine1->mFaders[7],ImageFader8));
-  mFaderControl9 = boost::shared_ptr<FaderControl>(
+  mFaderControl9 = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine1->mFaders[8],ImageFader9));
-  mFaderControl10 = boost::shared_ptr<FaderControl>(
+  mFaderControl10 = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine1->mFaders[9],ImageFader10));
-  mFaderControl11 = boost::shared_ptr<FaderControl>(
+  mFaderControl11 = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine1->mFaders[10],ImageFader11));
-  mFaderControl12 = boost::shared_ptr<FaderControl>(
+  mFaderControl12 = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine1->mFaders[11],ImageFader12));
-  mFaderControlMaster = boost::shared_ptr<FaderControl>(
+  mFaderControlMaster = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine1->mFaderMaster,ImageFaderMaster));
   //Connect
-  mDmxFemaleOut = boost::shared_ptr<DmxFemaleControl>(
+  mDmxFemaleOut = std::shared_ptr<DmxFemaleControl>(
     new DmxFemaleControl(this,mSimpleShine1->mDmxFemaleOut,ImageDmxFemaleOut));
-  mEuroMalePower = boost::shared_ptr<EuroMaleControl>(
+  mEuroMalePower = std::shared_ptr<EuroMaleControl>(
     new EuroMaleControl(this,mSimpleShine1->mEuroMalePower,ImageEuroMalePower));
   //Display
-  mLedControlPower = boost::shared_ptr<LedControl>(new LedControl(
+  mLedControlPower = std::shared_ptr<LedControl>(new LedControl(
     mSimpleShine1->mLedPower,ImageLedPower));
 
 
   CreateWatermark(ImageView,ImageWatermark);
-  OnResize(0);
+  Resize();
 
   //Manually set the faders
-  mFaderControl1->OnMouseDown(0,ImageFader1->Height - 1);
-  mFaderControl2->OnMouseDown(0,ImageFader2->Height - 1);
-  mFaderControl3->OnMouseDown(0,ImageFader3->Height - 1);
-  mFaderControl4->OnMouseDown(0,ImageFader4->Height - 1);
-  mFaderControl5->OnMouseDown(0,ImageFader5->Height - 1);
-  mFaderControl6->OnMouseDown(0,ImageFader6->Height - 1);
-  mFaderControl7->OnMouseDown(0,ImageFader7->Height - 1);
-  mFaderControl8->OnMouseDown(0,ImageFader8->Height - 1);
-  mFaderControl9->OnMouseDown(0,ImageFader9->Height - 1);
-  mFaderControl10->OnMouseDown(0,ImageFader10->Height - 1);
-  mFaderControl11->OnMouseDown(0,ImageFader11->Height - 1);
-  mFaderControl12->OnMouseDown(0,ImageFader12->Height - 1);
-  mFaderControlMaster->OnMouseDown(0,ImageFaderMaster->Height - 1);
+  mFaderControl1->OnMouseDown(0,ImageFader1->height - 1);
+  mFaderControl2->OnMouseDown(0,ImageFader2->height - 1);
+  mFaderControl3->OnMouseDown(0,ImageFader3->height - 1);
+  mFaderControl4->OnMouseDown(0,ImageFader4->height - 1);
+  mFaderControl5->OnMouseDown(0,ImageFader5->height - 1);
+  mFaderControl6->OnMouseDown(0,ImageFader6->height - 1);
+  mFaderControl7->OnMouseDown(0,ImageFader7->height - 1);
+  mFaderControl8->OnMouseDown(0,ImageFader8->height - 1);
+  mFaderControl9->OnMouseDown(0,ImageFader9->height - 1);
+  mFaderControl10->OnMouseDown(0,ImageFader10->height - 1);
+  mFaderControl11->OnMouseDown(0,ImageFader11->height - 1);
+  mFaderControl12->OnMouseDown(0,ImageFader12->height - 1);
+  mFaderControlMaster->OnMouseDown(0,ImageFaderMaster->height - 1);
 }
 //---------------------------------------------------------------------------
-void TFormSimpleShine1::UpdateBuffer()
+void FormSimpleShine1::UpdateBuffer()
 {
   switch (mDisplayMode)
   {
     case modeView:
-      ImageBuffer->Canvas->Draw(0,0,ImageView->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageView);
       break;
     case modeUse:
       //Update displays
       mLedControlPower->Update();
       //Start drawing
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       DrawOnBuffer(LabelUse1);
       DrawOnBuffer(LabelUse2);
@@ -120,7 +114,7 @@ void TFormSimpleShine1::UpdateBuffer()
       DrawOnBuffer(ImageLedPower);
       break;
     case modeConnect:
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       DrawOnBuffer(LabelConnectPower);
       DrawOnBuffer(LabelConnectDmxOut);
@@ -133,7 +127,7 @@ void TFormSimpleShine1::UpdateBuffer()
   DrawBorderAroundBuffer();
 }
 //---------------------------------------------------------------------------
-void TFormSimpleShine1::OnMouseDown(const int x, const int y)
+void FormSimpleShine1::OnMouseDown(const int x, const int y)
 {
   switch (mDisplayMode)
   {
@@ -143,80 +137,80 @@ void TFormSimpleShine1::OnMouseDown(const int x, const int y)
       if (OnImage(x,y,ImageFader1))
       {
         mFaderControl1->OnMouseDown(
-          x - ImageFader1->Left,
-          y - ImageFader1->Top);
+          x - ImageFader1->left,
+          y - ImageFader1->top);
       }
       else if (OnImage(x,y,ImageFader2))
       {
         mFaderControl2->OnMouseDown(
-          x - ImageFader1->Left,
-          y - ImageFader1->Top);
+          x - ImageFader1->left,
+          y - ImageFader1->top);
       }
       else if (OnImage(x,y,ImageFader3))
       {
         mFaderControl3->OnMouseDown(
-          x - ImageFader1->Left,
-          y - ImageFader1->Top);
+          x - ImageFader1->left,
+          y - ImageFader1->top);
       }
       else if (OnImage(x,y,ImageFader4))
       {
         mFaderControl4->OnMouseDown(
-          x - ImageFader1->Left,
-          y - ImageFader1->Top);
+          x - ImageFader1->left,
+          y - ImageFader1->top);
       }
       else if (OnImage(x,y,ImageFader5))
       {
         mFaderControl5->OnMouseDown(
-          x - ImageFader1->Left,
-          y - ImageFader1->Top);
+          x - ImageFader1->left,
+          y - ImageFader1->top);
       }
       else if (OnImage(x,y,ImageFader6))
       {
         mFaderControl6->OnMouseDown(
-          x - ImageFader1->Left,
-          y - ImageFader1->Top);
+          x - ImageFader1->left,
+          y - ImageFader1->top);
       }
       else if (OnImage(x,y,ImageFader7))
       {
         mFaderControl7->OnMouseDown(
-          x - ImageFader1->Left,
-          y - ImageFader1->Top);
+          x - ImageFader1->left,
+          y - ImageFader1->top);
       }
       else if (OnImage(x,y,ImageFader8))
       {
         mFaderControl8->OnMouseDown(
-          x - ImageFader1->Left,
-          y - ImageFader1->Top);
+          x - ImageFader1->left,
+          y - ImageFader1->top);
       }
       else if (OnImage(x,y,ImageFader9))
       {
         mFaderControl9->OnMouseDown(
-          x - ImageFader1->Left,
-          y - ImageFader1->Top);
+          x - ImageFader1->left,
+          y - ImageFader1->top);
       }
       else if (OnImage(x,y,ImageFader10))
       {
         mFaderControl10->OnMouseDown(
-          x - ImageFader1->Left,
-          y - ImageFader1->Top);
+          x - ImageFader1->left,
+          y - ImageFader1->top);
       }
       else if (OnImage(x,y,ImageFader11))
       {
         mFaderControl11->OnMouseDown(
-          x - ImageFader1->Left,
-          y - ImageFader1->Top);
+          x - ImageFader1->left,
+          y - ImageFader1->top);
       }
       else if (OnImage(x,y,ImageFader12))
       {
         mFaderControl12->OnMouseDown(
-          x - ImageFader1->Left,
-          y - ImageFader1->Top);
+          x - ImageFader1->left,
+          y - ImageFader1->top);
       }
       else if (OnImage(x,y,ImageFaderMaster))
       {
         mFaderControlMaster->OnMouseDown(
-          x - ImageFaderMaster->Left,
-          y - ImageFaderMaster->Top);
+          x - ImageFaderMaster->left,
+          y - ImageFaderMaster->top);
       }
 
       break;
@@ -230,37 +224,25 @@ void TFormSimpleShine1::OnMouseDown(const int x, const int y)
   }
 }
 //---------------------------------------------------------------------------
-void TFormSimpleShine1::OnAfterResize()
+void FormSimpleShine1::OnAfterResize()
 {
   //Use
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,14,7));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),14,7));
     //Resize bitmaps
-    ImageFader1->Picture->Bitmap->Height      = MergeRects(v[3][0],v[5][0]).Height();
-    ImageFader2->Picture->Bitmap->Height      = MergeRects(v[3][1],v[5][1]).Height();
-    ImageFader3->Picture->Bitmap->Height      = MergeRects(v[3][2],v[5][2]).Height();
-    ImageFader4->Picture->Bitmap->Height      = MergeRects(v[3][3],v[5][3]).Height();
-    ImageFader5->Picture->Bitmap->Height      = MergeRects(v[3][4],v[5][4]).Height();
-    ImageFader6->Picture->Bitmap->Height      = MergeRects(v[3][5],v[5][5]).Height();
-    ImageFader7->Picture->Bitmap->Height      = MergeRects(v[3][6],v[5][6]).Height();
-    ImageFader8->Picture->Bitmap->Height      = MergeRects(v[3][7],v[5][7]).Height();
-    ImageFader9->Picture->Bitmap->Height      = MergeRects(v[3][8],v[5][8]).Height();
-    ImageFader10->Picture->Bitmap->Height     = MergeRects(v[3][9],v[5][9]).Height();
-    ImageFader11->Picture->Bitmap->Height     = MergeRects(v[3][10],v[5][10]).Height();
-    ImageFader12->Picture->Bitmap->Height     = MergeRects(v[3][11],v[5][11]).Height();
-    ImageFaderMaster->Picture->Bitmap->Height = MergeRects(v[3][12],v[5][13]).Height();
-    ImageFader1->Refresh();
-    ImageFader2->Refresh();
-    ImageFader3->Refresh();
-    ImageFader4->Refresh();
-    ImageFader5->Refresh();
-    ImageFader6->Refresh();
-    ImageFader7->Refresh();
-    ImageFader8->Refresh();
-    ImageFader9->Refresh();
-    ImageFader10->Refresh();
-    ImageFader11->Refresh();
-    ImageFader12->Refresh();
+    SetPictureHeight(ImageFader1,MergeRects(v[3][0],v[5][0]).height());
+    SetPictureHeight(ImageFader2,MergeRects(v[3][1],v[5][1]).height());
+    SetPictureHeight(ImageFader3,MergeRects(v[3][2],v[5][2]).height());
+    SetPictureHeight(ImageFader4,MergeRects(v[3][3],v[5][3]).height());
+    SetPictureHeight(ImageFader5,MergeRects(v[3][4],v[5][4]).height());
+    SetPictureHeight(ImageFader6,MergeRects(v[3][5],v[5][5]).height());
+    SetPictureHeight(ImageFader7,MergeRects(v[3][6],v[5][6]).height());
+    SetPictureHeight(ImageFader8,MergeRects(v[3][7],v[5][7]).height());
+    SetPictureHeight(ImageFader9,MergeRects(v[3][8],v[5][8]).height());
+    SetPictureHeight(ImageFader10,MergeRects(v[3][9],v[5][9]).height());
+    SetPictureHeight(ImageFader11,MergeRects(v[3][10],v[5][10]).height());
+    SetPictureHeight(ImageFader12,MergeRects(v[3][11],v[5][11]).height());
+    SetPictureHeight(ImageFaderMaster,MergeRects(v[3][12],v[5][13]).height());
     //Place bitmaps
     //Labels
     PlaceInCenter(LabelUse1,v[2][0]);
@@ -296,7 +278,7 @@ void TFormSimpleShine1::OnAfterResize()
   }
   //Connect
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,2,2));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),2,2));
     //Labels
     PlaceInCenter(LabelConnectPower ,v[0][0]);
     PlaceInCenter(LabelConnectDmxOut,v[0][1]);

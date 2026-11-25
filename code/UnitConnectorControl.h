@@ -3,11 +3,10 @@
 #ifndef UnitConnectorControlH
 #define UnitConnectorControlH
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
-#include <boost/checked_delete.hpp>
+#include <memory>
 struct Connector;
-struct TFormSprites;
-struct TFormMachine;
+class FormSprites;
+class FormMachine;
 struct CinchRedFemale;
 struct CinchRedMale;
 struct CinchWhiteFemale;
@@ -27,18 +26,18 @@ struct SpeakonFemale;
 struct SpeakonMale;
 struct XlrFemale;
 struct XlrMale;
-namespace Extctrls { struct TImage; }
+struct Image;
 //---------------------------------------------------------------------------
 //Handles the GUI of a Connector
 struct ConnectorControl
 {
   ConnectorControl(
-    TFormMachine * const belongsTo,
-    Extctrls::TImage * const image,
-    const Extctrls::TImage * const imageUnselectedUnconnected,
-    const Extctrls::TImage * const imageSelectedUnconnected,
-    const Extctrls::TImage * const imageUnselectedConnected,
-    const Extctrls::TImage * const imageSelectedConnected);
+    FormMachine * const belongsTo,
+    Image * const image,
+    const Image * const imageUnselectedUnconnected,
+    const Image * const imageSelectedUnconnected,
+    const Image * const imageUnselectedConnected,
+    const Image * const imageSelectedConnected);
 
   void Select();
   void Unselect();
@@ -53,20 +52,19 @@ struct ConnectorControl
   const bool IsConnectedTo(const ConnectorControl * other) const;
 
   protected:
-  //ConnectorControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   virtual ~ConnectorControl() {}
-  friend boost::checked_delete(ConnectorControl*);
+  protected:
 
-  const Extctrls::TImage * const mImageUnselectedUnconnected;
-  const Extctrls::TImage * const mImageSelectedUnconnected;
-  const Extctrls::TImage * const mImageUnselectedConnected;
-  const Extctrls::TImage * const mImageSelectedConnected;
+  const Image * const mImageUnselectedUnconnected;
+  const Image * const mImageSelectedUnconnected;
+  const Image * const mImageUnselectedConnected;
+  const Image * const mImageSelectedConnected;
 
   private:
   bool mSelected;
-  Extctrls::TImage * const mImage;
-  TFormMachine * const mBelongsTo;
+  Image * const mImage;
+  FormMachine * const mBelongsTo;
   ConnectorControl * mIsConnectedTo;
   void UpdateImage();
 };
@@ -74,249 +72,237 @@ struct ConnectorControl
 struct CinchRedFemaleControl : public ConnectorControl
 {
   CinchRedFemaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<CinchRedFemale> cinchFemale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<CinchRedFemale> cinchFemale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<CinchRedFemale> mCinchFemale;
+  std::shared_ptr<CinchRedFemale> mCinchFemale;
 
-  //CinchRedFemaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~CinchRedFemaleControl() {}
-  friend boost::checked_delete(CinchRedFemaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct CinchWhiteFemaleControl : public ConnectorControl
 {
   CinchWhiteFemaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<CinchWhiteFemale> cinchFemale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<CinchWhiteFemale> cinchFemale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<CinchWhiteFemale> mCinchFemale;
+  std::shared_ptr<CinchWhiteFemale> mCinchFemale;
 
-  //CinchWhiteFemaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~CinchWhiteFemaleControl() {}
-  friend boost::checked_delete(CinchWhiteFemaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct CinchRedMaleControl : public ConnectorControl
 {
   CinchRedMaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<CinchRedMale> cinchMale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<CinchRedMale> cinchMale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<CinchRedMale> mCinchMale;
+  std::shared_ptr<CinchRedMale> mCinchMale;
 
-  //CinchRedMaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~CinchRedMaleControl() {}
-  friend boost::checked_delete(CinchRedMaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct CinchWhiteMaleControl : public ConnectorControl
 {
   CinchWhiteMaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<CinchRedMale> cinchMale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<CinchRedMale> cinchMale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<CinchRedMale> mCinchMale;
+  std::shared_ptr<CinchRedMale> mCinchMale;
 
-  //CinchWhiteMaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~CinchWhiteMaleControl() {}
-  friend boost::checked_delete(CinchWhiteMaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct DmxFemaleControl : public ConnectorControl
 {
   DmxFemaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<DmxFemale> dmxFemale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<DmxFemale> dmxFemale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<DmxFemale> mDmxFemale;
+  std::shared_ptr<DmxFemale> mDmxFemale;
 
-  //DmxFemaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~DmxFemaleControl() {}
-  friend boost::checked_delete(DmxFemaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct DmxMaleControl : public ConnectorControl
 {
   DmxMaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<DmxMale> dmxMale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<DmxMale> dmxMale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<DmxMale> mDmxMale;
+  std::shared_ptr<DmxMale> mDmxMale;
 
-  //DmxMaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~DmxMaleControl() {}
-  friend boost::checked_delete(DmxMaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct EuroFemaleControl : public ConnectorControl
 {
   EuroFemaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<EuroFemale> euroFemale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<EuroFemale> euroFemale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<EuroFemale> mEuroFemale;
+  std::shared_ptr<EuroFemale> mEuroFemale;
 
-  //EuroFemaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~EuroFemaleControl() {}
-  friend boost::checked_delete(EuroFemaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct EuroMaleControl : public ConnectorControl
 {
   EuroMaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<EuroMale> euroMale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<EuroMale> euroMale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<EuroMale> mEuroMale;
+  std::shared_ptr<EuroMale> mEuroMale;
 
-  //EuroMaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~EuroMaleControl() {}
-  friend boost::checked_delete(EuroMaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct JackFemaleControl : public ConnectorControl
 {
   JackFemaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<JackFemale> euroFemale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<JackFemale> euroFemale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<JackFemale> mJackFemale;
+  std::shared_ptr<JackFemale> mJackFemale;
 
-  //JackFemaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~JackFemaleControl() {}
-  friend boost::checked_delete(JackFemaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct JackXlrFemaleControl : public ConnectorControl
 {
   JackXlrFemaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<JackXlrFemale> euroFemale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<JackXlrFemale> euroFemale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<JackXlrFemale> mJackXlrFemale;
+  std::shared_ptr<JackXlrFemale> mJackXlrFemale;
 
-  //JackXlrFemaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~JackXlrFemaleControl() {}
-  friend boost::checked_delete(JackXlrFemaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct JackMaleControl : public ConnectorControl
 {
   JackMaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<JackMale> euroFemale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<JackMale> euroFemale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<JackMale> mJackMale;
+  std::shared_ptr<JackMale> mJackMale;
 
-  //JackMaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~JackMaleControl() {}
-  friend boost::checked_delete(JackMaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct Plug220Control : public ConnectorControl
 {
   Plug220Control(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<Plug220> plug220,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<Plug220> plug220,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<Plug220> mPlug220;
+  std::shared_ptr<Plug220> mPlug220;
 
-  //Plug220Control can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~Plug220Control() {}
-  friend boost::checked_delete(Plug220Control*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct Socket220Control : public ConnectorControl
 {
   Socket220Control(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<Socket220> socket220,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<Socket220> socket220,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
@@ -324,20 +310,19 @@ struct Socket220Control : public ConnectorControl
 
   private:
 
-  boost::shared_ptr<Socket220> mSocket220;
+  std::shared_ptr<Socket220> mSocket220;
 
-  //Socket220Control can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~Socket220Control() {}
-  friend boost::checked_delete(Socket220Control*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct SocketPowerFemaleControl : public ConnectorControl
 {
   SocketPowerFemaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<SocketPowerFemale> socketPowerFemale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<SocketPowerFemale> socketPowerFemale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
@@ -345,20 +330,19 @@ struct SocketPowerFemaleControl : public ConnectorControl
 
   private:
 
-  boost::shared_ptr<SocketPowerFemale> mSocketPowerFemale;
+  std::shared_ptr<SocketPowerFemale> mSocketPowerFemale;
 
-  //SocketPowerFemaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~SocketPowerFemaleControl() {}
-  friend boost::checked_delete(SocketPowerFemaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct SocketPowerMaleControl : public ConnectorControl
 {
   SocketPowerMaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<SocketPowerMale> socketPowerMale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<SocketPowerMale> socketPowerMale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
@@ -366,92 +350,87 @@ struct SocketPowerMaleControl : public ConnectorControl
 
   private:
 
-  boost::shared_ptr<SocketPowerMale> mSocketPowerMale;
+  std::shared_ptr<SocketPowerMale> mSocketPowerMale;
 
-  //SocketPowerMaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~SocketPowerMaleControl() {}
-  friend boost::checked_delete(SocketPowerMaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct SpeakonFemaleControl : public ConnectorControl
 {
   SpeakonFemaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<SpeakonFemale> euroFemale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<SpeakonFemale> euroFemale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<SpeakonFemale> mSpeakonFemale;
+  std::shared_ptr<SpeakonFemale> mSpeakonFemale;
 
-  //SpeakonFemaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~SpeakonFemaleControl() {}
-  friend boost::checked_delete(SpeakonFemaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct SpeakonMaleControl : public ConnectorControl
 {
   SpeakonMaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<SpeakonMale> euroFemale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<SpeakonMale> euroFemale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<SpeakonMale> mSpeakonMale;
+  std::shared_ptr<SpeakonMale> mSpeakonMale;
 
-  //SpeakonMaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~SpeakonMaleControl() {}
-  friend boost::checked_delete(SpeakonMaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct XlrFemaleControl : public ConnectorControl
 {
   XlrFemaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<XlrFemale> xlrFemale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<XlrFemale> xlrFemale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<XlrFemale> mXlrFemale;
+  std::shared_ptr<XlrFemale> mXlrFemale;
 
-  //XlrFemaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~XlrFemaleControl() {}
-  friend boost::checked_delete(XlrFemaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct XlrMaleControl : public ConnectorControl
 {
   XlrMaleControl(
-    TFormMachine * const belongsTo,
-    const boost::shared_ptr<XlrMale> xlrMale,
-    Extctrls::TImage * const image);
+    FormMachine * const belongsTo,
+    const std::shared_ptr<XlrMale> xlrMale,
+    Image * const image);
 
   const Connector * const GetConnector() const;
   Connector * GetConnector();
 
   private:
 
-  boost::shared_ptr<XlrMale> mXlrMale;
+  std::shared_ptr<XlrMale> mXlrMale;
 
-  //XlrMaleControl can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   ~XlrMaleControl() {}
-  friend boost::checked_delete(XlrMaleControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 

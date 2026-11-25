@@ -4,12 +4,12 @@
 #define UnitCreateMachinesH
 //---------------------------------------------------------------------------
 #include <vector>
-#include <boost/shared_ptr.hpp>
-struct TFormMachine;
-struct TFormSimStagecraftMain;
+#include <memory>
+class FormMachine;
+class FormSimStagecraftMain;
 //---------------------------------------------------------------------------
-std::vector<boost::shared_ptr<TFormMachine> > CreateMachines(
-  TFormSimStagecraftMain * const formParent,
+std::vector<std::shared_ptr<FormMachine> > CreateMachines(
+  FormSimStagecraftMain * const formParent,
   const int level);
 //---------------------------------------------------------------------------
 #endif

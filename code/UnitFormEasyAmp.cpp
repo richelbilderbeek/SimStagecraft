@@ -1,7 +1,6 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
 
+#include <cassert>
 #include "UnitConnectorControl.h"
 #include "UnitControllerControl.h"
 #include "UnitDisplayControl.h"
@@ -9,67 +8,62 @@
 #include "UnitFormMachine.h"
 #include "UnitFormSimStagecraftMain.h"
 #include "UnitAmplifier.h"
-#include "UnitVcl.h"
+#include "UnitImage.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma link "UnitFormMachine"
-#pragma resource "*.dfm"
-TFormEasyAmp *FormEasyAmp;
 //---------------------------------------------------------------------------
-__fastcall TFormEasyAmp::TFormEasyAmp(TComponent* Owner,
-    TFormSimStagecraftMain * const formParent)
-  : TFormMachine(Owner,formParent),
-    mAmplifier(boost::shared_ptr<EasyAmp>(new EasyAmp))
+FormEasyAmp::FormEasyAmp(FormSimStagecraftMain * const formParent)
+  : FormMachine(formParent,DesignClientWidth,DesignClientHeight),
+    mAmplifier(std::shared_ptr<EasyAmp>(new EasyAmp))
 {
 
 
   //Control
-  mPowerSwitch = boost::shared_ptr<TwoSwitchControl>(
+  mPowerSwitch = std::shared_ptr<TwoSwitchControl>(
     new TwoSwitchControl(this,mAmplifier->mPowerSwitch,ImagePowerSwitch));
-    boost::shared_ptr<DialControl> mGain;
-  this->mGain = boost::shared_ptr<DialControl>(
+    std::shared_ptr<DialControl> mGain;
+  this->mGain = std::shared_ptr<DialControl>(
     new DialControl(this,mAmplifier->mGain,ImageGain));
   assert(this->mGain);
   //Connect
-  mEuro = boost::shared_ptr<EuroMaleControl>(
+  mEuro = std::shared_ptr<EuroMaleControl>(
     new EuroMaleControl(this,mAmplifier->mEuroPower,ImageEuro));
-  mJackXlrL = boost::shared_ptr<JackXlrFemaleControl>(
+  mJackXlrL = std::shared_ptr<JackXlrFemaleControl>(
     new JackXlrFemaleControl(this,mAmplifier->mJackXlrL,ImageJackXlrL));
-  mJackXlrR = boost::shared_ptr<JackXlrFemaleControl>(
+  mJackXlrR = std::shared_ptr<JackXlrFemaleControl>(
     new JackXlrFemaleControl(this,mAmplifier->mJackXlrR,ImageJackXlrR));
-  mSpeakonL = boost::shared_ptr<SpeakonFemaleControl>(
+  mSpeakonL = std::shared_ptr<SpeakonFemaleControl>(
     new SpeakonFemaleControl(this,mAmplifier->mSpeakonL,ImageSpeakonL));
-  mSpeakonR = boost::shared_ptr<SpeakonFemaleControl>(
+  mSpeakonR = std::shared_ptr<SpeakonFemaleControl>(
     new SpeakonFemaleControl(this,mAmplifier->mSpeakonR,ImageSpeakonR));
   //Display
-  mLedPower = boost::shared_ptr<LedControl> (
+  mLedPower = std::shared_ptr<LedControl> (
     new LedControl(mAmplifier->mLedPower,ImageLed));
 
   CreateWatermark(ImageView,ImageWatermark);
 
-  OnResize(0);
+  Resize();
 
   //Set controls by clicking virtually
   //Strange, if I remove 'this' I get access violations,
   //  because mGain is null (where this->mGain is not)
   this->mGain->OnMouseDown(
-    1 * ImageGain->Picture->Bitmap->Width  / 4,
-    3 * ImageGain->Picture->Bitmap->Height / 4);
+    1 * ImageGain->picture.width()  / 4,
+    3 * ImageGain->picture.height() / 4);
   mPowerSwitch->OnMouseDown(0,0);
 }
 //---------------------------------------------------------------------------
-void TFormEasyAmp::UpdateBuffer()
+void FormEasyAmp::UpdateBuffer()
 {
   switch (mDisplayMode)
   {
     case modeView:
-      ImageBuffer->Canvas->Draw(0,0,ImageView->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageView);
       break;
     case modeUse:
       //Update displays
       mLedPower->Update();
       //Draw
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       //Controls
       DrawOnBuffer(ImagePowerSwitch);
@@ -78,7 +72,7 @@ void TFormEasyAmp::UpdateBuffer()
       DrawOnBuffer(ImageLed);
       break;
     case modeConnect:
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       //Connectors
       DrawOnBuffer(ImageEuro);
@@ -93,7 +87,7 @@ void TFormEasyAmp::UpdateBuffer()
   DrawBorderAroundBuffer();
 }
 //---------------------------------------------------------------------------
-void TFormEasyAmp::OnMouseDown(const int x, const int y)
+void FormEasyAmp::OnMouseDown(const int x, const int y)
 {
   switch (mDisplayMode)
   {
@@ -103,15 +97,15 @@ void TFormEasyAmp::OnMouseDown(const int x, const int y)
       if (OnImage(x,y,ImagePowerSwitch))
       {
         mPowerSwitch->OnMouseDown(
-          x - ImagePowerSwitch->Left,
-          y - ImagePowerSwitch->Top);
+          x - ImagePowerSwitch->left,
+          y - ImagePowerSwitch->top);
       }
       else if (OnImage(x,y,ImageGain))
       {
         assert(this->mGain);
         this->mGain->OnMouseDown(
-          x - ImageGain->Left,
-          y - ImageGain->Top);
+          x - ImageGain->left,
+          y - ImageGain->top);
       }
       break;
     case modeConnect:
@@ -129,11 +123,11 @@ void TFormEasyAmp::OnMouseDown(const int x, const int y)
   }
 }
 //---------------------------------------------------------------------------
-void TFormEasyAmp::OnAfterResize()
+void FormEasyAmp::OnAfterResize()
 {
   //Use
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,3,1));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),3,1));
     //Resize bitmaps
     //Place bitmaps
     //Labels
@@ -146,7 +140,7 @@ void TFormEasyAmp::OnAfterResize()
   }
   //Connect
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,3,2));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),3,2));
     //Labels
     //Connectors
     PlaceInCenter(ImageEuro,MergeRects(v[0][0],v[1][0]));

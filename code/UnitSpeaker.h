@@ -3,7 +3,7 @@
 #ifndef UnitSpeakerH
 #define UnitSpeakerH
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitMachine.h"
 //View
 //Use
@@ -19,8 +19,8 @@ struct XlrMale;
 //Display
 struct Led;
 //Forms
-struct TFormRcf322A;
-struct TFormRcfEvent3000;
+class FormRcf322A;
+class FormRcfEvent3000;
 //---------------------------------------------------------------------------
 struct Speaker : public Machine
 {
@@ -38,10 +38,9 @@ struct Speaker : public Machine
   virtual const bool HasPower() const = 0;
 
   protected:
-  //Speaker can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   virtual ~Speaker() {}
-  friend boost::checked_delete(Speaker *);
+  protected:
 
 };
 //---------------------------------------------------------------------------
@@ -58,10 +57,9 @@ struct PassiveSpeaker : public Speaker
   const bool HasPower() const { return 0.0; }
 
   protected:
-  //Speaker can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   virtual ~PassiveSpeaker() {}
-  friend boost::checked_delete(PassiveSpeaker *);
+  protected:
 
 };
 //---------------------------------------------------------------------------
@@ -86,26 +84,26 @@ struct Rcf322A : public Speaker
   //The sound level without the limiter acting
   const double GetUnlimitedSoundLevel() const;
 
-  //Rcf322A can only be deleted by boost::shared_ptr
+  public:
   ~Rcf322A() {}
-  friend boost::checked_delete(Rcf322A*);
+  private:
 
   //View
   //Use
-  boost::shared_ptr<TwoSwitch> mPowerSwitch;
-  boost::shared_ptr<Dial> mVolumeDial;
+  std::shared_ptr<TwoSwitch> mPowerSwitch;
+  std::shared_ptr<Dial> mVolumeDial;
   //Connect
-  boost::shared_ptr<JackFemale> mJackInput;
-  boost::shared_ptr<XlrMale> mXlrDaisyChain;
-  boost::shared_ptr<XlrFemale> mXlrInput;
-  boost::shared_ptr<EuroMale> mEuroMalePower;
-  boost::shared_ptr<InternalConnection> mConnectionLedPower;
-  boost::shared_ptr<InternalConnection> mConnectionLedLimProt;
+  std::shared_ptr<JackFemale> mJackInput;
+  std::shared_ptr<XlrMale> mXlrDaisyChain;
+  std::shared_ptr<XlrFemale> mXlrInput;
+  std::shared_ptr<EuroMale> mEuroMalePower;
+  std::shared_ptr<InternalConnection> mConnectionLedPower;
+  std::shared_ptr<InternalConnection> mConnectionLedLimProt;
   //Display
-  boost::shared_ptr<Led> mLedPower;
-  boost::shared_ptr<Led> mLedLimProt;
+  std::shared_ptr<Led> mLedPower;
+  std::shared_ptr<Led> mLedLimProt;
 
-  friend TFormRcf322A;
+  friend class FormRcf322A;
 };
 //---------------------------------------------------------------------------
 struct RcfEvent3000 : public PassiveSpeaker
@@ -122,18 +120,18 @@ struct RcfEvent3000 : public PassiveSpeaker
   //The sound level without the limiter acting
   const double GetUnlimitedSoundLevel() const;
 
-  //RcfEvent3000 can only be deleted by boost::shared_ptr
+  public:
   ~RcfEvent3000() {}
-  friend boost::checked_delete(RcfEvent3000*);
+  private:
 
   //View
   //Use
   //Connect
-  boost::shared_ptr<SpeakonFemale> mInput;
-  boost::shared_ptr<SpeakonFemale> mLink;
+  std::shared_ptr<SpeakonFemale> mInput;
+  std::shared_ptr<SpeakonFemale> mLink;
   //Display
 
-  friend TFormRcfEvent3000;
+  friend class FormRcfEvent3000;
 };
 //---------------------------------------------------------------------------
 

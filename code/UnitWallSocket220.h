@@ -3,10 +3,10 @@
 #ifndef UnitWallSocket220H
 #define UnitWallSocket220H
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitMachine.h"
 struct Socket220;
-struct TFormWallSocket220;
+class FormWallSocket220;
 //---------------------------------------------------------------------------
 struct WallSocket220 : public Machine
 {
@@ -32,13 +32,13 @@ struct WallSocket220 : public Machine
   private:
   //Control
   //Connect
-  boost::shared_ptr<Socket220> mSocket220;
+  std::shared_ptr<Socket220> mSocket220;
 
-  friend TFormWallSocket220;
+  friend class FormWallSocket220;
 
-  //WallSocket220 can only be deleted by boost::shared_ptr
+  public:
   ~WallSocket220() {}
-  friend boost::checked_delete(WallSocket220 *);
+  private:
 
 };
 //---------------------------------------------------------------------------

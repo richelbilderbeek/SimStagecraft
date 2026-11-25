@@ -1,27 +1,20 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
 
+#include <cassert>
 #include "UnitConnectorControl.h"
 #include "UnitDisplayControl.h"
 #include "UnitMachine.h"
 #include "UnitDimmerpack.h"
-#include "UnitVcl.h"
+#include "UnitImage.h"
 #include "UnitFormDimblockV3.h"
 #include "UnitFormSprites.h"
 #include "UnitFormMachine.h"
 #include "UnitFormSimStagecraftMain.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma link "UnitFormMachine"
-#pragma link "UnitFormMachine"
-#pragma resource "*.dfm"
-TFormDimblockV3 *FormDimblockV3;
 //---------------------------------------------------------------------------
-__fastcall TFormDimblockV3::TFormDimblockV3(TComponent* Owner,
-    TFormSimStagecraftMain * const formParent)
-  : TFormMachine(Owner,formParent),
-    mDimblockV3(boost::shared_ptr<DimblockV3>(new DimblockV3))
+FormDimblockV3::FormDimblockV3(FormSimStagecraftMain * const formParent)
+  : FormMachine(formParent,DesignClientWidth,DesignClientHeight),
+    mDimblockV3(std::shared_ptr<DimblockV3>(new DimblockV3))
 {
   mImageSockets.push_back(ImageSocket1);
   mImageSockets.push_back(ImageSocket2);
@@ -38,36 +31,36 @@ __fastcall TFormDimblockV3::TFormDimblockV3(TComponent* Owner,
   assert(mImageSockets.size() == 12);
   //Control
   //Connect
-  mDmxMaleInput = boost::shared_ptr<DmxMaleControl>(new DmxMaleControl(this,
+  mDmxMaleInput = std::shared_ptr<DmxMaleControl>(new DmxMaleControl(this,
     mDimblockV3->mDmxMaleInput, ImageDmxMaleInput));
-  mDmxFemaleThrough = boost::shared_ptr<DmxFemaleControl>(new DmxFemaleControl(this,
+  mDmxFemaleThrough = std::shared_ptr<DmxFemaleControl>(new DmxFemaleControl(this,
     mDimblockV3->mDmxFemaleOutput, ImageDmxFemaleThrough));
-  mSocketPowerMale = boost::shared_ptr<SocketPowerMaleControl>(
+  mSocketPowerMale = std::shared_ptr<SocketPowerMaleControl>(
     new SocketPowerMaleControl(this, mDimblockV3->mPowerMale, ImageSocketPowerMale));
   mSockets = this->CreateSocket220Controls();
   //Display
-  mLedMainsPower = boost::shared_ptr<LedControl>(new LedControl(
+  mLedMainsPower = std::shared_ptr<LedControl>(new LedControl(
     mDimblockV3->mLedMainsPower,ImageLedMainsPower));
-  mLedNondimSet = boost::shared_ptr<LedControl>(new LedControl(
+  mLedNondimSet = std::shared_ptr<LedControl>(new LedControl(
     mDimblockV3->mLedNondimSet,ImageLedNondimSet));
-  mLedPresetSet = boost::shared_ptr<LedControl>(new LedControl(
+  mLedPresetSet = std::shared_ptr<LedControl>(new LedControl(
     mDimblockV3->mLedPresetSet,ImageLedPresetSet));
-  mLedDmxPresent = boost::shared_ptr<LedControl>(new LedControl(
+  mLedDmxPresent = std::shared_ptr<LedControl>(new LedControl(
     mDimblockV3->mLedDmxPresent,ImageLedDmxPresent));
-  mLedWarning = boost::shared_ptr<LedControl>(new LedControl(
+  mLedWarning = std::shared_ptr<LedControl>(new LedControl(
     mDimblockV3->mLedWarning,ImageLedWarning));
 
   CreateWatermark(ImageView,ImageWatermark);
 
-  OnResize(0);
+  Resize();
 }
 //---------------------------------------------------------------------------
-void TFormDimblockV3::UpdateBuffer()
+void FormDimblockV3::UpdateBuffer()
 {
   switch (mDisplayMode)
   {
     case modeView:
-      ImageBuffer->Canvas->Draw(0,0,ImageView->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageView);
       break;
     case modeUse:
       //Update all
@@ -77,7 +70,7 @@ void TFormDimblockV3::UpdateBuffer()
       mLedDmxPresent->Update();
       mLedWarning->Update();
       //Start drawing
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       DrawOnBuffer(LabelUseMainsPower);
       DrawOnBuffer(LabelUseNondimSet);
@@ -92,7 +85,7 @@ void TFormDimblockV3::UpdateBuffer()
       DrawOnBuffer(ImageLedWarning);
       break;
     case modeConnect:
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       DrawOnBuffer(LabelConnectDmxIn);
       DrawOnBuffer(LabelConnectDmxThrough);
@@ -127,7 +120,7 @@ void TFormDimblockV3::UpdateBuffer()
   DrawBorderAroundBuffer();
 }
 //---------------------------------------------------------------------------
-void TFormDimblockV3::OnMouseDown(const int x, const int y)
+void FormDimblockV3::OnMouseDown(const int x, const int y)
 {
   switch (mDisplayMode)
   {
@@ -155,17 +148,17 @@ void TFormDimblockV3::OnMouseDown(const int x, const int y)
   }
 }
 //---------------------------------------------------------------------------
-const std::vector<boost::shared_ptr<Socket220Control> >
-  TFormDimblockV3::CreateSocket220Controls()
+const std::vector<std::shared_ptr<Socket220Control> >
+  FormDimblockV3::CreateSocket220Controls()
 {
-  std::vector<boost::shared_ptr<Socket220Control> > sockets;
+  std::vector<std::shared_ptr<Socket220Control> > sockets;
 
   const int nSockets = mImageSockets.size();
   assert(mDimblockV3->mSockets.size() == mImageSockets.size() );
 
   for (int i=0; i!=nSockets; ++i)
   {
-    boost::shared_ptr<Socket220Control> socket(new Socket220Control(
+    std::shared_ptr<Socket220Control> socket(new Socket220Control(
       this, mDimblockV3->mSockets[i], mImageSockets[i] ));
     sockets.push_back(socket);
 
@@ -176,13 +169,13 @@ const std::vector<boost::shared_ptr<Socket220Control> >
   return sockets;
 }
 //---------------------------------------------------------------------------
-void TFormDimblockV3::OnAfterResize()
+void FormDimblockV3::OnAfterResize()
 {
   //Use
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,4,4));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),4,4));
     //Resize images
-      //ImageFaderMaster->Picture->Bitmap->Height = MergeRects(v[1][0],v[3][0]).Height();
+      //SetPictureHeight(ImageFaderMaster,MergeRects(v[1][0],v[3][0]).height());
       //ImageFaderMaster->Refresh();
     //Labels
     PlaceInCenter(LabelUseMainsPower,v[0][0]);
@@ -199,7 +192,7 @@ void TFormDimblockV3::OnAfterResize()
   }
   //Connect
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,9,5));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),9,5));
     //Labels
     PlaceInCenter(LabelConnectDmxIn,MergeRects(v[0][1],v[0][2]));
     PlaceInCenter(LabelConnectDmxThrough,MergeRects(v[1][1],v[1][2]));

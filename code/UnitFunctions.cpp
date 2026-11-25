@@ -1,7 +1,6 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
+#include <cstdlib>
 #include "UnitFunctions.h"
 
 #include <cmath>
@@ -110,4 +109,3 @@ const double GetRandomUniform()
   return static_cast<double>(std::rand())/static_cast<double>(RAND_MAX);
 }
 //---------------------------------------------------------------------------
-#pragma package(smart_init)

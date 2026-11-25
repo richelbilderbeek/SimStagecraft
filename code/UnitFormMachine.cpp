@@ -1,78 +1,98 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
+/*
+  SimStagecraft, stagecraft simulation
+  Copyright (C) 2008  Richel Bilderbeek
 
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+//---------------------------------------------------------------------------
 #include <cassert>
+
+#include <QPainter>
+#include <QPen>
+#include <QTimer>
+
 #include "UnitMachine.h"
 #include "UnitConnectorControl.h"
 #include "UnitFormMachine.h"
 #include "UnitFormSimStagecraftMain.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma resource "*.dfm"
-TFormMachine *FormMachine;
-//---------------------------------------------------------------------------
-__fastcall TFormMachine::TFormMachine(TComponent* Owner,
-    TFormSimStagecraftMain * const formParent)
-  : TForm(Owner),
-    mFormParent(formParent),
-    mDisplayMode(modeView)
+FormMachine::FormMachine(
+    FormSimStagecraftMain * const formParent,
+    const int clientWidth, const int clientHeight)
+  : mFormParent(formParent),
+    Left(0),
+    Top(0),
+    ClientWidth(clientWidth),
+    ClientHeight(clientHeight),
+    ImageBuffer(&mImageBuffer),
+    mDisplayMode(modeView),
+    mImageBuffer("ImageBuffer","",0,0,clientWidth,clientHeight,false,true)
 {
-  assert(Owner == 0 && "Deletion of TFormMachine is done by boost::shared_ptr");
-  assert(mFormParent != 0 && "TFormMachine must know its parent form");
+  assert(mFormParent != 0 && "FormMachine must know its parent form");
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormMachine::FormResize(TObject *Sender)
+FormMachine::~FormMachine()
 {
-  ImageBuffer->Picture->Bitmap->Width  = ClientWidth;
-  ImageBuffer->Picture->Bitmap->Height = ClientHeight;
+  for (const std::unique_ptr<QTimer>& timer: mTimers) timer->stop();
+}
+//---------------------------------------------------------------------------
+void FormMachine::AddTimer(const int interval, const std::function<void()>& f)
+{
+  std::unique_ptr<QTimer> timer = std::make_unique<QTimer>();
+  QObject::connect(timer.get(), &QTimer::timeout, f);
+  timer->start(interval);
+  mTimers.push_back(std::move(timer));
+}
+//---------------------------------------------------------------------------
+void FormMachine::Resize()
+{
+  SetPictureSize(ImageBuffer,ClientWidth,ClientHeight);
+  ImageBuffer->width = ClientWidth;
+  ImageBuffer->height = ClientHeight;
   OnAfterResize();
 }
 //---------------------------------------------------------------------------
-void TFormMachine::OnControllerClick()
+void FormMachine::OnControllerClick()
 {
   mFormParent->OnControllerClick();
 }
 //---------------------------------------------------------------------------
-void TFormMachine::OnConnectorClick(ConnectorControl * const connectorControl)
+void FormMachine::OnConnectorClick(ConnectorControl * const connectorControl)
 {
   mFormParent->OnConnectorClick(connectorControl);
 }
 //---------------------------------------------------------------------------
-void TFormMachine::DrawOnBuffer(const TImage * const image)
+void FormMachine::DrawOnBuffer(const Image * const image)
 {
-  ImageBuffer->Canvas->Draw(image->Left, image->Top, image->Picture->Graphic);
+  DrawImage(ImageBuffer, image->left, image->top, image);
 }
 //---------------------------------------------------------------------------
-void TFormMachine::DrawOnBuffer(const std::vector<TImage * const>& images)
+void FormMachine::DrawOnBuffer(const std::vector<Image *>& images)
 {
-  typedef std::vector<TImage * const>::const_iterator Iterator;
-  const Iterator j = images.end();
-  for (Iterator i = images.begin(); i!=j; ++i)
+  for (const Image * const image: images)
   {
-    ImageBuffer->Canvas->Draw((*i)->Left, (*i)->Top, (*i)->Picture->Graphic);
+    DrawOnBuffer(image);
   }
 }
 //---------------------------------------------------------------------------
-void TFormMachine::DrawOnBuffer(const std::vector<TImage *>& images)
+void FormMachine::DrawBorderAroundBuffer()
 {
-  typedef std::vector<TImage * >::const_iterator Iterator;
-  const Iterator j = images.end();
-  for (Iterator i = images.begin(); i!=j; ++i)
-  {
-    ImageBuffer->Canvas->Draw((*i)->Left, (*i)->Top, (*i)->Picture->Graphic);
-  }
+  QPainter painter(&ImageBuffer->picture);
+  QPen pen(Qt::black);
+  pen.setWidth(mBorderSize);
+  painter.setPen(pen);
+  painter.setBrush(Qt::NoBrush);
+  painter.drawRect(0,0,ClientWidth,ClientHeight);
 }
 //---------------------------------------------------------------------------
-void TFormMachine::DrawBorderAroundBuffer()
-{
-  ImageBuffer->Canvas->Pen->Width = mBorderSize;
-  ImageBuffer->Canvas->Pen->Color = clBlack;
-  ImageBuffer->Canvas->MoveTo(0,0);
-  ImageBuffer->Canvas->LineTo(0,ClientHeight);
-  ImageBuffer->Canvas->LineTo(ClientWidth,ClientHeight);
-  ImageBuffer->Canvas->LineTo(ClientWidth,0);
-  ImageBuffer->Canvas->LineTo(0,0);
-}
-//---------------------------------------------------------------------------
-

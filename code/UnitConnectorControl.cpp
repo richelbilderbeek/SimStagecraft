@@ -1,20 +1,18 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
 #include <cassert>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include "UnitConnector.h"
 #include "UnitConnectorControl.h"
 #include "UnitFormSprites.h"
 #include "UnitFormMachine.h"
 //---------------------------------------------------------------------------
-ConnectorControl::ConnectorControl(TFormMachine * const belongsTo,
-  Extctrls::TImage * const image,
-  const Extctrls::TImage * const imageUnselectedUnconnected,
-  const Extctrls::TImage * const imageSelectedUnconnected,
-  const Extctrls::TImage * const imageUnselectedConnected,
-  const Extctrls::TImage * const imageSelectedConnected)
+ConnectorControl::ConnectorControl(FormMachine * const belongsTo,
+  Image * const image,
+  const Image * const imageUnselectedUnconnected,
+  const Image * const imageSelectedUnconnected,
+  const Image * const imageUnselectedConnected,
+  const Image * const imageSelectedConnected)
   : mBelongsTo(belongsTo),
     mImage(image),
     mImageUnselectedUnconnected(imageUnselectedUnconnected),
@@ -126,37 +124,37 @@ void ConnectorControl::UpdateImage()
   {
     if (this->IsConnected() == true)
     {
-      mImage->Picture = mImageSelectedConnected->Picture;
+      mImage->AssignPicture(mImageSelectedConnected);
     }
     else
     {
-      mImage->Picture = mImageSelectedUnconnected->Picture;
+      mImage->AssignPicture(mImageSelectedUnconnected);
     }
   }
   else
   {
     if (this->IsConnected() == true)
     {
-      mImage->Picture = mImageUnselectedConnected->Picture;
+      mImage->AssignPicture(mImageUnselectedConnected);
     }
     else
     {
-      mImage->Picture = mImageUnselectedUnconnected->Picture;
+      mImage->AssignPicture(mImageUnselectedUnconnected);
     }
   }
 }
 //---------------------------------------------------------------------------
 CinchRedFemaleControl::CinchRedFemaleControl(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<CinchRedFemale> cinchFemale,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<CinchRedFemale> cinchFemale,
+  Image * const image)
   : ConnectorControl(
       belongsTo,
       image,
-      FormSprites->ImageCinchFemaleRed,
-      FormSprites->ImageCinchFemaleRedSelected,
-      FormSprites->ImageCinchFemaleRedConnected,
-      FormSprites->ImageCinchFemaleRedConnectedSelected),
+      Sprites()->ImageCinchFemaleRed,
+      Sprites()->ImageCinchFemaleRedSelected,
+      Sprites()->ImageCinchFemaleRedConnected,
+      Sprites()->ImageCinchFemaleRedConnectedSelected),
     mCinchFemale(cinchFemale)
 {
   assert(belongsTo!=0);
@@ -173,16 +171,16 @@ Connector * CinchRedFemaleControl::GetConnector()
 }
 //---------------------------------------------------------------------------
 CinchWhiteFemaleControl::CinchWhiteFemaleControl(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<CinchWhiteFemale> cinchFemale,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<CinchWhiteFemale> cinchFemale,
+  Image * const image)
   : ConnectorControl(
       belongsTo,
       image,
-      FormSprites->ImageCinchFemaleWhite,
-      FormSprites->ImageCinchFemaleWhiteSelected,
-      FormSprites->ImageCinchFemaleWhiteConnected,
-      FormSprites->ImageCinchFemaleWhiteConnectedSelected),
+      Sprites()->ImageCinchFemaleWhite,
+      Sprites()->ImageCinchFemaleWhiteSelected,
+      Sprites()->ImageCinchFemaleWhiteConnected,
+      Sprites()->ImageCinchFemaleWhiteConnectedSelected),
     mCinchFemale(cinchFemale)
 {
   assert(belongsTo!=0);
@@ -199,16 +197,16 @@ Connector * CinchWhiteFemaleControl::GetConnector()
 }
 //---------------------------------------------------------------------------
 DmxFemaleControl::DmxFemaleControl(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<DmxFemale> dmxFemale,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<DmxFemale> dmxFemale,
+  Image * const image)
   : ConnectorControl(
       belongsTo,
       image,
-      FormSprites->ImageDmxFemale,
-      FormSprites->ImageDmxFemaleSelected,
-      FormSprites->ImageDmxFemaleConnected,
-      FormSprites->ImageDmxFemaleConnectedSelected),
+      Sprites()->ImageDmxFemale,
+      Sprites()->ImageDmxFemaleSelected,
+      Sprites()->ImageDmxFemaleConnected,
+      Sprites()->ImageDmxFemaleConnectedSelected),
     mDmxFemale(dmxFemale)
 {
   assert(belongsTo!=0);
@@ -225,16 +223,16 @@ Connector * DmxFemaleControl::GetConnector()
 }
 //---------------------------------------------------------------------------
 DmxMaleControl::DmxMaleControl(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<DmxMale> euroMale,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<DmxMale> euroMale,
+  Image * const image)
   : ConnectorControl(
       belongsTo,
       image,
-      FormSprites->ImageDmxMale,
-      FormSprites->ImageDmxMaleSelected,
-      FormSprites->ImageDmxMaleConnected,
-      FormSprites->ImageDmxMaleConnectedSelected),
+      Sprites()->ImageDmxMale,
+      Sprites()->ImageDmxMaleSelected,
+      Sprites()->ImageDmxMaleConnected,
+      Sprites()->ImageDmxMaleConnectedSelected),
     mDmxMale(euroMale)
 {
   assert(belongsTo!=0);
@@ -251,16 +249,16 @@ Connector * DmxMaleControl::GetConnector()
 }
 //---------------------------------------------------------------------------
 EuroMaleControl::EuroMaleControl(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<EuroMale> euroMale,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<EuroMale> euroMale,
+  Image * const image)
   : ConnectorControl(
       belongsTo,
       image,
-      FormSprites->ImageEuroMale,
-      FormSprites->ImageEuroMaleSelected,
-      FormSprites->ImageEuroMaleConnected,
-      FormSprites->ImageEuroMaleConnectedSelected),
+      Sprites()->ImageEuroMale,
+      Sprites()->ImageEuroMaleSelected,
+      Sprites()->ImageEuroMaleConnected,
+      Sprites()->ImageEuroMaleConnectedSelected),
     mEuroMale(euroMale)
 {
   assert(belongsTo!=0);
@@ -277,16 +275,16 @@ Connector * EuroMaleControl::GetConnector()
 }
 //---------------------------------------------------------------------------
 EuroFemaleControl::EuroFemaleControl(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<EuroFemale> euroMale,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<EuroFemale> euroMale,
+  Image * const image)
   : ConnectorControl(
       belongsTo,
       image,
-      FormSprites->ImageEuroFemale,
-      FormSprites->ImageEuroFemaleSelected,
-      FormSprites->ImageEuroFemaleConnected,
-      FormSprites->ImageEuroFemaleConnectedSelected),
+      Sprites()->ImageEuroFemale,
+      Sprites()->ImageEuroFemaleSelected,
+      Sprites()->ImageEuroFemaleConnected,
+      Sprites()->ImageEuroFemaleConnectedSelected),
     mEuroFemale(euroMale)
 {
   assert(belongsTo!=0);
@@ -303,14 +301,14 @@ Connector * EuroFemaleControl::GetConnector()
 }
 //---------------------------------------------------------------------------
 JackFemaleControl::JackFemaleControl(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<JackFemale> xlrFemale,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<JackFemale> xlrFemale,
+  Image * const image)
   : ConnectorControl(belongsTo,image,
-      FormSprites->ImageJackFemale,
-      FormSprites->ImageJackFemaleSelected,
-      FormSprites->ImageJackFemaleConnected,
-      FormSprites->ImageJackFemaleConnectedSelected),
+      Sprites()->ImageJackFemale,
+      Sprites()->ImageJackFemaleSelected,
+      Sprites()->ImageJackFemaleConnected,
+      Sprites()->ImageJackFemaleConnectedSelected),
     mJackFemale(xlrFemale)
 {
   assert(belongsTo!=0);
@@ -327,14 +325,14 @@ Connector * JackFemaleControl::GetConnector()
 }
 //---------------------------------------------------------------------------
 JackXlrFemaleControl::JackXlrFemaleControl(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<JackXlrFemale> xlrFemale,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<JackXlrFemale> xlrFemale,
+  Image * const image)
   : ConnectorControl(belongsTo,image,
-      FormSprites->ImageJackXlrFemale,
-      FormSprites->ImageJackXlrFemaleSelected,
-      FormSprites->ImageJackXlrFemaleConnected,
-      FormSprites->ImageJackXlrFemaleConnectedSelected),
+      Sprites()->ImageJackXlrFemale,
+      Sprites()->ImageJackXlrFemaleSelected,
+      Sprites()->ImageJackXlrFemaleConnected,
+      Sprites()->ImageJackXlrFemaleConnectedSelected),
     mJackXlrFemale(xlrFemale)
 {
   assert(belongsTo!=0);
@@ -351,14 +349,14 @@ Connector * JackXlrFemaleControl::GetConnector()
 }
 //---------------------------------------------------------------------------
 JackMaleControl::JackMaleControl(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<JackMale> xlrFemale,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<JackMale> xlrFemale,
+  Image * const image)
   : ConnectorControl(belongsTo,image,
-      FormSprites->ImageJackMale,
-      FormSprites->ImageJackMaleSelected,
-      FormSprites->ImageJackMaleConnected,
-      FormSprites->ImageJackMaleConnectedSelected),
+      Sprites()->ImageJackMale,
+      Sprites()->ImageJackMaleSelected,
+      Sprites()->ImageJackMaleConnected,
+      Sprites()->ImageJackMaleConnectedSelected),
     mJackMale(xlrFemale)
 {
   assert(belongsTo!=0);
@@ -375,14 +373,14 @@ Connector * JackMaleControl::GetConnector()
 }
 //---------------------------------------------------------------------------
 Plug220Control::Plug220Control(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<Plug220> plug220,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<Plug220> plug220,
+  Image * const image)
   : ConnectorControl(belongsTo,image,
-      FormSprites->ImagePlug220,
-      FormSprites->ImagePlug220Selected,
-      FormSprites->ImagePlug220Connected,
-      FormSprites->ImagePlug220ConnectedSelected),
+      Sprites()->ImagePlug220,
+      Sprites()->ImagePlug220Selected,
+      Sprites()->ImagePlug220Connected,
+      Sprites()->ImagePlug220ConnectedSelected),
     mPlug220(plug220)
 {
   assert(belongsTo!=0);
@@ -399,14 +397,14 @@ Connector * Plug220Control::GetConnector()
 }
 //---------------------------------------------------------------------------
 Socket220Control::Socket220Control(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<Socket220> socket220,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<Socket220> socket220,
+  Image * const image)
   : ConnectorControl(belongsTo,image,
-      FormSprites->ImageSocket220,
-      FormSprites->ImageSocket220Selected,
-      FormSprites->ImageSocket220Connected,
-      FormSprites->ImageSocket220ConnectedSelected),
+      Sprites()->ImageSocket220,
+      Sprites()->ImageSocket220Selected,
+      Sprites()->ImageSocket220Connected,
+      Sprites()->ImageSocket220ConnectedSelected),
     mSocket220(socket220)
 {
   assert(belongsTo!=0);
@@ -423,14 +421,14 @@ Connector * Socket220Control::GetConnector()
 }
 //---------------------------------------------------------------------------
 SocketPowerFemaleControl::SocketPowerFemaleControl(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<SocketPowerFemale> socketPowerFemale,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<SocketPowerFemale> socketPowerFemale,
+  Image * const image)
   : ConnectorControl(belongsTo,image,
-      FormSprites->ImageSocketPowerFemale,
-      FormSprites->ImageSocketPowerFemaleSelected,
-      FormSprites->ImageSocketPowerFemaleConnected,
-      FormSprites->ImageSocketPowerFemaleConnectedSelected),
+      Sprites()->ImageSocketPowerFemale,
+      Sprites()->ImageSocketPowerFemaleSelected,
+      Sprites()->ImageSocketPowerFemaleConnected,
+      Sprites()->ImageSocketPowerFemaleConnectedSelected),
     mSocketPowerFemale(socketPowerFemale)
 {
   assert(belongsTo!=0);
@@ -447,14 +445,14 @@ Connector * SocketPowerFemaleControl::GetConnector()
 }
 //---------------------------------------------------------------------------
 SocketPowerMaleControl::SocketPowerMaleControl(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<SocketPowerMale> socketPowerMale,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<SocketPowerMale> socketPowerMale,
+  Image * const image)
   : ConnectorControl(belongsTo,image,
-      FormSprites->ImageSocketPowerMale,
-      FormSprites->ImageSocketPowerMaleSelected,
-      FormSprites->ImageSocketPowerMaleConnected,
-      FormSprites->ImageSocketPowerMaleConnectedSelected),
+      Sprites()->ImageSocketPowerMale,
+      Sprites()->ImageSocketPowerMaleSelected,
+      Sprites()->ImageSocketPowerMaleConnected,
+      Sprites()->ImageSocketPowerMaleConnectedSelected),
     mSocketPowerMale(socketPowerMale)
 {
   assert(belongsTo!=0);
@@ -471,14 +469,14 @@ Connector * SocketPowerMaleControl::GetConnector()
 }
 //---------------------------------------------------------------------------
 SpeakonFemaleControl::SpeakonFemaleControl(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<SpeakonFemale> xlrFemale,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<SpeakonFemale> xlrFemale,
+  Image * const image)
   : ConnectorControl(belongsTo,image,
-      FormSprites->ImageSpeakonFemale,
-      FormSprites->ImageSpeakonFemaleSelected,
-      FormSprites->ImageSpeakonFemaleConnected,
-      FormSprites->ImageSpeakonFemaleConnectedSelected),
+      Sprites()->ImageSpeakonFemale,
+      Sprites()->ImageSpeakonFemaleSelected,
+      Sprites()->ImageSpeakonFemaleConnected,
+      Sprites()->ImageSpeakonFemaleConnectedSelected),
     mSpeakonFemale(xlrFemale)
 {
   assert(belongsTo!=0);
@@ -495,14 +493,14 @@ Connector * SpeakonFemaleControl::GetConnector()
 }
 //---------------------------------------------------------------------------
 SpeakonMaleControl::SpeakonMaleControl(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<SpeakonMale> xlrFemale,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<SpeakonMale> xlrFemale,
+  Image * const image)
   : ConnectorControl(belongsTo,image,
-      FormSprites->ImageSpeakonMale,
-      FormSprites->ImageSpeakonMaleSelected,
-      FormSprites->ImageSpeakonMaleConnected,
-      FormSprites->ImageSpeakonMaleConnectedSelected),
+      Sprites()->ImageSpeakonMale,
+      Sprites()->ImageSpeakonMaleSelected,
+      Sprites()->ImageSpeakonMaleConnected,
+      Sprites()->ImageSpeakonMaleConnectedSelected),
     mSpeakonMale(xlrFemale)
 {
   assert(belongsTo!=0);
@@ -519,14 +517,14 @@ Connector * SpeakonMaleControl::GetConnector()
 }
 //---------------------------------------------------------------------------
 XlrFemaleControl::XlrFemaleControl(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<XlrFemale> xlrFemale,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<XlrFemale> xlrFemale,
+  Image * const image)
   : ConnectorControl(belongsTo,image,
-      FormSprites->ImageXlrFemale,
-      FormSprites->ImageXlrFemaleSelected,
-      FormSprites->ImageXlrFemaleConnected,
-      FormSprites->ImageXlrFemaleConnectedSelected),
+      Sprites()->ImageXlrFemale,
+      Sprites()->ImageXlrFemaleSelected,
+      Sprites()->ImageXlrFemaleConnected,
+      Sprites()->ImageXlrFemaleConnectedSelected),
     mXlrFemale(xlrFemale)
 {
   assert(belongsTo!=0);
@@ -543,14 +541,14 @@ Connector * XlrFemaleControl::GetConnector()
 }
 //---------------------------------------------------------------------------
 XlrMaleControl::XlrMaleControl(
-  TFormMachine * const belongsTo,
-  const boost::shared_ptr<XlrMale> xlrMale,
-  Extctrls::TImage * const image)
+  FormMachine * const belongsTo,
+  const std::shared_ptr<XlrMale> xlrMale,
+  Image * const image)
   : ConnectorControl(belongsTo,image,
-      FormSprites->ImageXlrMale,
-      FormSprites->ImageXlrMaleSelected,
-      FormSprites->ImageXlrMaleConnected,
-      FormSprites->ImageXlrMaleConnectedSelected),
+      Sprites()->ImageXlrMale,
+      Sprites()->ImageXlrMaleSelected,
+      Sprites()->ImageXlrMaleConnected,
+      Sprites()->ImageXlrMaleConnectedSelected),
     mXlrMale(xlrMale)
 {
   assert(belongsTo!=0);
@@ -567,5 +565,4 @@ Connector * XlrMaleControl::GetConnector()
 }
 //---------------------------------------------------------------------------
 
-#pragma package(smart_init)
 

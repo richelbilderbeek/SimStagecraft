@@ -3,14 +3,14 @@
 #ifndef UnitTripletH
 #define UnitTripletH
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitMachine.h"
 //---------------------------------------------------------------------------
 struct TwoSwitch;
 //struct Connector;
 struct Plug220;
 struct Socket220;
-struct TFormTriplet;
+class FormTriplet;
 //---------------------------------------------------------------------------
 struct Triplet : public Machine
 {
@@ -34,16 +34,16 @@ struct Triplet : public Machine
   //View
   //Use
   //Connect
-  boost::shared_ptr<Plug220> mPlug;
-  boost::shared_ptr<Socket220> mSocket220_1;
-  boost::shared_ptr<Socket220> mSocket220_2;
-  boost::shared_ptr<Socket220> mSocket220_3;
+  std::shared_ptr<Plug220> mPlug;
+  std::shared_ptr<Socket220> mSocket220_1;
+  std::shared_ptr<Socket220> mSocket220_2;
+  std::shared_ptr<Socket220> mSocket220_3;
 
-  friend TFormTriplet;
+  friend class FormTriplet;
 
-  //Triplet can only be deleted by boost::shared_ptr
+  public:
   ~Triplet() {}
-  friend boost::checked_delete(Triplet *);
+  private:
 
 };
 //---------------------------------------------------------------------------

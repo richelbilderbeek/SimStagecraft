@@ -4,7 +4,7 @@
 #define UnitLightTableH
 //---------------------------------------------------------------------------
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitMachine.h"
 //Use
 struct Fader;
@@ -16,8 +16,8 @@ struct DmxFemale;
 //Display
 struct Led;
 //Misc
-struct TFormSimpleShine1;
-struct TFormSimpleShine2;
+class FormSimpleShine1;
+class FormSimpleShine2;
 //---------------------------------------------------------------------------
 struct LightTable : public Machine
 {
@@ -37,13 +37,12 @@ struct LightTable : public Machine
   virtual const bool HasPower() const = 0;
 
   protected:
-  //LightTable can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   virtual ~LightTable() {}
-  friend boost::checked_delete(LightTable *);
+  protected:
 
   //Misc
-  const std::vector<boost::shared_ptr<Fader> > CreateFaders(const int n) const;
+  const std::vector<std::shared_ptr<Fader> > CreateFaders(const int n) const;
 };
 //---------------------------------------------------------------------------
 struct SimpleShine1 : public LightTable
@@ -61,23 +60,23 @@ struct SimpleShine1 : public LightTable
 
   private:
 
-  //LightTable can only be deleted by boost::shared_ptr
+  public:
   ~SimpleShine1() {}
-  friend boost::checked_delete(SimpleShine1*);
+  private:
 
   //View
   //Use
-  std::vector<boost::shared_ptr<Fader> > mFaders;
-  boost::shared_ptr<Fader> mFaderMaster;
+  std::vector<std::shared_ptr<Fader> > mFaders;
+  std::shared_ptr<Fader> mFaderMaster;
   //Connect
-  boost::shared_ptr<EuroMale> mEuroMalePower;
-  boost::shared_ptr<DmxFemale> mDmxFemaleOut;
-  boost::shared_ptr<InternalConnection> mConnectionLedPower;
+  std::shared_ptr<EuroMale> mEuroMalePower;
+  std::shared_ptr<DmxFemale> mDmxFemaleOut;
+  std::shared_ptr<InternalConnection> mConnectionLedPower;
   //Display
-  boost::shared_ptr<Led> mLedPower;
+  std::shared_ptr<Led> mLedPower;
 
 
-  friend TFormSimpleShine1;
+  friend class FormSimpleShine1;
 };
 //---------------------------------------------------------------------------
 struct SimpleShine2 : public LightTable
@@ -95,29 +94,29 @@ struct SimpleShine2 : public LightTable
 
   private:
 
-  //LightTable can only be deleted by boost::shared_ptr
+  public:
   ~SimpleShine2() {}
-  friend boost::checked_delete(SimpleShine2*);
+  private:
 
   //View
   //Use
-  std::vector<boost::shared_ptr<Fader> > mFaders;
-  boost::shared_ptr<Fader> mFaderMaster;
-  boost::shared_ptr<Fader> mCrossfaderA;
-  boost::shared_ptr<Fader> mCrossfaderB;
+  std::vector<std::shared_ptr<Fader> > mFaders;
+  std::shared_ptr<Fader> mFaderMaster;
+  std::shared_ptr<Fader> mCrossfaderA;
+  std::shared_ptr<Fader> mCrossfaderB;
   //Connect
-  boost::shared_ptr<EuroMale> mEuroMalePower;
-  boost::shared_ptr<DmxFemale> mDmxFemaleOut;
-  boost::shared_ptr<InternalConnection> mConnectionLedPower;
-  boost::shared_ptr<InternalConnection> mConnectionLedA;
-  boost::shared_ptr<InternalConnection> mConnectionLedB;
+  std::shared_ptr<EuroMale> mEuroMalePower;
+  std::shared_ptr<DmxFemale> mDmxFemaleOut;
+  std::shared_ptr<InternalConnection> mConnectionLedPower;
+  std::shared_ptr<InternalConnection> mConnectionLedA;
+  std::shared_ptr<InternalConnection> mConnectionLedB;
   //Display
-  boost::shared_ptr<Led> mLedPower;
-  boost::shared_ptr<Led> mLedA;
-  boost::shared_ptr<Led> mLedB;
+  std::shared_ptr<Led> mLedPower;
+  std::shared_ptr<Led> mLedA;
+  std::shared_ptr<Led> mLedB;
 
 
-  friend TFormSimpleShine2;
+  friend class FormSimpleShine2;
 };
 //---------------------------------------------------------------------------
 

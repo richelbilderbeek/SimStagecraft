@@ -1,54 +1,48 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
 
+#include <cassert>
 #include <stdexcept>
 #include "UnitControllerControl.h"
 #include "UnitConnectorControl.h"
 #include "UnitMachine.h"
 #include "UnitTransitionPiece.h"
-#include "UnitVcl.h"
+#include "UnitImage.h"
 #include "UnitFormTransitionPieceJackMaleTwoCinchFemale.h"
 #include "UnitFormMachine.h"
 #include "UnitFormSimStagecraftMain.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma resource "*.dfm"
-TFormTransitionPieceJackMaleTwoCinchFemale *FormTransitionPieceJackMaleTwoCinchFemale;
-//---------------------------------------------------------------------------
-__fastcall TFormTransitionPieceJackMaleTwoCinchFemale::TFormTransitionPieceJackMaleTwoCinchFemale(
-    TComponent* Owner,
-    TFormSimStagecraftMain * const formParent)
-  : TFormMachine(Owner,formParent),
-    mTransitionPiece(boost::shared_ptr<TransitionPieceJackMaleTwoCinchFemale>(
+FormTransitionPieceJackMaleTwoCinchFemale::FormTransitionPieceJackMaleTwoCinchFemale(
+    FormSimStagecraftMain * const formParent)
+  : FormMachine(formParent,DesignClientWidth,DesignClientHeight),
+    mTransitionPiece(std::shared_ptr<TransitionPieceJackMaleTwoCinchFemale>(
       new TransitionPieceJackMaleTwoCinchFemale))
 {
   //Control
   //Connect
-  mJack = boost::shared_ptr<JackMaleControl>(
+  mJack = std::shared_ptr<JackMaleControl>(
     new JackMaleControl(this,mTransitionPiece->mJack,ImageJack));
-  mCinchL = boost::shared_ptr<CinchWhiteFemaleControl>(
+  mCinchL = std::shared_ptr<CinchWhiteFemaleControl>(
     new CinchWhiteFemaleControl(this,mTransitionPiece->mCinchL,ImageCinchL));
-  mCinchR = boost::shared_ptr<CinchRedFemaleControl>(
+  mCinchR = std::shared_ptr<CinchRedFemaleControl>(
     new CinchRedFemaleControl(this,mTransitionPiece->mCinchR,ImageCinchR));
 
   CreateWatermark(ImageView,ImageWatermark);
 
-  OnResize(0);
+  Resize();
 }
 //---------------------------------------------------------------------------
-void TFormTransitionPieceJackMaleTwoCinchFemale::UpdateBuffer()
+void FormTransitionPieceJackMaleTwoCinchFemale::UpdateBuffer()
 {
   switch (mDisplayMode)
   {
     case modeView:
-      ImageBuffer->Canvas->Draw(0,0,ImageView->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageView);
       break;
     case modeUse:
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       break;
     case modeConnect:
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       DrawOnBuffer(ImageJack);
       DrawOnBuffer(ImageCinchL);
       DrawOnBuffer(ImageCinchR);
@@ -59,7 +53,7 @@ void TFormTransitionPieceJackMaleTwoCinchFemale::UpdateBuffer()
   DrawBorderAroundBuffer();
 }
 //---------------------------------------------------------------------------
-void TFormTransitionPieceJackMaleTwoCinchFemale::OnMouseDown(const int x, const int y)
+void FormTransitionPieceJackMaleTwoCinchFemale::OnMouseDown(const int x, const int y)
 {
   switch (mDisplayMode)
   {
@@ -75,9 +69,9 @@ void TFormTransitionPieceJackMaleTwoCinchFemale::OnMouseDown(const int x, const 
   }
 }
 //---------------------------------------------------------------------------
-void TFormTransitionPieceJackMaleTwoCinchFemale::OnAfterResize()
+void FormTransitionPieceJackMaleTwoCinchFemale::OnAfterResize()
 {
-  const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,2,2));
+  const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),2,2));
   PlaceInCenter(ImageCinchL,v[0][0]);
   PlaceInCenter(ImageCinchR,v[1][0]);
   PlaceInCenter(ImageJack,  MergeRects(v[0][1],v[1][1]));

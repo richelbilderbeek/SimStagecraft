@@ -1,7 +1,6 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
+#include <cassert>
 #include "UnitController.h" //For Fader, etc..
 #include "UnitConnector.h"
 #include "UnitDisplay.h"
@@ -9,15 +8,15 @@
 //---------------------------------------------------------------------------
 SimpleShine1::SimpleShine1()
   : mFaders(this->CreateFaders(12)),
-    mFaderMaster(boost::shared_ptr<Fader>(new Fader)),
-    mEuroMalePower(boost::shared_ptr<EuroMale>(new EuroMale(this))),
-    mDmxFemaleOut(boost::shared_ptr<DmxFemale>(new DmxFemale(this))),
-    mConnectionLedPower(boost::shared_ptr<InternalConnection>(
+    mFaderMaster(std::shared_ptr<Fader>(new Fader)),
+    mEuroMalePower(std::shared_ptr<EuroMale>(new EuroMale(this))),
+    mDmxFemaleOut(std::shared_ptr<DmxFemale>(new DmxFemale(this))),
+    mConnectionLedPower(std::shared_ptr<InternalConnection>(
       new InternalConnection(this)))
 
 {
   //Display
-  mLedPower = boost::shared_ptr<Led>(
+  mLedPower = std::shared_ptr<Led>(
     new Led(mConnectionLedPower.get(),255,0,0));
 
 }
@@ -58,24 +57,24 @@ const bool SimpleShine1::HasPower() const
 //---------------------------------------------------------------------------
 SimpleShine2::SimpleShine2()
   : mFaders(this->CreateFaders(24)),
-    mCrossfaderA(boost::shared_ptr<Fader>(new Fader)),
-    mCrossfaderB(boost::shared_ptr<Fader>(new Fader)),
-    mFaderMaster(boost::shared_ptr<Fader>(new Fader)),
-    mEuroMalePower(boost::shared_ptr<EuroMale>(new EuroMale(this))),
-    mDmxFemaleOut(boost::shared_ptr<DmxFemale>(new DmxFemale(this))),
-    mConnectionLedPower(boost::shared_ptr<InternalConnection>(
+    mCrossfaderA(std::shared_ptr<Fader>(new Fader)),
+    mCrossfaderB(std::shared_ptr<Fader>(new Fader)),
+    mFaderMaster(std::shared_ptr<Fader>(new Fader)),
+    mEuroMalePower(std::shared_ptr<EuroMale>(new EuroMale(this))),
+    mDmxFemaleOut(std::shared_ptr<DmxFemale>(new DmxFemale(this))),
+    mConnectionLedPower(std::shared_ptr<InternalConnection>(
       new InternalConnection(this))),
-    mConnectionLedA(boost::shared_ptr<InternalConnection>(
+    mConnectionLedA(std::shared_ptr<InternalConnection>(
       new InternalConnection(this))),
-    mConnectionLedB(boost::shared_ptr<InternalConnection>(
+    mConnectionLedB(std::shared_ptr<InternalConnection>(
       new InternalConnection(this)))
 {
   //Display
-  mLedPower = boost::shared_ptr<Led>(
+  mLedPower = std::shared_ptr<Led>(
     new Led(mConnectionLedPower.get(),255,0,0));
-  mLedA = boost::shared_ptr<Led>(
+  mLedA = std::shared_ptr<Led>(
     new Led(mConnectionLedA.get(),255,0,0));
-  mLedB = boost::shared_ptr<Led>(
+  mLedB = std::shared_ptr<Led>(
     new Led(mConnectionLedB.get(),255,0,0));
 }
 //---------------------------------------------------------------------------
@@ -128,17 +127,16 @@ const bool SimpleShine2::HasPower() const
     connectedTo,std::vector<const Connector*>()) > 0.0 ? true : false);
 }
 //---------------------------------------------------------------------------
-const std::vector<boost::shared_ptr<Fader> >
+const std::vector<std::shared_ptr<Fader> >
   LightTable::CreateFaders(const int nFaders) const
 {
-  std::vector<boost::shared_ptr<Fader> > faders;
+  std::vector<std::shared_ptr<Fader> > faders;
   for (int i=0; i!=nFaders; ++i)
   {
-    boost::shared_ptr<Fader> fader(new Fader);
+    std::shared_ptr<Fader> fader(new Fader);
     faders.push_back(fader);
   }
   return faders;
 }
 //---------------------------------------------------------------------------
 
-#pragma package(smart_init)

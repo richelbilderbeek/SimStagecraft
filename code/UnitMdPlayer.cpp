@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
+#include <algorithm>
+#include <cassert>
 #include "UnitMdPlayer.h"
 //---------------------------------------------------------------------------
 #include "UnitDisplay.h"
@@ -11,29 +11,29 @@
 MdPlayer::MdPlayer()
   :
   //Use
-  mButtonPower(boost::shared_ptr<TapButton<MdPlayer> >(
+  mButtonPower(std::shared_ptr<TapButton<MdPlayer> >(
     new TapButton<MdPlayer>(this,&MdPlayer::PressPower))),
-  mButtonRecord(boost::shared_ptr<TapButton<MdPlayer> >(
+  mButtonRecord(std::shared_ptr<TapButton<MdPlayer> >(
     new TapButton<MdPlayer>(this,&MdPlayer::PressRecord))),
-  mButtonStop(boost::shared_ptr<TapButton<MdPlayer> >(
+  mButtonStop(std::shared_ptr<TapButton<MdPlayer> >(
     new TapButton<MdPlayer>(this,&MdPlayer::PressStop))),
-  mButtonPlay(boost::shared_ptr<TapButton<MdPlayer> >(
+  mButtonPlay(std::shared_ptr<TapButton<MdPlayer> >(
     new TapButton<MdPlayer>(this,&MdPlayer::PressPlay))),
   //Connect
-  mCinchFemaleInL(boost::shared_ptr<CinchWhiteFemale>(new CinchWhiteFemale(this))),
-  mCinchFemaleInR(boost::shared_ptr<CinchRedFemale>(new CinchRedFemale(this))),
-  mCinchFemaleOutL(boost::shared_ptr<CinchWhiteFemale>(new CinchWhiteFemale(this))),
-  mCinchFemaleOutR(boost::shared_ptr<CinchRedFemale>(new CinchRedFemale(this))),
-  mPlug220Power(boost::shared_ptr<Plug220>(new Plug220(this))),
-  mConnectionAudioSignalL(boost::shared_ptr<InternalConnection>(
+  mCinchFemaleInL(std::shared_ptr<CinchWhiteFemale>(new CinchWhiteFemale(this))),
+  mCinchFemaleInR(std::shared_ptr<CinchRedFemale>(new CinchRedFemale(this))),
+  mCinchFemaleOutL(std::shared_ptr<CinchWhiteFemale>(new CinchWhiteFemale(this))),
+  mCinchFemaleOutR(std::shared_ptr<CinchRedFemale>(new CinchRedFemale(this))),
+  mPlug220Power(std::shared_ptr<Plug220>(new Plug220(this))),
+  mConnectionAudioSignalL(std::shared_ptr<InternalConnection>(
     new InternalConnection(this))),
-  mConnectionAudioSignalR(boost::shared_ptr<InternalConnection>(
+  mConnectionAudioSignalR(std::shared_ptr<InternalConnection>(
     new InternalConnection(this))),
-  mConnectionLcdSymbolRecord(boost::shared_ptr<InternalConnection> (
+  mConnectionLcdSymbolRecord(std::shared_ptr<InternalConnection> (
     new InternalConnection(this))),
-  mConnectionLcdSymbolPlay(boost::shared_ptr<InternalConnection> (
+  mConnectionLcdSymbolPlay(std::shared_ptr<InternalConnection> (
     new InternalConnection(this))),
-  mConnectionLedPower(boost::shared_ptr<InternalConnection> (
+  mConnectionLedPower(std::shared_ptr<InternalConnection> (
     new InternalConnection(this))),
   mState(mdOff),
   mAudioRecordedL(std::vector<double>(100,0.0)),
@@ -41,15 +41,15 @@ MdPlayer::MdPlayer()
   mPlayPos(0)
 {
   //Display
-  mAudioSignalDisplayL = boost::shared_ptr<AudioSignalDisplay>(
+  mAudioSignalDisplayL = std::shared_ptr<AudioSignalDisplay>(
     new AudioSignalDisplay(mConnectionAudioSignalL.get()));
-  mAudioSignalDisplayR = boost::shared_ptr<AudioSignalDisplay>(
+  mAudioSignalDisplayR = std::shared_ptr<AudioSignalDisplay>(
     new AudioSignalDisplay(mConnectionAudioSignalR.get()));
-  mLcdSymbolRecord = boost::shared_ptr<LcdSymbol>(
+  mLcdSymbolRecord = std::shared_ptr<LcdSymbol>(
     new LcdSymbol(mConnectionLcdSymbolRecord.get()));
-  mLcdSymbolPlay = boost::shared_ptr<LcdSymbol>(
+  mLcdSymbolPlay = std::shared_ptr<LcdSymbol>(
     new LcdSymbol(mConnectionLcdSymbolPlay.get()));
-  mLedPower = boost::shared_ptr<Led>(
+  mLedPower = std::shared_ptr<Led>(
     new Led(mConnectionLedPower.get(),0,255,0));
 
   assert(mLcdSymbolRecord.get()!=0);
@@ -264,4 +264,3 @@ void MdPlayer::Tick()
   }
 }
 //---------------------------------------------------------------------------
-#pragma package(smart_init)

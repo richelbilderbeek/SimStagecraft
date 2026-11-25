@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
+#include <algorithm>
+#include <cassert>
 #include "UnitTransitionPiece.h"
 //---------------------------------------------------------------------------
 #include "UnitDisplay.h"
@@ -9,9 +9,9 @@
 #include "UnitController.h"
 //---------------------------------------------------------------------------
 TransitionPieceJackMaleTwoCinchFemale::TransitionPieceJackMaleTwoCinchFemale()
-  : mJack(boost::shared_ptr<JackMale>(new JackMale(this))),
-    mCinchL(boost::shared_ptr<CinchWhiteFemale>(new CinchWhiteFemale(this))),
-    mCinchR(boost::shared_ptr<CinchRedFemale>(new CinchRedFemale(this)))
+  : mJack(std::shared_ptr<JackMale>(new JackMale(this))),
+    mCinchL(std::shared_ptr<CinchWhiteFemale>(new CinchWhiteFemale(this))),
+    mCinchR(std::shared_ptr<CinchRedFemale>(new CinchRedFemale(this)))
 {
 
 }
@@ -75,4 +75,3 @@ const double TransitionPieceJackMaleTwoCinchFemale::AudioSignalStrength(
   }
 }
 //---------------------------------------------------------------------------
-#pragma package(smart_init)

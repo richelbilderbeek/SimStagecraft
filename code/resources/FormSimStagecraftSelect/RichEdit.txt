@@ -1,0 +1,7 @@
+Goal:
+Let the speaker produce sound
+
+Equipment:
+- wall socket, 220 Volts
+- microphone, Shure SM-58
+- speaker, RCF322A

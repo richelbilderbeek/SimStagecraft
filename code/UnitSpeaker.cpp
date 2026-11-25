@@ -1,7 +1,6 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
+#include <algorithm>
 #include <cassert>
 #include "UnitController.h"
 #include "UnitConnector.h"
@@ -9,23 +8,23 @@
 #include "UnitDisplay.h"
 //---------------------------------------------------------------------------
 Rcf322A::Rcf322A()
-  : mPowerSwitch(boost::shared_ptr<TwoSwitch>(new TwoSwitch)),
-    mVolumeDial(boost::shared_ptr<Dial>(new Dial)),
-    mJackInput(boost::shared_ptr<JackFemale>(new JackFemale(this))),
-    mXlrDaisyChain(boost::shared_ptr<XlrMale>(new XlrMale(this))),
-    mXlrInput(boost::shared_ptr<XlrFemale>(new XlrFemale(this))),
-    mEuroMalePower(boost::shared_ptr<EuroMale>(new EuroMale(this))),
-    mConnectionLedPower(boost::shared_ptr<InternalConnection>(
+  : mPowerSwitch(std::shared_ptr<TwoSwitch>(new TwoSwitch)),
+    mVolumeDial(std::shared_ptr<Dial>(new Dial)),
+    mJackInput(std::shared_ptr<JackFemale>(new JackFemale(this))),
+    mXlrDaisyChain(std::shared_ptr<XlrMale>(new XlrMale(this))),
+    mXlrInput(std::shared_ptr<XlrFemale>(new XlrFemale(this))),
+    mEuroMalePower(std::shared_ptr<EuroMale>(new EuroMale(this))),
+    mConnectionLedPower(std::shared_ptr<InternalConnection>(
       new InternalConnection(this))),
-    mConnectionLedLimProt(boost::shared_ptr<InternalConnection>(
+    mConnectionLedLimProt(std::shared_ptr<InternalConnection>(
       new InternalConnection(this))),
     mMaxSoundLevel(1.5)
 {
   //mLedPower is green
-  mLedPower = boost::shared_ptr<Led>(
+  mLedPower = std::shared_ptr<Led>(
     new Led(mConnectionLedPower.get(),0,255,0));
   //mLedLimProt is red
-  mLedLimProt = boost::shared_ptr<Led>(
+  mLedLimProt = std::shared_ptr<Led>(
     new Led(mConnectionLedLimProt.get(),255,0,0));
 }
 //---------------------------------------------------------------------------
@@ -120,8 +119,8 @@ const double Rcf322A::AudioSignalStrength(const Connector * const connector,
 }
 //---------------------------------------------------------------------------
 RcfEvent3000::RcfEvent3000()
-  : mInput(boost::shared_ptr<SpeakonFemale>(new SpeakonFemale(this))),
-    mLink(boost::shared_ptr<SpeakonFemale>(new SpeakonFemale(this)))
+  : mInput(std::shared_ptr<SpeakonFemale>(new SpeakonFemale(this))),
+    mLink(std::shared_ptr<SpeakonFemale>(new SpeakonFemale(this)))
 {
 
 }
@@ -161,4 +160,3 @@ const double RcfEvent3000::AudioSignalStrength(const Connector * const connector
 }
 //---------------------------------------------------------------------------
 
-#pragma package(smart_init)

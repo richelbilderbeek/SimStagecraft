@@ -3,15 +3,8 @@
 #ifndef UnitFormCdPlayerH
 #define UnitFormCdPlayerH
 //---------------------------------------------------------------------------
-#include <Classes.hpp>
-#include <Controls.hpp>
-#include <StdCtrls.hpp>
-#include <Forms.hpp>
-#include <ComCtrls.hpp>
-#include <ExtCtrls.hpp>
-#include <Graphics.hpp>
-//---------------------------------------------------------------------------
 #include "UnitFormMachine.h"
+#include "ui/UiFormCdPlayer.h"
 #include "UnitTapButtonControl.h"
 //Machine
 struct CdPlayer;
@@ -28,54 +21,32 @@ struct LcdSymbolPlayControl;
 struct LcdSymbolRecControl;
 struct LedControl;
 //---------------------------------------------------------------------------
-class TFormCdPlayer : public TFormMachine
+class FormCdPlayer : public FormMachine, private UiFormCdPlayer
 {
-__published:	// IDE-managed Components
-  TPageControl *PageControl;
-  TTabSheet *TabSheetView;
-  TTabSheet *TabSheetUse;
-  TTabSheet *TabSheetConnect;
-  TImage *ImageView;
-  TImage *ImagePlug220Power;
-  TImage *ImageWatermark;
-  TImage *ImageAudioSignalL;
-  TImage *LabelConnectOut;
-  TImage *ImageTapButtonPlay;
-  TImage *ImageTapButtonStop;
-  TImage *ImageAudioSignalR;
-  TImage *ImageCinchFemaleOutL;
-  TImage *ImageCinchFemaleOutR;
-  TImage *ImageTapButtonPower;
-  TImage *ImageLedPower;
-  TImage *ImageLcdSymbolPlay;
-  TTimer *TimerTick;
-  void __fastcall TimerTickTimer(TObject *Sender);
-private:	// User declarations
+private:
+  void TimerTickTimer();	// User declarations
   //Machine
-  boost::shared_ptr<CdPlayer> mCdPlayer;
+  std::shared_ptr<CdPlayer> mCdPlayer;
   //Control
-  boost::shared_ptr<TapButtonControl<CdPlayer> > mTapButtonPlay;
-  boost::shared_ptr<TapButtonControl<CdPlayer> > mTapButtonStop;
-  boost::shared_ptr<TapButtonControl<CdPlayer> > mTapButtonPower;
+  std::shared_ptr<TapButtonControl<CdPlayer> > mTapButtonPlay;
+  std::shared_ptr<TapButtonControl<CdPlayer> > mTapButtonStop;
+  std::shared_ptr<TapButtonControl<CdPlayer> > mTapButtonPower;
   //Connect
-  boost::shared_ptr<CinchWhiteFemaleControl> mCinchFemaleOutL;
-  boost::shared_ptr<CinchRedFemaleControl> mCinchFemaleOutR;
-  boost::shared_ptr<Plug220Control> mPlug220Power;
+  std::shared_ptr<CinchWhiteFemaleControl> mCinchFemaleOutL;
+  std::shared_ptr<CinchRedFemaleControl> mCinchFemaleOutR;
+  std::shared_ptr<Plug220Control> mPlug220Power;
   //Display
-  boost::shared_ptr<AudioSignalControl> mAudioSignalDisplayL;
-  boost::shared_ptr<AudioSignalControl> mAudioSignalDisplayR;
-  boost::shared_ptr<LcdSymbolPlayControl> mLcdSymbolPlay;
-  boost::shared_ptr<LedControl> mLedPower;
+  std::shared_ptr<AudioSignalControl> mAudioSignalDisplayL;
+  std::shared_ptr<AudioSignalControl> mAudioSignalDisplayR;
+  std::shared_ptr<LcdSymbolPlayControl> mLcdSymbolPlay;
+  std::shared_ptr<LedControl> mLedPower;
 
 public:		// User declarations
-  __fastcall TFormCdPlayer(TComponent* Owner,
-    TFormSimStagecraftMain * const formParent);
+  FormCdPlayer(FormSimStagecraftMain * const formParent);
   void OnMouseDown(const int x, const int y);
   void OnAfterResize();
-  const TImage * const GetImageBuffer() const;
+  const Image * const GetImageBuffer() const;
   void UpdateBuffer();
 };
-//---------------------------------------------------------------------------
-extern PACKAGE TFormCdPlayer *FormCdPlayer;
 //---------------------------------------------------------------------------
 #endif

@@ -3,7 +3,7 @@
 #ifndef UnitSimpleSound3H
 #define UnitSimpleSound3H
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitSoundTable.h"
 struct Fader;
 struct PressButton;
@@ -15,7 +15,7 @@ struct XlrMale;
 struct XlrFemale;
 struct InternalConnection;
 struct AudioSignalDisplay;
-struct TFormSimpleSound3;
+class FormSimpleSound3;
 //---------------------------------------------------------------------------
 struct SimpleSound3 : public SoundTable
 {
@@ -34,37 +34,37 @@ struct SimpleSound3 : public SoundTable
 
   private:
 
+  public:
   ~SimpleSound3() {}
-  //SimpleSound3 can only be deleted by boost::shared_ptr
-  friend boost::checked_delete(SimpleSound3 *);
+  private:
 
   //View
   //Use
-  boost::shared_ptr<Fader> mFader1;
-  boost::shared_ptr<Fader> mFader2;
-  boost::shared_ptr<Fader> mFader3;
-  boost::shared_ptr<Dial> mDialGain1;
-  boost::shared_ptr<Dial> mDialGain2;
-  boost::shared_ptr<Dial> mDialGain3;
-  boost::shared_ptr<Dial> mDialAux1_1;
-  boost::shared_ptr<Dial> mDialAux1_2;
-  boost::shared_ptr<Dial> mDialAux1_3;
-  boost::shared_ptr<PressButton> mPressButtonPfl1;
-  boost::shared_ptr<PressButton> mPressButtonPfl2;
-  boost::shared_ptr<PressButton> mPressButtonPfl3;
-  boost::shared_ptr<Dial> mDialSendAux1;
-  boost::shared_ptr<Fader> mFaderMaster;
+  std::shared_ptr<Fader> mFader1;
+  std::shared_ptr<Fader> mFader2;
+  std::shared_ptr<Fader> mFader3;
+  std::shared_ptr<Dial> mDialGain1;
+  std::shared_ptr<Dial> mDialGain2;
+  std::shared_ptr<Dial> mDialGain3;
+  std::shared_ptr<Dial> mDialAux1_1;
+  std::shared_ptr<Dial> mDialAux1_2;
+  std::shared_ptr<Dial> mDialAux1_3;
+  std::shared_ptr<PressButton> mPressButtonPfl1;
+  std::shared_ptr<PressButton> mPressButtonPfl2;
+  std::shared_ptr<PressButton> mPressButtonPfl3;
+  std::shared_ptr<Dial> mDialSendAux1;
+  std::shared_ptr<Fader> mFaderMaster;
   //Connect
-  boost::shared_ptr<XlrFemale> mMic1;
-  boost::shared_ptr<XlrFemale> mMic2;
-  boost::shared_ptr<XlrFemale> mMic3;
-  boost::shared_ptr<JackFemale> mAux1;
-  boost::shared_ptr<XlrMale> mMasterL;
-  boost::shared_ptr<XlrMale> mMasterR;
-  boost::shared_ptr<EuroMale> mPower;
-  boost::shared_ptr<InternalConnection> mConnectionAudioSignal;
+  std::shared_ptr<XlrFemale> mMic1;
+  std::shared_ptr<XlrFemale> mMic2;
+  std::shared_ptr<XlrFemale> mMic3;
+  std::shared_ptr<JackFemale> mAux1;
+  std::shared_ptr<XlrMale> mMasterL;
+  std::shared_ptr<XlrMale> mMasterR;
+  std::shared_ptr<EuroMale> mPower;
+  std::shared_ptr<InternalConnection> mConnectionAudioSignal;
   //Display
-  boost::shared_ptr<AudioSignalDisplay> mAudioSignalDisplay;
+  std::shared_ptr<AudioSignalDisplay> mAudioSignalDisplay;
   //Misc
   const double AudioSignalInputStrength(
     const Connector * const connector,
@@ -80,7 +80,7 @@ struct SimpleSound3 : public SoundTable
     const int channel) const;
 
 
-  friend TFormSimpleSound3;
+  friend class FormSimpleSound3;
 };
 //---------------------------------------------------------------------------
 #endif

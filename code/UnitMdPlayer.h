@@ -4,7 +4,7 @@
 #define UnitMdPlayerH
 //---------------------------------------------------------------------------
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitController.h"
 #include "UnitMachine.h"
 #include "UnitTapButton.h"
@@ -17,7 +17,7 @@ struct LcdSymbol;
 struct Led;
 struct Plug220;
 struct PressButton;
-struct TFormMdPlayer;
+class FormMdPlayer;
 //---------------------------------------------------------------------------
 struct MdPlayer : public Machine
 {
@@ -53,35 +53,35 @@ struct MdPlayer : public Machine
   int mPlayPos;
 
 
+  public:
   ~MdPlayer() {}
-  //MdPlayer can only be deleted by boost::shared_ptr
-  friend boost::checked_delete(MdPlayer *);
+  private:
 
   //View
   //Use
-  boost::shared_ptr< TapButton<MdPlayer> > mButtonPower;
-  boost::shared_ptr< TapButton<MdPlayer> > mButtonRecord;
-  boost::shared_ptr< TapButton<MdPlayer> > mButtonStop;
-  boost::shared_ptr< TapButton<MdPlayer> > mButtonPlay;
+  std::shared_ptr< TapButton<MdPlayer> > mButtonPower;
+  std::shared_ptr< TapButton<MdPlayer> > mButtonRecord;
+  std::shared_ptr< TapButton<MdPlayer> > mButtonStop;
+  std::shared_ptr< TapButton<MdPlayer> > mButtonPlay;
   //Connect
-  boost::shared_ptr<CinchWhiteFemale> mCinchFemaleInL;
-  boost::shared_ptr<CinchRedFemale> mCinchFemaleInR;
-  boost::shared_ptr<CinchWhiteFemale> mCinchFemaleOutL;
-  boost::shared_ptr<CinchRedFemale> mCinchFemaleOutR;
-  boost::shared_ptr<Plug220> mPlug220Power;
-  boost::shared_ptr<InternalConnection> mConnectionAudioSignalL;
-  boost::shared_ptr<InternalConnection> mConnectionAudioSignalR;
-  boost::shared_ptr<InternalConnection> mConnectionLcdSymbolRecord;
-  boost::shared_ptr<InternalConnection> mConnectionLcdSymbolPlay;
-  boost::shared_ptr<InternalConnection> mConnectionLedPower;
+  std::shared_ptr<CinchWhiteFemale> mCinchFemaleInL;
+  std::shared_ptr<CinchRedFemale> mCinchFemaleInR;
+  std::shared_ptr<CinchWhiteFemale> mCinchFemaleOutL;
+  std::shared_ptr<CinchRedFemale> mCinchFemaleOutR;
+  std::shared_ptr<Plug220> mPlug220Power;
+  std::shared_ptr<InternalConnection> mConnectionAudioSignalL;
+  std::shared_ptr<InternalConnection> mConnectionAudioSignalR;
+  std::shared_ptr<InternalConnection> mConnectionLcdSymbolRecord;
+  std::shared_ptr<InternalConnection> mConnectionLcdSymbolPlay;
+  std::shared_ptr<InternalConnection> mConnectionLedPower;
   //Display
-  boost::shared_ptr<AudioSignalDisplay> mAudioSignalDisplayL;
-  boost::shared_ptr<AudioSignalDisplay> mAudioSignalDisplayR;
-  boost::shared_ptr<LcdSymbol> mLcdSymbolRecord;
-  boost::shared_ptr<LcdSymbol> mLcdSymbolPlay;
-  boost::shared_ptr<Led> mLedPower;
+  std::shared_ptr<AudioSignalDisplay> mAudioSignalDisplayL;
+  std::shared_ptr<AudioSignalDisplay> mAudioSignalDisplayR;
+  std::shared_ptr<LcdSymbol> mLcdSymbolRecord;
+  std::shared_ptr<LcdSymbol> mLcdSymbolPlay;
+  std::shared_ptr<Led> mLedPower;
 
-  friend TFormMdPlayer;
+  friend class FormMdPlayer;
 };
 //---------------------------------------------------------------------------
 #endif

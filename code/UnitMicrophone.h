@@ -3,9 +3,9 @@
 #ifndef UnitMicrophoneH
 #define UnitMicrophoneH
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitMachine.h"
-struct TFormShureSm58;
+class FormShureSm58;
 struct XlrMale;
 //---------------------------------------------------------------------------
 struct Microphone : public Machine
@@ -26,10 +26,9 @@ struct Microphone : public Machine
   virtual const bool HasPower() const = 0;
 
   protected:
-  //Microphone can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   virtual ~Microphone() {}
-  friend boost::checked_delete(Microphone *);
+  protected:
 
 
 };
@@ -44,7 +43,7 @@ struct ShureSm58 : public Microphone
 
   private:
 
-  friend TFormShureSm58;
+  friend class FormShureSm58;
 
   double mAudioSignalStrength;
   void SetAudioSignalStrength(const double audioSignalStrength);
@@ -54,12 +53,12 @@ struct ShureSm58 : public Microphone
   //Use
   //Shure SM-58 does not have a power switch
   //Connect
-  boost::shared_ptr<XlrMale> mXlrInput;
+  std::shared_ptr<XlrMale> mXlrInput;
 
 
-  //ShureSm58 can only be deleted by boost::shared_ptr
+  public:
   ~ShureSm58() {}
-  friend boost::checked_delete(ShureSm58 *);
+  private:
 };
 //---------------------------------------------------------------------------
 #endif

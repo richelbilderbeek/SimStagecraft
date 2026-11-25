@@ -1,16 +1,11 @@
 //---------------------------------------------------------------------------
-
-#include <vcl.h>
-#pragma hdrstop
-
 #include "UnitFormSimStagecraftWhatsNew.h"
+#include "UnitTextDialog.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma resource "*.dfm"
-TFormSimStagecraftWhatsNew *FormSimStagecraftWhatsNew;
-//---------------------------------------------------------------------------
-__fastcall TFormSimStagecraftWhatsNew::TFormSimStagecraftWhatsNew(TComponent* Owner)
-        : TForm(Owner)
+FormSimStagecraftWhatsNew::FormSimStagecraftWhatsNew(QWidget * const parent)
+  : QDialog(parent)
 {
+  SetupTextDialog(this, "What's new?",
+    ":/FormSimStagecraftWhatsNew/RichEdit.txt");
 }
 //---------------------------------------------------------------------------

@@ -1,7 +1,6 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
 
+#include <cassert>
 #include <cmath>
 #include <stdexcept>
 #include "UnitControllerControl.h"
@@ -9,55 +8,50 @@
 #include "UnitDisplayControl.h"
 #include "UnitMachine.h"
 #include "UnitSpeaker.h"
-#include "UnitVcl.h"
+#include "UnitImage.h"
 #include "UnitFormRcfEvent3000.h"
 #include "UnitFormMachine.h"
 #include "UnitFormSprites.h"
 
 #include "UnitFormSimStagecraftMain.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma link "UnitFormMachine"
-#pragma resource "*.dfm"
-TFormRcfEvent3000 *FormRcfEvent3000;
 //---------------------------------------------------------------------------
-__fastcall TFormRcfEvent3000::TFormRcfEvent3000(TComponent* Owner,
-    TFormSimStagecraftMain * const formParent)
-  : TFormMachine(Owner,formParent),
-    mSpeaker(boost::shared_ptr<RcfEvent3000>(new RcfEvent3000))
+FormRcfEvent3000::FormRcfEvent3000(FormSimStagecraftMain * const formParent)
+  : FormMachine(formParent,DesignClientWidth,DesignClientHeight),
+    mSpeaker(std::shared_ptr<RcfEvent3000>(new RcfEvent3000))
 {
   //Control
   //Connect
-  mInput = boost::shared_ptr<SpeakonFemaleControl>(
+  mInput = std::shared_ptr<SpeakonFemaleControl>(
     new SpeakonFemaleControl(this,mSpeaker->mInput,ImageInput));
-  mLink = boost::shared_ptr<SpeakonFemaleControl>(
+  mLink = std::shared_ptr<SpeakonFemaleControl>(
     new SpeakonFemaleControl(this,mSpeaker->mLink,ImageLink));
   //Display
 
 
   CreateWatermark(ImageView,ImageWatermark);
 
-  OnResize(0);
+  Resize();
 }
 //---------------------------------------------------------------------------
-void TFormRcfEvent3000::UpdateBuffer()
+void FormRcfEvent3000::UpdateBuffer()
 {
   switch (mDisplayMode)
   {
     case modeView:
-      ImageBuffer->Canvas->Draw(0,0,ImageView->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageView);
       break;
     case modeUse:
       //Update all
       DrawAudioSignal(ImageSound,mSpeaker->GetSoundLevel());
       //Start drawing
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       //Controls
       DrawOnBuffer(ImageSound);
       break;
     case modeConnect:
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       //Connectors
       DrawOnBuffer(ImageInput);
@@ -69,7 +63,7 @@ void TFormRcfEvent3000::UpdateBuffer()
   DrawBorderAroundBuffer();
 }
 //---------------------------------------------------------------------------
-void TFormRcfEvent3000::OnMouseDown(const int x, const int y)
+void FormRcfEvent3000::OnMouseDown(const int x, const int y)
 {
   switch (mDisplayMode)
   {
@@ -84,12 +78,12 @@ void TFormRcfEvent3000::OnMouseDown(const int x, const int y)
   }
 }
 //---------------------------------------------------------------------------
-void TFormRcfEvent3000::OnAfterResize()
+void FormRcfEvent3000::OnAfterResize()
 {
   //Use
   {
-    //Get y-x-ordered vector of TRects
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,1,1));
+    //Get y-x-ordered vector of QRects
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),1,1));
     //Resize bitmaps
     //Place bitmaps
     //Labels
@@ -99,7 +93,7 @@ void TFormRcfEvent3000::OnAfterResize()
   }
   //Connect
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,2,1));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),2,1));
     //Labels
     //Connectors
     PlaceInCenter(ImageInput,v[0][0]);

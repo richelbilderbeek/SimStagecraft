@@ -1,41 +1,114 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
-
 #include <cassert>
 #include <cmath>
-#include <boost/shared_ptr.hpp>
+
+#include <QFile>
+#include <QFont>
+#include <QLabel>
+#include <QPlainTextEdit>
+#include <QPushButton>
+#include <QTimer>
+
 #include "UnitFormSimStagecraftAbout.h"
 #include "UnitFormSimStagecraftWhatsNew.h"
 #include "UnitFormSimStagecraftOtherLicences.h"
+#include "UnitSurfaceWidget.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma resource "*.dfm"
-TFormSimStagecraftAbout *FormSimStagecraftAbout;
-//---------------------------------------------------------------------------
-__fastcall TFormSimStagecraftAbout::TFormSimStagecraftAbout(TComponent* Owner)
-  : TForm(Owner), mDr(1), mDg(1), mDb(1)
+namespace {
+
+QString ReadResourceText(const QString& resource)
 {
+  QFile file(resource);
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return QString();
+  return QString::fromUtf8(file.readAll());
+}
+
+QLabel * CreatePanel(QWidget * const parent, const QString& caption,
+  const QRect& geometry, const int pixelSize = 11, const bool bold = false)
+{
+  QLabel * const label = new QLabel(caption,parent);
+  label->setGeometry(geometry);
+  label->setAlignment(Qt::AlignCenter);
+  label->setStyleSheet("background-color: black; color: white;");
+  QFont font("Courier New");
+  font.setStyleHint(QFont::Monospace);
+  font.setPixelSize(pixelSize);
+  font.setBold(bold);
+  label->setFont(font);
+  return label;
+}
+
+} //~namespace
+//---------------------------------------------------------------------------
+FormSimStagecraftAbout::FormSimStagecraftAbout(QWidget * const parent)
+  : QDialog(parent),
+    mSurface(new SurfaceWidget(this)),
+    TimerMain(new QTimer(this)),
+    TimerColor(new QTimer(this)),
+    mDr(1), mDg(1), mDb(1), mTick(0)
+{
+  setWindowTitle(QString::fromUtf8(DesignCaption));
+  setFixedSize(DesignClientWidth,DesignClientHeight);
+  setStyleSheet("QDialog { background-color: black; }");
+
+  mSurface->setGeometry(ImageBackground->left, ImageBackground->top,
+    ImageBackground->picture.width(), ImageBackground->picture.height());
+  mSurface->buffer = ImageBackground;
+  ImageBackground->left = 0;
+  ImageBackground->top = 0;
+
+  CreatePanel(this, "SimStagecraft", QRect(327,0,258,41), 29, true);
+  CreatePanel(this, "Version 1.1", QRect(327,42,258,39));
+  CreatePanel(this, QString::fromUtf8("(C) 2008 Richèl Bilderbeek"), QRect(327,81,258,39));
+  CreatePanel(this, "Programmed by", QRect(327,120,258,39));
+  CreatePanel(this, QString::fromUtf8("Richèl Bilderbeek"), QRect(327,159,258,39));
+  CreatePanel(this, "from October 2008 to and", QRect(327,198,258,39));
+  CreatePanel(this, "including January 2009", QRect(327,237,258,39));
+  CreatePanel(this, "http://www.richelbilderbeek.nl", QRect(327,276,258,39));
+
+  QPushButton * const buttonOtherLicences = new QPushButton("Other licences",this);
+  buttonOtherLicences->setGeometry(8,288,121,25);
+  connect(buttonOtherLicences, &QPushButton::clicked, this,
+    [this]() { FormSimStagecraftOtherLicences f(this); f.exec(); });
+
+  QPushButton * const buttonWhatsNew = new QPushButton("What's new?",this);
+  buttonWhatsNew->setGeometry(216,288,99,25);
+  connect(buttonWhatsNew, &QPushButton::clicked, this,
+    [this]() { FormSimStagecraftWhatsNew f(this); f.exec(); });
+
+  QPlainTextEdit * const richEditLicence = new QPlainTextEdit(this);
+  richEditLicence->setGeometry(0,320,591,89);
+  richEditLicence->setReadOnly(true);
+  richEditLicence->setFrameStyle(QFrame::NoFrame);
+  richEditLicence->setStyleSheet("background-color: black; color: white;");
+  {
+    QFont font("Courier New");
+    font.setStyleHint(QFont::Monospace);
+    font.setPixelSize(11);
+    richEditLicence->setFont(font);
+  }
+  richEditLicence->setPlainText(
+    ReadResourceText(":/FormSimStagecraftAbout/RichEditLicence.txt"));
+
+  connect(TimerMain, &QTimer::timeout, this, [this]() { TimerMainTimer(); });
+  connect(TimerColor, &QTimer::timeout, this, [this]() { TimerColorTimer(); });
+
   DrawBackground();
-  TimerMain->OnTimer(0);
+  TimerMainTimer();
+  TimerMain->start(50);
+  TimerColor->start(1000);
 }
 //---------------------------------------------------------------------------
-void TFormSimStagecraftAbout::DrawBackground()
+void FormSimStagecraftAbout::DrawBackground()
 {
-  TImage * const image = ImageBackground;
-
+  Image * const image = ImageBackground;
   assert(image!=0);
-  assert(image->Picture->Bitmap != 0);
-  assert(image->Picture->Bitmap->PixelFormat == pf24bit);
-
-  const int maxx = image->Picture->Bitmap->Width;
-  const int maxy = image->Picture->Bitmap->Height;
+  const int maxx = image->picture.width();
+  const int maxy = image->picture.height();
   for (int y = 0; y != maxy; ++y)
   {
-    unsigned char * const myLine
-      = static_cast<unsigned char*>(image->Picture->Bitmap->ScanLine[y]);
+    QRgb * const line = reinterpret_cast<QRgb*>(image->picture.scanLine(y));
     const double yD = static_cast<double>(y);
-
     for (int x = 0; x != maxx; ++x)
     {
       const double xD = static_cast<double>(x);
@@ -45,21 +118,18 @@ void TFormSimStagecraftAbout::DrawBackground()
         + std::sin(yD / 4.0)
         - std::sin( (xD + yD) / 5.0);
       const int grey = static_cast<int>( (zD + 3.0) * (256.0 / 6.0) );
-      assert(grey >=   0);
-      assert(grey <  256);
-      myLine[x*3+2] = (myLine[x*3+2] + grey) % 256; //Red
-      myLine[x*3+1] = (myLine[x*3+1] + grey) % 256; //Green
-      myLine[x*3+0] = (myLine[x*3+0] + grey) % 256; //Blue
+      line[x] = qRgb(
+        (qRed(line[x])   + grey) % 256,
+        (qGreen(line[x]) + grey) % 256,
+        (qBlue(line[x])  + grey) % 256);
     }
   }
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormSimStagecraftAbout::TimerColorTimer(TObject *Sender)
+void FormSimStagecraftAbout::TimerColorTimer()
 {
-  static int tick = 0;
-  ++tick;
-
-  switch (tick % 15)
+  ++mTick;
+  switch (mTick % 15)
   {
     case  0: mDr =  3; mDg = -4; mDb =  2; break;
     case  1: mDr =  4; mDg = -3; mDb =  1; break;
@@ -79,62 +149,23 @@ void __fastcall TFormSimStagecraftAbout::TimerColorTimer(TObject *Sender)
   }
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormSimStagecraftAbout::TimerMainTimer(TObject *Sender)
+void FormSimStagecraftAbout::TimerMainTimer()
 {
-  TImage * const image = ImageBackground;
-
-  assert(image!=0);
-  assert(image->Picture->Bitmap != 0);
-  assert(image->Picture->Bitmap->PixelFormat == pf24bit);
-
-  const int maxx = image->Picture->Bitmap->Width;
-  const int maxy = image->Picture->Bitmap->Height;
+  Image * const image = ImageBackground;
+  const int maxx = image->picture.width();
+  const int maxy = image->picture.height();
   for (int y = 0; y != maxy; ++y)
   {
-    unsigned char * const myLine
-      = static_cast<unsigned char*>(image->Picture->Bitmap->ScanLine[y]);
+    QRgb * const line = reinterpret_cast<QRgb*>(image->picture.scanLine(y));
     for (int x = 0; x != maxx; ++x)
     {
-      myLine[x*3+2]+=mDr; //Red
-      myLine[x*3+1]+=mDg; //Green
-      myLine[x*3+0]+=mDb; //Blue
+      //Overflow is intended: the colors cycle
+      line[x] = qRgb(
+        (qRed(line[x])   + mDr + 256) % 256,
+        (qGreen(line[x]) + mDg + 256) % 256,
+        (qBlue(line[x])  + mDb + 256) % 256);
     }
   }
-
-  this->Canvas->Draw(0,0,ImageBackground->Picture->Graphic);
+  mSurface->update();
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormSimStagecraftAbout::ButtonWhatsNewClick(
-      TObject *Sender)
-{
-  boost::shared_ptr<TFormSimStagecraftWhatsNew> f(
-    new TFormSimStagecraftWhatsNew(0));
-  f->ShowModal();
-}
-//---------------------------------------------------------------------------
-
-
-void __fastcall TFormSimStagecraftAbout::ButtonOtherLicencesClick(
-      TObject *Sender)
-{
-  boost::shared_ptr<TFormSimStagecraftOtherLicences> f(
-    new TFormSimStagecraftOtherLicences(0));
-  f->ShowModal();
-}
-//---------------------------------------------------------------------------
-/*
-= About SimStagecraft =
-
-Some technical information about SimStagecraft
-
-== Project ==
-
-In 'Project | Forms | Auto-create Forms' the following Forms
-should appear, in this order:
-- FormSimStagecraftMenu
-- FormSprites
-All other Forms must be in the 'Available Forms' collumn
-
-
-*/
-

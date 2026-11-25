@@ -5,7 +5,7 @@
 //---------------------------------------------------------------------------
 #include "UnitMachine.h"
 struct InternalConnection;
-struct TFormPar64;
+class FormPar64;
 //---------------------------------------------------------------------------
 //A Lamp is a Machine that does not supply anything
 struct Lamp : public Machine
@@ -31,10 +31,9 @@ struct Lamp : public Machine
 
 
   protected:
-  //Lamp can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   virtual ~Lamp() {}
-  friend boost::checked_delete(Lamp*);
+  protected:
 
 };
 //---------------------------------------------------------------------------
@@ -48,12 +47,12 @@ struct Par64 : public Lamp
 
   //Control
   //Connect
-  boost::shared_ptr<Plug220> mPlug220;
-  friend TFormPar64;
+  std::shared_ptr<Plug220> mPlug220;
+  friend class FormPar64;
 
-  //Par64 can only be deleted by boost::shared_ptr
+  public:
   ~Par64() {}
-  friend boost::checked_delete(Par64*);
+  private:
 };
 //---------------------------------------------------------------------------
 #endif

@@ -1,64 +1,60 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
 
+#include <cassert>
 #include "UnitConnectorControl.h"
 #include "UnitMachine.h"
 #include "UnitMicrophone.h"
 #include "UnitFunctions.h"
-#include "UnitVcl.h"
+#include "UnitImage.h"
 #include "UnitFormShureSm58.h"
 #include "UnitFormSprites.h"
 #include "UnitFormMachine.h"
 #include "UnitFormSimStagecraftMain.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma resource "*.dfm"
-TFormShureSm58 *FormShureSm58;
-//---------------------------------------------------------------------------
-__fastcall TFormShureSm58::TFormShureSm58(TComponent* Owner,
-    TFormSimStagecraftMain * const formParent)
-  : TFormMachine(Owner,formParent),
-    mMicrophone(boost::shared_ptr<ShureSm58>(new ShureSm58)),
+FormShureSm58::FormShureSm58(FormSimStagecraftMain * const formParent)
+  : FormMachine(formParent,DesignClientWidth,DesignClientHeight),
+    mMicrophone(std::shared_ptr<ShureSm58>(new ShureSm58)),
     mSinging(false),
     mSingerAverage( 0.4 + GetRandomUniform() * 0.6)
 {
   //Use
   //Connect
-  mXlrMale = boost::shared_ptr<XlrMaleControl>(
+  mXlrMale = std::shared_ptr<XlrMaleControl>(
     new XlrMaleControl(this,mMicrophone->mXlrInput,ImageXlrMale));
 
-  OnResize(0);
+  AddTimer(100,[this]() { TimerSingTimer(); });
+
+  Resize();
 
   CreateWatermark(ImageView,ImageWatermark);
 }
 //---------------------------------------------------------------------------
-void TFormShureSm58::UpdateBuffer()
+void FormShureSm58::UpdateBuffer()
 {
   switch (mDisplayMode)
   {
     case modeView   :
-      ImageBuffer->Canvas->Draw(0,0,ImageView->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageView);
       break;
     case modeUse    :
       //Set new audio signal
       DrawAudioSignal(ImageAudioSignal,mMicrophone->GetAudioSignalStrength());
       //Draw 'Use' images
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       DrawOnBuffer(ImageSing);
       DrawOnBuffer(ImageAudioSignal);
       break;
     case modeConnect:
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       DrawOnBuffer(ImageXlrMale);
       break;
     default: assert(!"Should not get here");
   }
   DrawBorderAroundBuffer();
-  //Drawing is done by TFormSimStagecraftMain
+  //Drawing is done by FormSimStagecraftMain
 }
 //---------------------------------------------------------------------------
-void TFormShureSm58::OnMouseDown(const int x, const int y)
+void FormShureSm58::OnMouseDown(const int x, const int y)
 {
   switch (mDisplayMode)
   {
@@ -71,13 +67,13 @@ void TFormShureSm58::OnMouseDown(const int x, const int y)
         {
           mSinging = false;
           mMicrophone->SetAudioSignalStrength(0.0);
-          ImageSing->Picture = FormSprites->ImageSingNo->Picture;
+          ImageSing->AssignPicture(Sprites()->ImageSingNo);
         }
         else
         {
           mSinging = true;
           mMicrophone->SetAudioSignalStrength(1.0);
-          ImageSing->Picture = FormSprites->ImageSingYes->Picture;
+          ImageSing->AssignPicture(Sprites()->ImageSingYes);
         }
         mFormParent->OnControllerClick();
       }
@@ -91,7 +87,7 @@ void TFormShureSm58::OnMouseDown(const int x, const int y)
   }
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormShureSm58::TimerSingTimer(TObject *Sender)
+void FormShureSm58::TimerSingTimer()
 {
   //This singer sings at a strength of mSingerAverage
   // plus or minus 0.5 * mSingerAverage
@@ -103,12 +99,12 @@ void __fastcall TFormShureSm58::TimerSingTimer(TObject *Sender)
   mFormParent->OnControllerClick();
 }
 //---------------------------------------------------------------------------
-void TFormShureSm58::OnAfterResize()
+void FormShureSm58::OnAfterResize()
 {
-  const std::vector<TRect> v(GetRectsHorizontal(ClientRect,2));
+  const std::vector<QRect> v(GetRectsHorizontal(ClientRect(),2));
   PlaceInCenter(ImageSing,v[0]);
   PlaceInCenter(ImageAudioSignal,v[1]);
-  PlaceInCenter(ImageXlrMale,ClientRect);
+  PlaceInCenter(ImageXlrMale,ClientRect());
 }
 //---------------------------------------------------------------------------
 

@@ -1,21 +1,20 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
+#include <cassert>
 #include "UnitDisplay.h"
 #include "UnitDisplayControl.h"
 #include "UnitFormSprites.h"
-#include "UnitVcl.h"
+#include "UnitImage.h"
 //---------------------------------------------------------------------------
-DisplayControl::DisplayControl(Extctrls::TImage * const image)
+DisplayControl::DisplayControl(Image * const image)
   : mImage(image)
 {
   assert(mImage!=0);
 }
 //---------------------------------------------------------------------------
 AudioSignalControl::AudioSignalControl(
-    const boost::shared_ptr<AudioSignalDisplay> audioSignalDisplay,
-    Extctrls::TImage * const image)
+    const std::shared_ptr<AudioSignalDisplay> audioSignalDisplay,
+    Image * const image)
   : DisplayControl(image), mAudioSignalDisplay(audioSignalDisplay)
 {
   assert(mAudioSignalDisplay.get()!=0);
@@ -27,8 +26,8 @@ void AudioSignalControl::Update()
   DrawAudioSignal(mImage,intensity);
 }
 //---------------------------------------------------------------------------
-LcdSymbolControl::LcdSymbolControl(const boost::shared_ptr<LcdSymbol> lcdSymbol,
-    Extctrls::TImage * const image, Extctrls::TImage * const imageLcdSymbol)
+LcdSymbolControl::LcdSymbolControl(const std::shared_ptr<LcdSymbol> lcdSymbol,
+    Image * const image, Image * const imageLcdSymbol)
   : DisplayControl(image), mLcdSymbol(lcdSymbol), mImageLcdSymbol(imageLcdSymbol)
 {
   assert(mLcdSymbol.get()!=0);
@@ -38,26 +37,26 @@ LcdSymbolControl::LcdSymbolControl(const boost::shared_ptr<LcdSymbol> lcdSymbol,
 void LcdSymbolControl::Update()
 {
   const double intensity = mLcdSymbol->GetDisplayIntensity();
-  mImage->Picture = mImageLcdSymbol->Picture;
+  mImage->AssignPicture(mImageLcdSymbol);
   Blacken(mImage,1.0-intensity);
 }
 //---------------------------------------------------------------------------
-LcdSymbolPlayControl::LcdSymbolPlayControl(const boost::shared_ptr<LcdSymbol> lcdSymbol,
-    Extctrls::TImage * const image)
-  : LcdSymbolControl(lcdSymbol,image,FormSprites->ImageLcdSymbolPlay)
+LcdSymbolPlayControl::LcdSymbolPlayControl(const std::shared_ptr<LcdSymbol> lcdSymbol,
+    Image * const image)
+  : LcdSymbolControl(lcdSymbol,image,Sprites()->ImageLcdSymbolPlay)
 {
 
 }
 //---------------------------------------------------------------------------
-LcdSymbolRecControl::LcdSymbolRecControl(const boost::shared_ptr<LcdSymbol> lcdSymbol,
-    Extctrls::TImage * const image)
-  : LcdSymbolControl(lcdSymbol,image,FormSprites->ImageLcdSymbolRec)
+LcdSymbolRecControl::LcdSymbolRecControl(const std::shared_ptr<LcdSymbol> lcdSymbol,
+    Image * const image)
+  : LcdSymbolControl(lcdSymbol,image,Sprites()->ImageLcdSymbolRec)
 {
 
 }
 //---------------------------------------------------------------------------
-LedControl::LedControl(const boost::shared_ptr<Led> led,
-    Extctrls::TImage * const image)
+LedControl::LedControl(const std::shared_ptr<Led> led,
+    Image * const image)
   : DisplayControl(image), mLed(led)
 {
   assert(mLed.get()!=0);
@@ -69,4 +68,3 @@ void LedControl::Update()
   DrawLed(mImage,intensity,mLed->mRed,mLed->mGreen,mLed->mBlue);
 }
 //---------------------------------------------------------------------------
-#pragma package(smart_init)

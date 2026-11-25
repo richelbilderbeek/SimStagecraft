@@ -1,0 +1,31 @@
+# Check that the Qt version of SimStagecraft builds,
+# then run the smoke test that opens every screen and level
+name: Build Qt version
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+jobs:
+  build_qt:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Qt 6 and CMake
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qt6-base-dev cmake ninja-build
+
+      - name: Configure
+        # Debug, so that the asserts in the code are checked by the tests
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+        env:
+          QT_QPA_PLATFORM: offscreen

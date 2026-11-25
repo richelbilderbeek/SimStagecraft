@@ -1,235 +1,263 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
-//---------------------------------------------------------------------------
 #include <algorithm>
-#include <cmath>
 #include <cassert>
-#include <algorithm>
+#include <cmath>
+
+#include <QCheckBox>
+#include <QHBoxLayout>
+#include <QKeyEvent>
+#include <QPushButton>
+#include <QTimer>
+#include <QVBoxLayout>
+
 #include "UnitCreateMachines.h"
 #include "UnitConnectorControl.h"
 #include "UnitFormMachine.h"
 #include "UnitFormSimStagecraftMain.h"
-#include "UnitVcl.h"
+#include "UnitImage.h"
+#include "UnitSurfaceWidget.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma resource "*.dfm"
-TFormSimStagecraftMain *FormSimStagecraftMain;
+namespace {
+
+//A rectangle like the VCL TRect, where Right and Bottom are
+//one pixel beyond the rectangle
+struct Box
+{
+  int Left;
+  int Top;
+  int Right;
+  int Bottom;
+};
+
+const bool InRect(const int x, const int y, const Box& r)
+{
+  return (x >= r.Left && x < r.Right && y >= r.Top && y < r.Bottom);
+}
+
+void MoveAway(Box& r1, Box& r2, const int width, const int height)
+{
+  int dx1 = 0;
+  int dy1 = 0;
+  int dx2 = 0;
+  int dy2 = 0;
+  //No collision
+  if (r1.Left   < 0) ++dx1;
+  if (r1.Top    < 0) ++dy1;
+  if (r1.Right  > width ) --dx1;
+  if (r1.Bottom > height) --dy1;
+  if (r2.Left   < 0) ++dx2;
+  if (r2.Top    < 0) ++dy2;
+  if (r2.Right  > width ) --dx2;
+  if (r2.Bottom > height) --dy2;
+
+  if (!( r1.Right  < r2.Left || r1.Left > r2.Right
+    || r1.Bottom < r2.Top  || r1.Top  > r2.Bottom))
+  {
+    if (InRect(r1.Left ,r1.Top   ,r2)==true) { ++dx1; ++dy1; --dx2; --dy2;}
+    if (InRect(r1.Right,r1.Top   ,r2)==true) { --dx1; ++dy1; ++dx2; --dy2;}
+    if (InRect(r1.Left ,r1.Bottom,r2)==true) { ++dx1; --dy1; --dx2; ++dy2;}
+    if (InRect(r1.Right,r1.Bottom,r2)==true) { --dx1; --dy1; ++dx2; ++dy2;}
+    //If all 4 edges are collision
+    if (dx1 == 0 && dy1 == 0)
+    {
+      ++dx1;
+      ++dy1;
+      --dx2;
+      --dy2;
+    }
+  }
+  r1.Left   += dx1;
+  r1.Right  += dx1;
+  r1.Top    += dy1;
+  r1.Bottom += dy1;
+  r2.Left   += dx2;
+  r2.Right  += dx2;
+  r2.Top    += dy2;
+  r2.Bottom += dy2;
+}
+
+void PlaceInCenter(FormMachine * const form, const QRect& rect)
+{
+  assert(form!=0);
+  form->Left = rect.left() + (rect.width()  / 2) - (form->ClientWidth  / 2);
+  form->Top  = rect.top()  + (rect.height() / 2) - (form->ClientHeight / 2);
+}
+
+} //~namespace
 //---------------------------------------------------------------------------
-//The constructor a TForm-derived class cannot take a TComponent* and
-//int, because this will result in a Stack Overflow. Instead of passing an
-//int, a String is passed.
-__fastcall TFormSimStagecraftMain::TFormSimStagecraftMain(TComponent* Owner,
-  const String selectedLevel)
-  : TForm(Owner),
-    mMachines(CreateMachines(this,StrToInt(selectedLevel))),
+FormSimStagecraftMain::FormSimStagecraftMain(
+  QWidget * const parent, const int selectedLevel)
+  : QDialog(parent),
+    mSurface(new SurfaceWidget(this)),
+    PanelBottom(new QWidget(this)),
+    CheckBoxAutoMove(new QCheckBox("AutoMove",PanelBottom)),
+    ButtonView(new QPushButton("1) View",PanelBottom)),
+    ButtonConnect(new QPushButton("2) Connect",PanelBottom)),
+    ButtonUse(new QPushButton("3) Use",PanelBottom)),
+    ButtonQuit(new QPushButton(PanelBottom)),
+    TimerMain(new QTimer(this)),
     mConnector1(0), mConnector2(0), //Human, 1-based counting :-)
+    mDisplayMode(modeView),
     mDragMachine(0),
     mDragX(0),
     mDragY(0)
 {
-  //Set the Tag of the three TSpeedButtons
-  //These are used in the OnButtonClick method
-  ButtonView->Tag    = 1;
-  ButtonConnect->Tag = 2;
-  ButtonUse->Tag     = 3;
+  setWindowTitle(QString::fromUtf8(DesignCaption));
+  setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+  resize(DesignClientWidth,DesignClientHeight);
 
-  OnResize(0);
-
-  SetDisplayModes(modeView);
-
-  UpdateBuffers();
-
-  DrawScreen();
-}
-//---------------------------------------------------------------------------
-const int TFormSimStagecraftMain::GetDrawingSurfaceHeight() const
-{
-  //Need to remove const of TFormStagecraftMain,
-  //because the VCL is not const-correct. Grumble, grumble...
-  TFormSimStagecraftMain * const form = const_cast<TFormSimStagecraftMain*>(this);
-  return form->ClientHeight - form->PanelBottom->Height;
-}
-//---------------------------------------------------------------------------
-const int TFormSimStagecraftMain::GetDrawingSurfaceWidth() const
-{
-  //Need to remove const of TFormStagecraftMain,
-  //because the VCL is not const-correct. Grumble, grumble...
-  TFormSimStagecraftMain * const form = const_cast<TFormSimStagecraftMain*>(this);
-  return form->ClientWidth;
-}
-//---------------------------------------------------------------------------
-void TFormSimStagecraftMain::DrawScreen()
-{
-  //Draw background on buffer (or clear buffer otherwise)
-  ImageBuffer->Canvas->Draw(0,0,ImageBackground->Picture->Graphic);
-
+  //Bottom panel: AutoMove, the three display mode buttons and quit
   {
-    
-    //Draw all Machines
-    const ConstMachineIterator j = mMachines.end();
-    for (ConstMachineIterator i = mMachines.begin();
-      i!=j;
-      ++i)
+    for (QPushButton * const button: { ButtonView, ButtonConnect, ButtonUse })
     {
-      const int x = (*i)->Left;
-      const int y = (*i)->Top;
-      ImageBuffer->Canvas->Draw(x,y,(*i)->ImageBuffer->Picture->Graphic);
+      button->setCheckable(true);
+      button->setAutoExclusive(true);
+      button->setFocusPolicy(Qt::NoFocus);
     }
+    ButtonView->setChecked(true);
+    CheckBoxAutoMove->setFocusPolicy(Qt::NoFocus);
+    ButtonQuit->setIcon(QPixmap::fromImage(ImageQuit->Graphic()));
+    ButtonQuit->setIconSize(ImageQuit->picture.size());
+    ButtonQuit->setFlat(true);
+    ButtonQuit->setFocusPolicy(Qt::NoFocus);
+    ButtonQuit->setToolTip("Quit");
+    QHBoxLayout * const layout = new QHBoxLayout(PanelBottom);
+    layout->setContentsMargins(4,4,4,4);
+    layout->setSpacing(4);
+    layout->addWidget(CheckBoxAutoMove);
+    layout->addWidget(ButtonView,1);
+    layout->addWidget(ButtonConnect,1);
+    layout->addWidget(ButtonUse,1);
+    layout->addWidget(ButtonQuit);
+  }
+  {
+    QVBoxLayout * const layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0,0,0,0);
+    layout->setSpacing(0);
+    layout->addWidget(mSurface,1);
+    layout->addWidget(PanelBottom);
   }
 
-  //Draw wires on buffer
-  //??
+  connect(ButtonView, &QPushButton::clicked, this,
+    [this]() { SetDisplayModes(modeView); DrawScreen(); });
+  connect(ButtonConnect, &QPushButton::clicked, this,
+    [this]() { SetDisplayModes(modeConnect); DrawScreen(); });
+  connect(ButtonUse, &QPushButton::clicked, this,
+    [this]() { SetDisplayModes(modeUse); DrawScreen(); });
+  connect(ButtonQuit, &QPushButton::clicked, this, &QDialog::close);
+  connect(TimerMain, &QTimer::timeout, this, [this]() { TimerMainTimer(); });
 
-  //Draw buffer to screen
-  this->Canvas->Draw(0,0,ImageBuffer->Picture->Graphic);
+  mSurface->buffer = ImageBuffer;
+  mSurface->onMouseDown = [this](int x, int y) { FormMouseDown(x,y); };
+  mSurface->onMouseMove = [this](int x, int y) { FormMouseMove(x,y); };
+  mSurface->onMouseUp   = [this](int x, int y) { FormMouseUp(x,y); };
+  mSurface->onResize    = [this]() { FormResize(); };
+
+  ImageBuffer->left = 0;
+  ImageBuffer->top = 0;
+
+  mMachines = CreateMachines(this,selectedLevel);
+
+  FormResize();
+  SetDisplayModes(modeView);
+  UpdateBuffers();
+  DrawScreen();
+
+  TimerMain->start(100);
+  setWindowState(Qt::WindowMaximized);
 }
 //---------------------------------------------------------------------------
-void TFormSimStagecraftMain::SetDisplayModes(const EnumDisplayMode mode)
+FormSimStagecraftMain::~FormSimStagecraftMain()
+{
+  TimerMain->stop();
+  //Machines must be deleted before the widgets
+  mMachines.clear();
+}
+//---------------------------------------------------------------------------
+const int FormSimStagecraftMain::GetDrawingSurfaceHeight() const
+{
+  return std::max(1,mSurface->height());
+}
+//---------------------------------------------------------------------------
+const int FormSimStagecraftMain::GetDrawingSurfaceWidth() const
+{
+  return std::max(1,mSurface->width());
+}
+//---------------------------------------------------------------------------
+void FormSimStagecraftMain::DrawScreen()
+{
+  //Draw background on buffer (or clear buffer otherwise)
+  DrawImage(ImageBuffer,0,0,ImageBackground);
+  //Draw all Machines
+  for (const std::shared_ptr<FormMachine>& machine: mMachines)
+  {
+    DrawImage(ImageBuffer,machine->Left,machine->Top,machine->ImageBuffer);
+  }
+  //Draw buffer to screen
+  mSurface->update();
+}
+//---------------------------------------------------------------------------
+void FormSimStagecraftMain::SetDisplayModes(const EnumDisplayMode mode)
 {
   mDisplayMode = mode;
-  //Set the DisplayMode of all TFormMachines
-  const MachineIterator j = mMachines.end();
-  for (MachineIterator i = mMachines.begin(); i!=j; ++i)
+  //Set the DisplayMode of all FormMachines
+  for (const std::shared_ptr<FormMachine>& machine: mMachines)
   {
-    (*i)->SetDisplayMode(mode);
+    machine->SetDisplayMode(mode);
   }
   UpdateBuffers(); //Needed for non-active machines (e.g. Par64 and WallSocket220)
 }
 //---------------------------------------------------------------------------
-void TFormSimStagecraftMain::UpdateBuffers()
+void FormSimStagecraftMain::UpdateBuffers()
 {
-  //Set the DisplayMode of all TFormMachines
-  const MachineIterator j = mMachines.end();
-  for (MachineIterator i = mMachines.begin(); i!=j; ++i)
+  for (const std::shared_ptr<FormMachine>& machine: mMachines)
   {
-    (*i)->UpdateBuffer();
+    machine->UpdateBuffer();
   }
 }
 //---------------------------------------------------------------------------
-void TFormSimStagecraftMain::PaintBackground()
+void FormSimStagecraftMain::PaintBackground()
 {
-  TImage * const image = ImageBackground;
-
-  assert(image!=0);
-  assert(image->Picture->Bitmap != 0);
-  assert(image->Picture->Bitmap->PixelFormat == pf24bit);
-
-  const int maxx = image->Picture->Bitmap->Width;
-  const int maxy = image->Picture->Bitmap->Height;
-  for (int y = 0; y != maxy; ++y)
-  {
-    unsigned char * const myLine
-      = static_cast<unsigned char*>(image->Picture->Bitmap->ScanLine[y]);
-    const double yD = static_cast<double>(y);
-
-    for (int x = 0; x != maxx; ++x)
-    {
-      const double xD = static_cast<double>(x);
-      //Range z: -3 , +3
-      const double zD
-        = std::cos(xD / 30.0)
-        + std::sin(yD / 45.0)
-        - std::sin( (xD + yD) / 60.0);
-      const int grey = static_cast<int>( (zD + 3.0) * (256.0 / 6.0) );
-      assert(grey >=   0);
-      assert(grey <  256);
-      myLine[x*3+2] = grey; //Red
-      myLine[x*3+1] = grey; //Green
-      myLine[x*3+0] = grey; //Blue
-    }
-  }
+  PaintWavyBackground(ImageBackground);
 }
-//---------------------------------------------------------------------------}
-void TFormSimStagecraftMain::TickBackground()
+//---------------------------------------------------------------------------
+void FormSimStagecraftMain::TimerMainTimer()
 {
-  TImage * const image = ImageBackground;
-
-  assert(image!=0);
-  assert(image->Picture->Bitmap != 0);
-  assert(image->Picture->Bitmap->PixelFormat == pf24bit);
-
-  const int maxx = image->Picture->Bitmap->Width;
-  const int maxy = image->Picture->Bitmap->Height;
-  for (int y = 0; y != maxy; ++y)
-  {
-    unsigned char * const myLine
-      = static_cast<unsigned char*>(image->Picture->Bitmap->ScanLine[y]);
-    for (int x = 0; x != maxx; ++x)
-    {
-      ++myLine[x*3+2]; //Red
-      ++myLine[x*3+1]; //Green
-      ++myLine[x*3+0]; //Blue
-    }
-  }
-}
-//---------------------------------------------------------------------------}
-
-void __fastcall TFormSimStagecraftMain::TimerMainTimer(TObject *Sender)
-{
-  //TickBackground();
-
-  if (CheckBoxAutoMove->Checked == true) AutoMove();
-
+  if (CheckBoxAutoMove->isChecked()) AutoMove();
   DrawScreen();
-
 }
 //---------------------------------------------------------------------------
-
-void __fastcall TFormSimStagecraftMain::OnButtonClick(TObject *Sender)
+void FormSimStagecraftMain::keyPressEvent(QKeyEvent * e)
 {
-  //Only SpeedButtons are allowed to call this method
-  //button is not const,
-  //because the VCL is not const-correct. Grumble, grumble...
-  TSpeedButton * const button = dynamic_cast<TSpeedButton*>(Sender);
-  assert(button!=0);
-  switch (button->Tag)
+  switch (e->key())
   {
-    case 1: this->SetDisplayModes(modeView   ); break;
-    case 2: this->SetDisplayModes(modeConnect);break;
-    case 3: this->SetDisplayModes(modeUse    ); break;
+    case Qt::Key_A:
+      CheckBoxAutoMove->setChecked(!CheckBoxAutoMove->isChecked());
+      break;
+    case Qt::Key_V: case Qt::Key_1: case Qt::Key_F1:
+      ButtonView->click();
+      break;
+    case Qt::Key_C: case Qt::Key_2: case Qt::Key_F2:
+      ButtonConnect->click();
+      break;
+    case Qt::Key_U: case Qt::Key_3: case Qt::Key_F3:
+      ButtonUse->click();
+      break;
+    case Qt::Key_Q: case Qt::Key_0: case Qt::Key_F10: case Qt::Key_Escape:
+      close();
+      break;
     default:
-      OutputDebugString(IntToStr(button->Tag).c_str());
-      assert(!"Should not get here: Unknown TSpeedButton::Tag");
-  }
-
-  DrawScreen();
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormSimStagecraftMain::FormKeyDown(TObject *Sender,
-      WORD &Key, TShiftState Shift)
-{
-  switch (Key)
-  {
-    case 'A': case 'a':
-      CheckBoxAutoMove->Checked = !CheckBoxAutoMove->Checked; 
-      break;
-    case 'V': case 'v': case '1': case VK_F1:
-      ButtonView->Down = true;
-      OnButtonClick(ButtonView);
-      break;
-    case 'C': case 'c': case '2': case VK_F2:
-      ButtonConnect->Down = true;
-      OnButtonClick(ButtonConnect);
-      break;
-    case 'U': case 'u': case '3': case VK_F3:
-      ButtonUse->Down = true;
-      OnButtonClick(ButtonUse);
-      break;
-    case 'Q': /*case 'q':*/ case '0': case VK_F10:
-      Close();
-      break;
+      QDialog::keyPressEvent(e);
   }
 }
 //---------------------------------------------------------------------------
 //Children forms will call this method if a connector is clicked.
 //This method return if the connector is selected or not
 //The child forms know if the connector is connected or not
-void TFormSimStagecraftMain::OnConnectorClick(
+void FormSimStagecraftMain::OnConnectorClick(
   ConnectorControl * const connector)
 {
   assert(connector != 0);
-
   if (mConnector1 == connector)
   {
     //Unselect
@@ -327,23 +355,14 @@ void TFormSimStagecraftMain::OnConnectorClick(
   UpdateBuffers();
 }
 //---------------------------------------------------------------------------
-void TFormSimStagecraftMain::OnControllerClick()
+void FormSimStagecraftMain::OnControllerClick()
 {
-  UpdateBuffers(); //Refreshes all TFormMachines
+  UpdateBuffers(); //Refreshes all FormMachines
 }
 //---------------------------------------------------------------------------
-
-void __fastcall TFormSimStagecraftMain::ImageQuitMouseDown(TObject *Sender,
-      TMouseButton Button, TShiftState Shift, int X, int Y)
+const bool FormSimStagecraftMain::OnFormMachine(const int x, const int y,
+  const FormMachine * const form) const
 {
-  Close();  
-}
-//---------------------------------------------------------------------------
-const bool TFormSimStagecraftMain::OnFormMachine(const int x, const int y,
-  const TFormMachine * const formReal) const
-{
-  //Const_cast because the VCL is not const-correct. Grumble, grumble...
-  TFormMachine * const form = const_cast<TFormMachine*>(formReal);
   return (
        x >= form->Left
     && x  < form->Left + form->ClientWidth
@@ -351,10 +370,8 @@ const bool TFormSimStagecraftMain::OnFormMachine(const int x, const int y,
     && y  < form->Top + form->ClientHeight);
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormSimStagecraftMain::FormMouseDown(TObject *Sender,
-      TMouseButton Button, TShiftState Shift, int X, int Y)
+void FormSimStagecraftMain::FormMouseDown(const int X, const int Y)
 {
-  //
   const int nFormMachines = mMachines.size();
   for (int i=nFormMachines-1; i!=-1; --i)
   {
@@ -363,7 +380,7 @@ void __fastcall TFormSimStagecraftMain::FormMouseDown(TObject *Sender,
       //Cursor is on the top window
       const int formX = X - mMachines[i]->Left;
       const int formY = Y - mMachines[i]->Top;
-      const int borderSize = TFormMachine::mBorderSize;
+      const int borderSize = FormMachine::mBorderSize;
       //Dragging?
       if ( formX < borderSize
         || formX > mMachines[i]->ClientWidth - borderSize
@@ -375,14 +392,9 @@ void __fastcall TFormSimStagecraftMain::FormMouseDown(TObject *Sender,
         mDragX = X;
         mDragY = Y;
         //Make dragged machine appear on top
-        //by swapping it to the end of the std::vector
-        //(no lust to use std::vector::remove and so...)
-        for (int j = i; j != nFormMachines - 1; ++j)
-        {
-          assert(j + 1 < static_cast<int>(mMachines.size()));
-          std::swap(mMachines[j],mMachines[j+1]);
-        }
-        this->Cursor = crDrag;
+        //by moving it to the end of the std::vector
+        std::rotate(mMachines.begin() + i, mMachines.begin() + i + 1, mMachines.end());
+        mSurface->setCursor(Qt::ClosedHandCursor);
         return;
       }
       else
@@ -394,8 +406,7 @@ void __fastcall TFormSimStagecraftMain::FormMouseDown(TObject *Sender,
   }
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormSimStagecraftMain::FormMouseMove(TObject *Sender,
-      TShiftState Shift, int X, int Y)
+void FormSimStagecraftMain::FormMouseMove(const int X, const int Y)
 {
   if (mDragMachine != 0)
   {
@@ -405,7 +416,7 @@ void __fastcall TFormSimStagecraftMain::FormMouseMove(TObject *Sender,
     mDragMachine->Top  += dY;
     mDragX = X;
     mDragY = Y;
-    this->Cursor = crDrag;
+    mSurface->setCursor(Qt::ClosedHandCursor);
   }
   else
   {
@@ -418,80 +429,46 @@ void __fastcall TFormSimStagecraftMain::FormMouseMove(TObject *Sender,
         //We are on the top windows
         const int formX = X - mMachines[i]->Left;
         const int formY = Y - mMachines[i]->Top;
-        const int borderSize = TFormMachine::mBorderSize;
+        const int borderSize = FormMachine::mBorderSize;
         //Dragging?
         if ( formX < borderSize
           || formX > mMachines[i]->ClientWidth - borderSize
           || formY < borderSize
           || formY > mMachines[i]->ClientHeight - borderSize)
         {
-          this->Cursor = crDrag;
+          mSurface->setCursor(Qt::OpenHandCursor);
           return;
         }
         else
         {
-          this->Cursor = crArrow;
+          mSurface->setCursor(Qt::ArrowCursor);
           return;
         }
       }
     }
-    this->Cursor = crArrow;
+    mSurface->setCursor(Qt::ArrowCursor);
   }
-
 }
 //---------------------------------------------------------------------------
-
-void __fastcall TFormSimStagecraftMain::FormMouseUp(TObject *Sender,
-      TMouseButton Button, TShiftState Shift, int X, int Y)
+void FormSimStagecraftMain::FormMouseUp(const int, const int)
 {
   mDragMachine = 0;
-  this->Cursor = crArrow;
+  mSurface->setCursor(Qt::ArrowCursor);
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormSimStagecraftMain::FormResize(TObject *Sender)
+void FormSimStagecraftMain::FormResize()
 {
-  ImageBuffer->Picture->Bitmap->Width      = this->GetDrawingSurfaceWidth();
-  ImageBuffer->Picture->Bitmap->Height     = this->GetDrawingSurfaceHeight();
-  ImageBackground->Picture->Bitmap->Width  = this->GetDrawingSurfaceWidth();
-  ImageBackground->Picture->Bitmap->Height = this->GetDrawingSurfaceHeight();
-  //Resize SpeedButtons
-  const int spacing = 4; //The number of pixels from button to edge of TPanel
-  const int buttonWidth
-    = (PanelBottom->ClientWidth / 3)
-    - (4 * spacing)
-    - (ImageQuit->Width / 3)
-    - (CheckBoxAutoMove->Width / 3);
-  const int buttonHeight = PanelBottom->ClientHeight  - ( 2 * spacing);
-  CheckBoxAutoMove->Left = (1 * spacing);
-  ButtonView->Left       = (2 * spacing) + (0 * buttonWidth);
-  ButtonConnect->Left    = (3 * spacing) + (1 * buttonWidth);
-  ButtonUse->Left        = (4 * spacing) + (2 * buttonWidth);
-  ButtonView->Left       += (CheckBoxAutoMove->Left + CheckBoxAutoMove->Width);
-  ButtonConnect->Left    += (CheckBoxAutoMove->Left + CheckBoxAutoMove->Width);
-  ButtonUse->Left        += (CheckBoxAutoMove->Left + CheckBoxAutoMove->Width);
-  CheckBoxAutoMove->Top
-    = (PanelBottom->ClientHeight / 2)
-    - (CheckBoxAutoMove->Height / 2);
-  ButtonView->Top     = spacing;
-  ButtonUse->Top      = spacing;
-  ButtonConnect->Top  = spacing;
-  ButtonView->Width    = buttonWidth;
-  ButtonUse->Width     = buttonWidth;
-  ButtonConnect->Width = buttonWidth;
-  ButtonView->Height    = buttonHeight;
-  ButtonUse->Height     = buttonHeight;
-  ButtonConnect->Height = buttonHeight;
+  SetPictureSize(ImageBuffer, GetDrawingSurfaceWidth(), GetDrawingSurfaceHeight());
+  SetPictureSize(ImageBackground, GetDrawingSurfaceWidth(), GetDrawingSurfaceHeight());
   //Repaint the screen at its new size
   PaintBackground();
-
   TileMachines();
-
+  DrawScreen();
 }
 //---------------------------------------------------------------------------
-void TFormSimStagecraftMain::TileMachines()
+void FormSimStagecraftMain::TileMachines()
 {
   if (mMachines.empty() == true) return;
-
   const int nMachines = mMachines.size();
   const int nCols = 1 + static_cast<int>(
     std::sqrt( static_cast<double>(nMachines - 1) ) );
@@ -501,45 +478,33 @@ void TFormSimStagecraftMain::TileMachines()
   const int dx = this->GetDrawingSurfaceWidth()  / nCols;
   const int dy = this->GetDrawingSurfaceHeight() / nRows;
   int count = 0;
-  const MachineIterator j = mMachines.end();
-  for (MachineIterator i = mMachines.begin();
-    i!=j;
-    ++i)
+  for (const std::shared_ptr<FormMachine>& machine: mMachines)
   {
     const int x = (count % nCols) * dx;
     const int y = (count / nCols) * dy;
-    assert( x >= 0);
-    assert( y >= 0);
-    assert( x <= this->GetDrawingSurfaceWidth());
-    assert( y <= this->GetDrawingSurfaceHeight());
-    TRect rect;
-    rect.Left = x;
-    rect.Top  = y;
-    rect.Right  = x + dx;
-    rect.Bottom = y  + dy;
-    PlaceInCenter( (*i).get(), rect);
+    PlaceInCenter(machine.get(), QRect(x,y,dx,dy));
     ++count;
   }
 }
 //---------------------------------------------------------------------------
-void TFormSimStagecraftMain::AutoMove()
+void FormSimStagecraftMain::AutoMove()
 {
   const int nForms = mMachines.size();
   for (int i=0; i!=nForms; ++i)
   {
     for (int j=0; j!=i; ++j)
     {
-      TRect r1;
+      Box r1;
       r1.Left   = mMachines[i]->Left;
       r1.Top    = mMachines[i]->Top;
       r1.Right  = r1.Left + mMachines[i]->ClientWidth;
       r1.Bottom = r1.Top  + mMachines[i]->ClientHeight;
-      TRect r2;
+      Box r2;
       r2.Left   = mMachines[j]->Left;
       r2.Top    = mMachines[j]->Top;
       r2.Right  = r2.Left + mMachines[j]->ClientWidth;
       r2.Bottom = r2.Top  + mMachines[j]->ClientHeight;
-      MoveAway(r1,r2);
+      MoveAway(r1,r2,GetDrawingSurfaceWidth(),GetDrawingSurfaceHeight());
       mMachines[i]->Left = r1.Left;
       mMachines[i]->Top  = r1.Top;
       mMachines[j]->Left = r2.Left;
@@ -548,53 +513,3 @@ void TFormSimStagecraftMain::AutoMove()
   }
 }
 //---------------------------------------------------------------------------
-void TFormSimStagecraftMain::MoveAway(TRect& r1, TRect& r2)
-{
-  int dx1 = 0;
-  int dy1 = 0;
-  int dx2 = 0;
-  int dy2 = 0;
-
-  //No collision
-  if (r1.Left   < 0) ++dx1;
-  if (r1.Top    < 0) ++dy1;
-  if (r1.Right  > this->GetDrawingSurfaceWidth() ) --dx1;
-  if (r1.Bottom > this->GetDrawingSurfaceHeight()) --dy1;
-  if (r2.Left   < 0) ++dx2;
-  if (r2.Top    < 0) ++dy2;
-  if (r2.Right  > this->GetDrawingSurfaceWidth() ) --dx2;
-  if (r2.Bottom > this->GetDrawingSurfaceHeight()) --dy2;
-
-  if (!( r1.Right  < r2.Left || r1.Left > r2.Right
-    || r1.Bottom < r2.Top  || r1.Top  > r2.Bottom))
-  {
-    if (InRect(r1.Left ,r1.Top   ,r2)==true) { ++dx1; ++dy1; --dx2; --dy2;}
-    if (InRect(r1.Right,r1.Top   ,r2)==true) { --dx1; ++dy1; ++dx2; --dy2;}
-    if (InRect(r1.Left ,r1.Bottom,r2)==true) { ++dx1; --dy1; --dx2; ++dy2;}
-    if (InRect(r1.Right,r1.Bottom,r2)==true) { --dx1; --dy1; ++dx2; ++dy2;}
-    //If all 4 edges are collision
-    if (dx1 == 0 && dy1 == 0)
-    {
-      ++dx1;
-      ++dy1;
-      --dx2;
-      --dy2;
-    }
-  }
-  r1.Left   += dx1;
-  r1.Right  += dx1;
-  r1.Top    += dy1;
-  r1.Bottom += dy1;
-  r2.Left   += dx2;
-  r2.Right  += dx2;
-  r2.Top    += dy2;
-  r2.Bottom += dy2;
-}
-//---------------------------------------------------------------------------
-const bool InRect(const int x, const int y, const TRect& r)
-{
-  return (x >= r.Left && x < r.Right && y >= r.Top && y < r.Bottom);
-}
-//---------------------------------------------------------------------------
-
-

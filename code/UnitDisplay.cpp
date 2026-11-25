@@ -1,7 +1,4 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
-//---------------------------------------------------------------------------
 #include <cassert>
 #include "UnitConnector.h"
 #include "UnitDisplay.h"
@@ -10,7 +7,7 @@
 //here the soldering takes place: the InternalConnections
 //'attachedTo' and 'mConnection' are mutually connected
 Display::Display(InternalConnection * const attachedTo)
-  : mConnection(boost::shared_ptr<InternalConnection>(new
+  : mConnection(std::shared_ptr<InternalConnection>(new
       InternalConnection(this)))
 {
   assert(mConnection.get() != 0);
@@ -73,4 +70,3 @@ Led::Led(InternalConnection * const attachedTo,
   assert(mBlue  >= 0); assert(mBlue  < 256);
 }
 //---------------------------------------------------------------------------
-#pragma package(smart_init)

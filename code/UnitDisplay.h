@@ -3,7 +3,7 @@
 #ifndef UnitDisplayH
 #define UnitDisplayH
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitMachine.h"
 struct InternalConnection;
 struct LcdSymbolControl;
@@ -39,12 +39,11 @@ struct Display : public Machine
   const double GetDisplayIntensity() const;
 
   protected:
-  boost::shared_ptr<InternalConnection> mConnection;
+  std::shared_ptr<InternalConnection> mConnection;
 
-  //Display can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   virtual ~Display() {}
-  friend boost::checked_delete(Display*);
+  protected:
 };
 //---------------------------------------------------------------------------
 struct AudioSignalDisplay : public Display
@@ -55,9 +54,9 @@ struct AudioSignalDisplay : public Display
 
   friend struct AudioSignalControl;
 
-  //AudioSignalDisplay can only be deleted by boost::shared_ptr
+  public:
   ~AudioSignalDisplay() {}
-  friend boost::checked_delete(AudioSignalDisplay*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct LcdDisplay : public Display
@@ -65,10 +64,9 @@ struct LcdDisplay : public Display
   LcdDisplay(InternalConnection * const attachedTo);
 
   protected:
-  //LcdDisplay can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   virtual ~LcdDisplay() {}
-  friend boost::checked_delete(LcdDisplay*);
+  protected:
 };
 //---------------------------------------------------------------------------
 struct LcdSymbol : public Display
@@ -79,9 +77,9 @@ struct LcdSymbol : public Display
 
   friend struct LcdSymbolControl;
 
-  //LcdSymbol can only be deleted by boost::shared_ptr
+  public:
   ~LcdSymbol() {}
-  friend boost::checked_delete(LcdSymbol*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct Led : public Display
@@ -97,9 +95,9 @@ struct Led : public Display
 
   friend struct LedControl;
 
-  //Led can only be deleted by boost::shared_ptr
+  public:
   ~Led() {}
-  friend boost::checked_delete(Led*);
+  private:
 };
 //---------------------------------------------------------------------------
 #endif

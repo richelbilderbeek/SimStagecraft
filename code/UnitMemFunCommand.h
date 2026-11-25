@@ -3,7 +3,7 @@
 #ifndef UnitMemFunCommandH
 #define UnitMemFunCommandH
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
+#include <memory>
 //---------------------------------------------------------------------------
 // From http://www.richelbilderbeek.nl/CppCommandDesignPattern.htm
 //---------------------------------------------------------------------------
@@ -14,7 +14,7 @@ struct MemFunCommand
 
   MemFunCommand(T * const target, const MemFunPtr memFun)
     : mTarget(target), mFunction(memFun) { }
-  void Execute() { (mTarget->*mFunction)(); }
+  void Execute() const { (mTarget->*mFunction)(); }
   private:
   T * mTarget;
   MemFunPtr mFunction;

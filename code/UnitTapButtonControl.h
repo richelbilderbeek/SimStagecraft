@@ -5,18 +5,20 @@
 //---------------------------------------------------------------------------
 #include <cassert>
 #include <cmath>
-#include <boost/shared_ptr.hpp>
-#include <boost/checked_delete.hpp>
+#include <memory>
+#include <algorithm>
 #include "UnitControllerControl.h"
+#include "UnitFormMachine.h"
 #include "UnitFunctions.h"
+#include "UnitImage.h"
 #include "UnitTapButton.h"
 //---------------------------------------------------------------------------
-export template <class T>
+template <class T>
 struct TapButtonControl : public ControllerControl
 {
-  TapButtonControl(TFormMachine * const formParent,
-    const boost::shared_ptr<TapButton<T> > tapButton,
-    Extctrls::TImage * const image)
+  TapButtonControl(FormMachine * const formParent,
+    const std::shared_ptr<TapButton<T> > tapButton,
+    Image * const image)
     : ControllerControl(formParent,image),
       mTapButton(tapButton),
       mImage(image)
@@ -27,8 +29,8 @@ struct TapButtonControl : public ControllerControl
 
   void OnMouseDown(const int x, const int y)
   {
-    const int midX = mImage->Width / 2;
-    const int midY = mImage->Height / 2;
+    const int midX = mImage->width / 2;
+    const int midY = mImage->height / 2;
     const double angle
       = GetAngle( static_cast<double>(x - midX),
           static_cast<double>(y - midY));
@@ -47,12 +49,12 @@ struct TapButtonControl : public ControllerControl
 
   private:
 
-  const boost::shared_ptr<TapButton<T> > mTapButton;
-  const Extctrls::TImage * const mImage;
+  const std::shared_ptr<TapButton<T> > mTapButton;
+  const Image * const mImage;
 
-  //TapButtonControl can only be deleted by boost::shared_ptr
+  public:
   ~TapButtonControl() {}
-  friend boost::checked_delete(TapButtonControl *);
+  private:
 };
 //---------------------------------------------------------------------------
 #endif

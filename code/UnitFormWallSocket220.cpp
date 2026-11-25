@@ -1,44 +1,38 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
 
+#include <cassert>
 #include "UnitMachine.h"
 #include "UnitWallSocket220.h"
 #include "UnitConnectorControl.h"
-#include "UnitVcl.h"
+#include "UnitImage.h"
 #include "UnitFormWallSocket220.h"
 #include "UnitFormMachine.h"
 #include "UnitFormSimStagecraftMain.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma resource "*.dfm"
-TFormWallSocket220 *FormWallSocket220;
-//---------------------------------------------------------------------------
-__fastcall TFormWallSocket220::TFormWallSocket220(TComponent* Owner,
-    TFormSimStagecraftMain * const formParent)
-  : TFormMachine(Owner,formParent),
-    mSocket220(boost::shared_ptr<WallSocket220>(new WallSocket220))
+FormWallSocket220::FormWallSocket220(FormSimStagecraftMain * const formParent)
+  : FormMachine(formParent,DesignClientWidth,DesignClientHeight),
+    mSocket220(std::shared_ptr<WallSocket220>(new WallSocket220))
 {
-  mSocket220Control = boost::shared_ptr<Socket220Control>(
+  mSocket220Control = std::shared_ptr<Socket220Control>(
     new Socket220Control( this,mSocket220->mSocket220,ImageSocket220));
 
   CreateWatermark(ImageView,ImageWatermark);
 
-  OnResize(0);
+  Resize();
 }
 //---------------------------------------------------------------------------
-void TFormWallSocket220::UpdateBuffer()
+void FormWallSocket220::UpdateBuffer()
 {
   switch (mDisplayMode)
   {
     case modeView:
-      ImageBuffer->Canvas->Draw(0,0,ImageView->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageView);
       break;
     case modeUse:
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       break;
     case modeConnect:
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       DrawOnBuffer(ImageSocket220);
       break;
     default: assert(!"Should not get here");
@@ -46,7 +40,7 @@ void TFormWallSocket220::UpdateBuffer()
   DrawBorderAroundBuffer();
 }
 //---------------------------------------------------------------------------
-void TFormWallSocket220::OnMouseDown(const int x, const int y)
+void FormWallSocket220::OnMouseDown(const int x, const int y)
 {
   switch (mDisplayMode)
   {
@@ -62,9 +56,9 @@ void TFormWallSocket220::OnMouseDown(const int x, const int y)
   }
 }
 //---------------------------------------------------------------------------
-void TFormWallSocket220::OnAfterResize()
+void FormWallSocket220::OnAfterResize()
 {
-  PlaceInCenter(ImageSocket220,ClientRect);
+  PlaceInCenter(ImageSocket220,ClientRect());
 }
 //---------------------------------------------------------------------------
 

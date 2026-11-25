@@ -3,7 +3,7 @@
 #ifndef UnitSimpleSound2H
 #define UnitSimpleSound2H
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitSoundTable.h"
 struct Fader;
 struct PressButton;
@@ -14,7 +14,7 @@ struct XlrMale;
 struct XlrFemale;
 struct InternalConnection;
 struct AudioSignalDisplay;
-struct TFormSimpleSound2;
+class FormSimpleSound2;
 //---------------------------------------------------------------------------
 struct SimpleSound2 : public SoundTable
 {
@@ -33,31 +33,31 @@ struct SimpleSound2 : public SoundTable
 
   private:
 
+  public:
   ~SimpleSound2() {}
-  //SimpleSound2 can only be deleted by boost::shared_ptr
-  friend boost::checked_delete(SimpleSound2 *);
+  private:
 
   //View
   //Use
-  boost::shared_ptr<Fader> mFader1;
-  boost::shared_ptr<Fader> mFader2;
-  boost::shared_ptr<Dial> mDial1; //Gain dial
-  boost::shared_ptr<Dial> mDial2; //Gain dial
-  boost::shared_ptr<PressButton> mPressButton1; //PFL button
-  boost::shared_ptr<PressButton> mPressButton2; //PFL button
-  boost::shared_ptr<Fader> mFaderMaster;
+  std::shared_ptr<Fader> mFader1;
+  std::shared_ptr<Fader> mFader2;
+  std::shared_ptr<Dial> mDial1; //Gain dial
+  std::shared_ptr<Dial> mDial2; //Gain dial
+  std::shared_ptr<PressButton> mPressButton1; //PFL button
+  std::shared_ptr<PressButton> mPressButton2; //PFL button
+  std::shared_ptr<Fader> mFaderMaster;
   //Connect
-  boost::shared_ptr<XlrFemale> mMic1;
-  boost::shared_ptr<XlrFemale> mMic2;
-  boost::shared_ptr<XlrMale> mMasterL;
-  boost::shared_ptr<XlrMale> mMasterR;
-  boost::shared_ptr<EuroMale> mPower;
-  boost::shared_ptr<InternalConnection> mConnectionAudioSignal;
+  std::shared_ptr<XlrFemale> mMic1;
+  std::shared_ptr<XlrFemale> mMic2;
+  std::shared_ptr<XlrMale> mMasterL;
+  std::shared_ptr<XlrMale> mMasterR;
+  std::shared_ptr<EuroMale> mPower;
+  std::shared_ptr<InternalConnection> mConnectionAudioSignal;
   //Display
-  boost::shared_ptr<AudioSignalDisplay> mAudioSignalDisplay;
+  std::shared_ptr<AudioSignalDisplay> mAudioSignalDisplay;
   //Misc
 
-  friend TFormSimpleSound2;
+  friend class FormSimpleSound2;
 };
 //---------------------------------------------------------------------------
 #endif

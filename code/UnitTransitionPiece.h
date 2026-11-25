@@ -4,11 +4,11 @@
 #define UnitTransitionPieceH
 //---------------------------------------------------------------------------
 #include "UnitMachine.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 struct JackMale;
 struct CinchRedFemale;
 struct CinchWhiteFemale;
-struct TFormTransitionPieceJackMaleTwoCinchFemale;
+class FormTransitionPieceJackMaleTwoCinchFemale;
 //---------------------------------------------------------------------------
 struct TransitionPiece : public Machine
 {
@@ -28,10 +28,10 @@ struct TransitionPiece : public Machine
 
   protected:
 
+  public:
   virtual ~TransitionPiece() {}
-  //TransitionPiece can only be deleted by boost::shared_ptr
+  protected:
   //or descandants
-  friend boost::checked_delete(TransitionPiece *);
 
   //View
   //Use
@@ -49,19 +49,19 @@ struct TransitionPieceJackMaleTwoCinchFemale : public TransitionPiece
 
   private:
 
+  public:
   ~TransitionPieceJackMaleTwoCinchFemale() {}
-  //TransitionPieceJackMaleTwoCinchFemale can only be deleted by boost::shared_ptr
-  friend boost::checked_delete(TransitionPieceJackMaleTwoCinchFemale *);
+  private:
 
   //View
   //Use
   //Connect
-  boost::shared_ptr<JackMale> mJack;
-  boost::shared_ptr<CinchWhiteFemale> mCinchL;
-  boost::shared_ptr<CinchRedFemale> mCinchR;
+  std::shared_ptr<JackMale> mJack;
+  std::shared_ptr<CinchWhiteFemale> mCinchL;
+  std::shared_ptr<CinchRedFemale> mCinchR;
   //Display
 
-  friend TFormTransitionPieceJackMaleTwoCinchFemale;
+  friend class FormTransitionPieceJackMaleTwoCinchFemale;
 };
 //---------------------------------------------------------------------------
 #endif

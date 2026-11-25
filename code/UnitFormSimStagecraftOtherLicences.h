@@ -1,23 +1,13 @@
 //---------------------------------------------------------------------------
-
 #ifndef UnitFormSimStagecraftOtherLicencesH
 #define UnitFormSimStagecraftOtherLicencesH
 //---------------------------------------------------------------------------
-#include <Classes.hpp>
-#include <Controls.hpp>
-#include <StdCtrls.hpp>
-#include <Forms.hpp>
-#include <ComCtrls.hpp>
+#include <QDialog>
 //---------------------------------------------------------------------------
-class TFormSimStagecraftOtherLicences : public TForm
+class FormSimStagecraftOtherLicences : public QDialog
 {
-__published:	// IDE-managed Components
-        TRichEdit *RichEdit;
-private:	// User declarations
-public:		// User declarations
-        __fastcall TFormSimStagecraftOtherLicences(TComponent* Owner);
+public:
+  explicit FormSimStagecraftOtherLicences(QWidget * const parent = nullptr);
 };
-//---------------------------------------------------------------------------
-extern PACKAGE TFormSimStagecraftOtherLicences *FormSimStagecraftOtherLicences;
 //---------------------------------------------------------------------------
 #endif

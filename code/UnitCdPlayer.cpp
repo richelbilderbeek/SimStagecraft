@@ -1,7 +1,6 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
+#include <cassert>
 #include "UnitCdPlayer.h"
 //---------------------------------------------------------------------------
 #include <cmath>
@@ -12,23 +11,23 @@
 CdPlayer::CdPlayer()
   :
   //Use
-  mButtonPower(boost::shared_ptr<TapButton<CdPlayer> >(
+  mButtonPower(std::shared_ptr<TapButton<CdPlayer> >(
     new TapButton<CdPlayer>(this,&CdPlayer::PressPower))),
-  mButtonStop(boost::shared_ptr<TapButton<CdPlayer> >(
+  mButtonStop(std::shared_ptr<TapButton<CdPlayer> >(
     new TapButton<CdPlayer>(this,&CdPlayer::PressStop))),
-  mButtonPlay(boost::shared_ptr<TapButton<CdPlayer> >(
+  mButtonPlay(std::shared_ptr<TapButton<CdPlayer> >(
     new TapButton<CdPlayer>(this,&CdPlayer::PressPlay))),
   //Connect
-  mCinchFemaleOutL(boost::shared_ptr<CinchWhiteFemale>(new CinchWhiteFemale(this))),
-  mCinchFemaleOutR(boost::shared_ptr<CinchRedFemale>(new CinchRedFemale(this))),
-  mPlug220Power(boost::shared_ptr<Plug220>(new Plug220(this))),
-  mConnectionAudioSignalL(boost::shared_ptr<InternalConnection>(
+  mCinchFemaleOutL(std::shared_ptr<CinchWhiteFemale>(new CinchWhiteFemale(this))),
+  mCinchFemaleOutR(std::shared_ptr<CinchRedFemale>(new CinchRedFemale(this))),
+  mPlug220Power(std::shared_ptr<Plug220>(new Plug220(this))),
+  mConnectionAudioSignalL(std::shared_ptr<InternalConnection>(
     new InternalConnection(this))),
-  mConnectionAudioSignalR(boost::shared_ptr<InternalConnection>(
+  mConnectionAudioSignalR(std::shared_ptr<InternalConnection>(
     new InternalConnection(this))),
-  mConnectionLcdSymbolPlay(boost::shared_ptr<InternalConnection> (
+  mConnectionLcdSymbolPlay(std::shared_ptr<InternalConnection> (
     new InternalConnection(this))),
-  mConnectionLedPower(boost::shared_ptr<InternalConnection> (
+  mConnectionLedPower(std::shared_ptr<InternalConnection> (
     new InternalConnection(this))),
   mState(cdOff),
   mAudioRecordedL(this->CreateCdL()),
@@ -36,13 +35,13 @@ CdPlayer::CdPlayer()
   mPlayPos(0)
 {
   //Display
-  mAudioSignalDisplayL = boost::shared_ptr<AudioSignalDisplay>(
+  mAudioSignalDisplayL = std::shared_ptr<AudioSignalDisplay>(
     new AudioSignalDisplay(mConnectionAudioSignalL.get()));
-  mAudioSignalDisplayR = boost::shared_ptr<AudioSignalDisplay>(
+  mAudioSignalDisplayR = std::shared_ptr<AudioSignalDisplay>(
     new AudioSignalDisplay(mConnectionAudioSignalR.get()));
-  mLcdSymbolPlay = boost::shared_ptr<LcdSymbol>(
+  mLcdSymbolPlay = std::shared_ptr<LcdSymbol>(
     new LcdSymbol(mConnectionLcdSymbolPlay.get()));
-  mLedPower = boost::shared_ptr<Led>(
+  mLedPower = std::shared_ptr<Led>(
     new Led(mConnectionLedPower.get(),0,255,0));
 }
 //---------------------------------------------------------------------------
@@ -207,4 +206,3 @@ const std::vector<double> CdPlayer::CreateCdR() const
 }
 //---------------------------------------------------------------------------
 
-#pragma package(smart_init)

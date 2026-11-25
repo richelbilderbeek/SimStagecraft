@@ -1,25 +1,24 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
+#include <cassert>
 #include "UnitDisplay.h"
 #include "UnitConnector.h"
 #include "UnitDimmerpack.h"
 //---------------------------------------------------------------------------
 DimblockV3::DimblockV3()
-  : mDmxMaleInput(boost::shared_ptr<DmxMale>(new DmxMale(this))),
-    mDmxFemaleOutput(boost::shared_ptr<DmxFemale>(new DmxFemale(this))),
-    mPowerMale(boost::shared_ptr<SocketPowerMale>(new SocketPowerMale(this))),
+  : mDmxMaleInput(std::shared_ptr<DmxMale>(new DmxMale(this))),
+    mDmxFemaleOutput(std::shared_ptr<DmxFemale>(new DmxFemale(this))),
+    mPowerMale(std::shared_ptr<SocketPowerMale>(new SocketPowerMale(this))),
     mSockets(CreateSockets(this,12)),
-    mConnectionLedMainsPower(boost::shared_ptr<InternalConnection>(
+    mConnectionLedMainsPower(std::shared_ptr<InternalConnection>(
       new InternalConnection(this))),
-    mConnectionLedNondimSet(boost::shared_ptr<InternalConnection>(
+    mConnectionLedNondimSet(std::shared_ptr<InternalConnection>(
       new InternalConnection(this))),
-    mConnectionLedPresetSet(boost::shared_ptr<InternalConnection>(
+    mConnectionLedPresetSet(std::shared_ptr<InternalConnection>(
       new InternalConnection(this))),
-    mConnectionLedDmxPresent(boost::shared_ptr<InternalConnection>(
+    mConnectionLedDmxPresent(std::shared_ptr<InternalConnection>(
       new InternalConnection(this))),
-    mConnectionLedWarning(boost::shared_ptr<InternalConnection>(
+    mConnectionLedWarning(std::shared_ptr<InternalConnection>(
       new InternalConnection(this)))
 {
   assert(mDmxMaleInput.get() != 0);
@@ -28,15 +27,15 @@ DimblockV3::DimblockV3()
   assert(mSockets.size() == 12);
 
   //Display
-  mLedMainsPower = boost::shared_ptr<Led>(
+  mLedMainsPower = std::shared_ptr<Led>(
     new Led(mConnectionLedMainsPower.get(),255,0,0));
-  mLedNondimSet = boost::shared_ptr<Led>(
+  mLedNondimSet = std::shared_ptr<Led>(
     new Led(mConnectionLedNondimSet.get(),0,255,0));
-  mLedPresetSet = boost::shared_ptr<Led>(
+  mLedPresetSet = std::shared_ptr<Led>(
     new Led(mConnectionLedPresetSet.get(),255,255,0));
-  mLedDmxPresent = boost::shared_ptr<Led>(
+  mLedDmxPresent = std::shared_ptr<Led>(
     new Led(mConnectionLedDmxPresent.get(),0,255,0));
-  mLedWarning = boost::shared_ptr<Led>(
+  mLedWarning = std::shared_ptr<Led>(
     new Led(mConnectionLedWarning.get(),255,0,0));
 
 }
@@ -126,18 +125,17 @@ const bool DimblockV3::HasPower() const
     otherConnector,std::vector<const Connector*>());
 }
 //---------------------------------------------------------------------------
-const std::vector<boost::shared_ptr<Socket220> > CreateSockets(
+const std::vector<std::shared_ptr<Socket220> > CreateSockets(
   const Machine * const belongTo,
   const int nSockets)
 {
-  std::vector<boost::shared_ptr<Socket220> > sockets;
+  std::vector<std::shared_ptr<Socket220> > sockets;
 
   for (int i=0; i!=nSockets; ++i)
   {
-    boost::shared_ptr<Socket220> socket(new Socket220(belongTo));
+    std::shared_ptr<Socket220> socket(new Socket220(belongTo));
     sockets.push_back(socket);
   }
   return sockets;
 }
 //---------------------------------------------------------------------------
-#pragma package(smart_init)

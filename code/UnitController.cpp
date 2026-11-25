@@ -1,6 +1,4 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
 #include <cassert>
 #include "UnitController.h"
@@ -65,4 +63,3 @@ const double Fader::GetRelPosition() const
   return relPosition;
 }
 //---------------------------------------------------------------------------
-#pragma package(smart_init)

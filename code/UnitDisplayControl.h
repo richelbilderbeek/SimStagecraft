@@ -3,97 +3,95 @@
 #ifndef UnitDisplayControlH
 #define UnitDisplayControlH
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
+#include <memory>
 struct AudioSignalDisplay;
 struct LcdSymbol;
 struct Led;
-namespace Extctrls { struct TImage; }
+struct Image;
 //---------------------------------------------------------------------------
 struct DisplayControl
 {
-  DisplayControl(Extctrls::TImage * const image);
+  DisplayControl(Image * const image);
   virtual void Update() = 0;
 
   protected:
-  Extctrls::TImage * const mImage;
+  Image * const mImage;
 
-  //DisplayControl can only be deleted by boost::shared_ptr
-  //or descendants
+  public:
   virtual ~DisplayControl() {}
-  friend boost::checked_delete(DisplayControl *);
+  protected:
 };
 //---------------------------------------------------------------------------
 struct AudioSignalControl : public DisplayControl
 {
   AudioSignalControl(
-    const boost::shared_ptr<AudioSignalDisplay> audioSignalDisplay,
-    Extctrls::TImage * const image);
+    const std::shared_ptr<AudioSignalDisplay> audioSignalDisplay,
+    Image * const image);
 
   void Update();
 
   private:
-  const boost::shared_ptr<AudioSignalDisplay> mAudioSignalDisplay;
+  const std::shared_ptr<AudioSignalDisplay> mAudioSignalDisplay;
 
-  //AudioSignalControl can only be deleted by boost::shared_ptr
+  public:
   ~AudioSignalControl() {}
-  friend boost::checked_delete(AudioSignalControl*);
+  private:
 };
 //---------------------------------------------------------------------------
 struct LcdSymbolControl : public DisplayControl
 {
-  LcdSymbolControl(const boost::shared_ptr<LcdSymbol> lcdSymbol,
-    Extctrls::TImage * const image,
-    Extctrls::TImage * const imageLcdSymbol);
+  LcdSymbolControl(const std::shared_ptr<LcdSymbol> lcdSymbol,
+    Image * const image,
+    Image * const imageLcdSymbol);
 
   void Update();
 
   private:
 
-  const boost::shared_ptr<LcdSymbol> mLcdSymbol;
-  Extctrls::TImage * const mImageLcdSymbol;
+  const std::shared_ptr<LcdSymbol> mLcdSymbol;
+  Image * const mImageLcdSymbol;
 
   protected:
-  //LcdSymbolControl can only be deleted by boost::shared_ptr
-  //or descendants
+  public:
   virtual ~LcdSymbolControl() {}
-  friend boost::checked_delete(LcdSymbolControl *);
+  protected:
 };
 //---------------------------------------------------------------------------
 struct LcdSymbolPlayControl : public LcdSymbolControl
 {
-  LcdSymbolPlayControl(const boost::shared_ptr<LcdSymbol> lcdSymbol,
-    Extctrls::TImage * const image);
+  LcdSymbolPlayControl(const std::shared_ptr<LcdSymbol> lcdSymbol,
+    Image * const image);
 
   private:
-  //LcdSymbolPlayControl can only be deleted by boost::shared_ptr
+  public:
   ~LcdSymbolPlayControl() {}
-  friend boost::checked_delete(LcdSymbolPlayControl *);
+  private:
 };
 //---------------------------------------------------------------------------
 struct LcdSymbolRecControl : public LcdSymbolControl
 {
-  LcdSymbolRecControl(const boost::shared_ptr<LcdSymbol> lcdSymbol,
-    Extctrls::TImage * const image);
+  LcdSymbolRecControl(const std::shared_ptr<LcdSymbol> lcdSymbol,
+    Image * const image);
 
   private:
-  //LcdSymbolRecControl can only be deleted by boost::shared_ptr
+  public:
   ~LcdSymbolRecControl() {}
-  friend boost::checked_delete(LcdSymbolRecControl *);
+  private:
 };
 //---------------------------------------------------------------------------
 struct LedControl : public DisplayControl
 {
-  LedControl(const boost::shared_ptr<Led> led,
-    Extctrls::TImage * const image);
+  LedControl(const std::shared_ptr<Led> led,
+    Image * const image);
 
   void Update();
 
   private:
-  const boost::shared_ptr<Led> mLed;
+  const std::shared_ptr<Led> mLed;
 
-  //LedControl can only be deleted by boost::shared_ptr
+  public:
   ~LedControl() {}
-  friend boost::checked_delete(LedControl *);
+  private:
 };
 //---------------------------------------------------------------------------
 

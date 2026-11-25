@@ -1,7 +1,6 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
 
+#include <cassert>
 #include "UnitConnectorControl.h"
 #include "UnitControllerControl.h"
 #include "UnitDisplayControl.h"
@@ -9,63 +8,58 @@
 #include "UnitFormMachine.h"
 #include "UnitFormSimStagecraftMain.h"
 #include "UnitMdPlayer.h"
-#include "UnitVcl.h"
+#include "UnitImage.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma resource "*.dfm"
-TFormMdPlayer *FormMdPlayer;
-//---------------------------------------------------------------------------
-__fastcall TFormMdPlayer::TFormMdPlayer(TComponent* Owner,
-    TFormSimStagecraftMain * const formParent)
-  : TFormMachine(Owner,formParent),
-    mMdPlayer(boost::shared_ptr<MdPlayer>(new MdPlayer))
+FormMdPlayer::FormMdPlayer(FormSimStagecraftMain * const formParent)
+  : FormMachine(formParent,DesignClientWidth,DesignClientHeight),
+    mMdPlayer(std::shared_ptr<MdPlayer>(new MdPlayer))
 {
 
   //Control
-  mTapButtonPlay = boost::shared_ptr<TapButtonControl<MdPlayer> > (
+  mTapButtonPlay = std::shared_ptr<TapButtonControl<MdPlayer> > (
     new TapButtonControl<MdPlayer>(this,mMdPlayer->mButtonPlay, ImageTapButtonPlay));
-  mTapButtonRecord = boost::shared_ptr<TapButtonControl<MdPlayer> > (
+  mTapButtonRecord = std::shared_ptr<TapButtonControl<MdPlayer> > (
     new TapButtonControl<MdPlayer>(this,mMdPlayer->mButtonRecord, ImageTapButtonRecord));
-  mTapButtonStop = boost::shared_ptr<TapButtonControl<MdPlayer> > (
+  mTapButtonStop = std::shared_ptr<TapButtonControl<MdPlayer> > (
     new TapButtonControl<MdPlayer>(this,mMdPlayer->mButtonStop, ImageTapButtonStop));
-  mTapButtonPower = boost::shared_ptr<TapButtonControl<MdPlayer> > (
+  mTapButtonPower = std::shared_ptr<TapButtonControl<MdPlayer> > (
     new TapButtonControl<MdPlayer>(this,mMdPlayer->mButtonPower, ImageTapButtonPower));
 
   //Connect
-  mCinchFemaleInL = boost::shared_ptr<CinchWhiteFemaleControl>(
+  mCinchFemaleInL = std::shared_ptr<CinchWhiteFemaleControl>(
     new CinchWhiteFemaleControl(this,mMdPlayer->mCinchFemaleInL,ImageCinchFemaleInL));
-  mCinchFemaleInR = boost::shared_ptr<CinchRedFemaleControl>(
+  mCinchFemaleInR = std::shared_ptr<CinchRedFemaleControl>(
     new CinchRedFemaleControl(this,mMdPlayer->mCinchFemaleInR,ImageCinchFemaleInR));
-  mCinchFemaleOutL = boost::shared_ptr<CinchWhiteFemaleControl>(
+  mCinchFemaleOutL = std::shared_ptr<CinchWhiteFemaleControl>(
     new CinchWhiteFemaleControl(this,mMdPlayer->mCinchFemaleOutL,ImageCinchFemaleOutL));
-  mCinchFemaleOutR = boost::shared_ptr<CinchRedFemaleControl>(
+  mCinchFemaleOutR = std::shared_ptr<CinchRedFemaleControl>(
     new CinchRedFemaleControl(this,mMdPlayer->mCinchFemaleOutR,ImageCinchFemaleOutR));
-  mPlug220Power = boost::shared_ptr<Plug220Control>(
+  mPlug220Power = std::shared_ptr<Plug220Control>(
     new Plug220Control(this,mMdPlayer->mPlug220Power,ImagePlug220Power));
   //Display
-  mAudioSignalDisplayL = boost::shared_ptr<AudioSignalControl>(
+  mAudioSignalDisplayL = std::shared_ptr<AudioSignalControl>(
     new AudioSignalControl(mMdPlayer->mAudioSignalDisplayL,ImageAudioSignalL));
-  mAudioSignalDisplayR = boost::shared_ptr<AudioSignalControl>(
+  mAudioSignalDisplayR = std::shared_ptr<AudioSignalControl>(
     new AudioSignalControl(mMdPlayer->mAudioSignalDisplayR,ImageAudioSignalR));
-  mLcdSymbolRec = boost::shared_ptr<LcdSymbolRecControl> (
+  mLcdSymbolRec = std::shared_ptr<LcdSymbolRecControl> (
     new LcdSymbolRecControl(mMdPlayer->mLcdSymbolRecord,ImageLcdSymbolRec));
-  mLcdSymbolPlay = boost::shared_ptr<LcdSymbolPlayControl> (
+  mLcdSymbolPlay = std::shared_ptr<LcdSymbolPlayControl> (
     new LcdSymbolPlayControl(mMdPlayer->mLcdSymbolPlay,ImageLcdSymbolPlay));
-  mLedPower = boost::shared_ptr<LedControl> (
+  mLedPower = std::shared_ptr<LedControl> (
     new LedControl(mMdPlayer->mLedPower,ImageLedPower));
 
   CreateWatermark(ImageView,ImageWatermark);
 
-  OnResize(0);
+  Resize();
 }
 //---------------------------------------------------------------------------
-void TFormMdPlayer::UpdateBuffer()
+void FormMdPlayer::UpdateBuffer()
 {
   switch (mDisplayMode)
   {
     case modeView:
       mMdPlayer->Tick(); //Important for recording and playing
-      ImageBuffer->Canvas->Draw(0,0,ImageView->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageView);
       break;
     case modeUse:
       //Update displays
@@ -76,7 +70,7 @@ void TFormMdPlayer::UpdateBuffer()
       mLcdSymbolPlay->Update();
       mLedPower->Update();
       //Draw
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       //DrawOnBuffer(LabelUse1);
       //Controls
@@ -93,7 +87,7 @@ void TFormMdPlayer::UpdateBuffer()
       break;
     case modeConnect:
       mMdPlayer->Tick(); //Important for recording and playing
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       DrawOnBuffer(LabelConnectIn);
       DrawOnBuffer(LabelConnectOut);
@@ -110,7 +104,7 @@ void TFormMdPlayer::UpdateBuffer()
   DrawBorderAroundBuffer();
 }
 //---------------------------------------------------------------------------
-void TFormMdPlayer::OnMouseDown(const int x, const int y)
+void FormMdPlayer::OnMouseDown(const int x, const int y)
 {
   switch (mDisplayMode)
   {
@@ -120,26 +114,26 @@ void TFormMdPlayer::OnMouseDown(const int x, const int y)
       if (OnImage(x,y,ImageTapButtonPower))
       {
         mTapButtonPower->OnMouseDown(
-          x - ImageTapButtonPower->Left,
-          y - ImageTapButtonPower->Top);
+          x - ImageTapButtonPower->left,
+          y - ImageTapButtonPower->top);
       }
       else if (OnImage(x,y,ImageTapButtonPlay))
       {
         mTapButtonPlay->OnMouseDown(
-          x - ImageTapButtonPlay->Left,
-          y - ImageTapButtonPlay->Top);
+          x - ImageTapButtonPlay->left,
+          y - ImageTapButtonPlay->top);
       }
       else if (OnImage(x,y,ImageTapButtonRecord))
       {
         mTapButtonRecord->OnMouseDown(
-          x - ImageTapButtonRecord->Left,
-          y - ImageTapButtonRecord->Top);
+          x - ImageTapButtonRecord->left,
+          y - ImageTapButtonRecord->top);
       }
       else if (OnImage(x,y,ImageTapButtonStop))
       {
         mTapButtonStop->OnMouseDown(
-          x - ImageTapButtonStop->Left,
-          y - ImageTapButtonStop->Top);
+          x - ImageTapButtonStop->left,
+          y - ImageTapButtonStop->top);
       }
       break;
     case modeConnect:
@@ -157,13 +151,13 @@ void TFormMdPlayer::OnMouseDown(const int x, const int y)
   }
 }
 //---------------------------------------------------------------------------
-void TFormMdPlayer::OnAfterResize()
+void FormMdPlayer::OnAfterResize()
 {
   //Use
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,9,1));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),9,1));
     //Resize bitmaps
-    //ImageFader1->Picture->Bitmap->Height = MergeRects(v[4][2],v[6][2]).Height();
+    //SetPictureHeight(ImageFader1,MergeRects(v[4][2],v[6][2]).height());
     //ImageFader1->Refresh();
     //Place bitmaps
     //Labels
@@ -182,7 +176,7 @@ void TFormMdPlayer::OnAfterResize()
   }
   //Connect
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,5,2));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),5,2));
     //Labels
     PlaceInCenter(LabelConnectIn ,MergeRects(v[0][0],v[0][1]));
     PlaceInCenter(LabelConnectOut,MergeRects(v[0][2],v[0][3]));

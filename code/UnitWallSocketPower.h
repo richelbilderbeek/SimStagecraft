@@ -3,10 +3,10 @@
 #ifndef UnitWallSocketPowerH
 #define UnitWallSocketPowerH
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitMachine.h"
 struct SocketPowerFemale;
-struct TFormWallSocketPower;
+class FormWallSocketPower;
 //---------------------------------------------------------------------------
 struct WallSocketPower : public Machine
 {
@@ -32,13 +32,13 @@ struct WallSocketPower : public Machine
   private:
   //Control
   //Connect
-  boost::shared_ptr<SocketPowerFemale> mSocketPower;
+  std::shared_ptr<SocketPowerFemale> mSocketPower;
 
-  friend TFormWallSocketPower;
+  friend class FormWallSocketPower;
 
-  //WallSocketPower can only be deleted by boost::shared_ptr
+  public:
   ~WallSocketPower() {}
-  friend boost::checked_delete(WallSocketPower *);
+  private:
 
 };
 //---------------------------------------------------------------------------

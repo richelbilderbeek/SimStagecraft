@@ -4,9 +4,9 @@
 #define UnitDimmerpackH
 //---------------------------------------------------------------------------
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitMachine.h"
-struct TFormDimblockV3;
+class FormDimblockV3;
 struct SocketPowerMale;
 struct DmxMale;
 struct DmxFemale;
@@ -34,10 +34,9 @@ struct Dimmerpack : public Machine
   virtual const bool HasPower() const = 0;
 
   protected:
-  //Dimmerpack can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   virtual ~Dimmerpack() {}
-  friend boost::checked_delete(Dimmerpack *);
+  protected:
 
 
 };
@@ -58,36 +57,36 @@ struct DimblockV3 : public Dimmerpack
 
   private:
 
-  //DimblockV3 can only be deleted by boost::shared_ptr
+  public:
   ~DimblockV3() {}
-  friend boost::checked_delete(DimblockV3*);
+  private:
 
   //View
   //Use
   //Connect
-  boost::shared_ptr<DmxMale> mDmxMaleInput;
-  boost::shared_ptr<DmxFemale> mDmxFemaleOutput;
-  boost::shared_ptr<SocketPowerMale> mPowerMale;
-  std::vector<boost::shared_ptr<Socket220> > mSockets;
+  std::shared_ptr<DmxMale> mDmxMaleInput;
+  std::shared_ptr<DmxFemale> mDmxFemaleOutput;
+  std::shared_ptr<SocketPowerMale> mPowerMale;
+  std::vector<std::shared_ptr<Socket220> > mSockets;
 
-  boost::shared_ptr<InternalConnection> mConnectionLedMainsPower;
-  boost::shared_ptr<InternalConnection> mConnectionLedNondimSet;
-  boost::shared_ptr<InternalConnection> mConnectionLedPresetSet;
-  boost::shared_ptr<InternalConnection> mConnectionLedDmxPresent;
-  boost::shared_ptr<InternalConnection> mConnectionLedWarning;
+  std::shared_ptr<InternalConnection> mConnectionLedMainsPower;
+  std::shared_ptr<InternalConnection> mConnectionLedNondimSet;
+  std::shared_ptr<InternalConnection> mConnectionLedPresetSet;
+  std::shared_ptr<InternalConnection> mConnectionLedDmxPresent;
+  std::shared_ptr<InternalConnection> mConnectionLedWarning;
   //Display
-  boost::shared_ptr<Led> mLedMainsPower;
-  boost::shared_ptr<Led> mLedNondimSet;
-  boost::shared_ptr<Led> mLedPresetSet;
-  boost::shared_ptr<Led> mLedDmxPresent;
-  boost::shared_ptr<Led> mLedWarning;
+  std::shared_ptr<Led> mLedMainsPower;
+  std::shared_ptr<Led> mLedNondimSet;
+  std::shared_ptr<Led> mLedPresetSet;
+  std::shared_ptr<Led> mLedDmxPresent;
+  std::shared_ptr<Led> mLedWarning;
 
 
-  friend TFormDimblockV3;
+  friend class FormDimblockV3;
 
 };
 //---------------------------------------------------------------------------
-const std::vector<boost::shared_ptr<Socket220> > CreateSockets(
+const std::vector<std::shared_ptr<Socket220> > CreateSockets(
   const Machine * const belongTo,
   const int nSockets);
 //---------------------------------------------------------------------------

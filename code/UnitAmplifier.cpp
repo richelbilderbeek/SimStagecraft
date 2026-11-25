@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
+#include <algorithm>
+#include <cassert>
 #include "UnitController.h" //For Fader, etc..
 #include "UnitConnector.h"
 #include "UnitDisplay.h"
@@ -9,19 +9,19 @@
 //---------------------------------------------------------------------------
 EasyAmp::EasyAmp()
   : //Use
-    mPowerSwitch(boost::shared_ptr<TwoSwitch>(new TwoSwitch)),
-    mGain(boost::shared_ptr<Dial>(new Dial)),
+    mPowerSwitch(std::shared_ptr<TwoSwitch>(new TwoSwitch)),
+    mGain(std::shared_ptr<Dial>(new Dial)),
     //Connect
-    mEuroPower(boost::shared_ptr<EuroMale>(new EuroMale(this))),
-    mJackXlrL(boost::shared_ptr<JackXlrFemale>(new JackXlrFemale(this))),
-    mJackXlrR(boost::shared_ptr<JackXlrFemale>(new JackXlrFemale(this))),
-    mSpeakonL(boost::shared_ptr<SpeakonFemale>(new SpeakonFemale(this))),
-    mSpeakonR(boost::shared_ptr<SpeakonFemale>(new SpeakonFemale(this))),
-    mConnectionLedPower(boost::shared_ptr<InternalConnection>(
+    mEuroPower(std::shared_ptr<EuroMale>(new EuroMale(this))),
+    mJackXlrL(std::shared_ptr<JackXlrFemale>(new JackXlrFemale(this))),
+    mJackXlrR(std::shared_ptr<JackXlrFemale>(new JackXlrFemale(this))),
+    mSpeakonL(std::shared_ptr<SpeakonFemale>(new SpeakonFemale(this))),
+    mSpeakonR(std::shared_ptr<SpeakonFemale>(new SpeakonFemale(this))),
+    mConnectionLedPower(std::shared_ptr<InternalConnection>(
       new InternalConnection(this)))
 {
   //Display
-  mLedPower = boost::shared_ptr<Led>(
+  mLedPower = std::shared_ptr<Led>(
     new Led(mConnectionLedPower.get(),255,0,0));
 
 }
@@ -84,4 +84,3 @@ const bool EasyAmp::HasPower() const
 }
 //---------------------------------------------------------------------------
 
-#pragma package(smart_init)

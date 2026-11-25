@@ -1,15 +1,15 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
+#include <algorithm>
+#include <cassert>
 #include "UnitController.h"
 #include "UnitConnector.h"
 
 #include "UnitOctlet.h"
 //---------------------------------------------------------------------------
 Octlet::Octlet()
-  : mPowerSwitch(boost::shared_ptr<TwoSwitch>(new TwoSwitch)),
-    mPlug(boost::shared_ptr<Plug220>(new Plug220(this))),
+  : mPowerSwitch(std::shared_ptr<TwoSwitch>(new TwoSwitch)),
+    mPlug(std::shared_ptr<Plug220>(new Plug220(this))),
     mSockets220(CreateSockets220())
 {
 
@@ -48,18 +48,17 @@ const bool Octlet::HasPower() const
     std::vector<const Connector*>()) > 0.0 ? true : false);
 }
 //---------------------------------------------------------------------------
-const std::vector<boost::shared_ptr<Socket220> > Octlet::CreateSockets220() const
+const std::vector<std::shared_ptr<Socket220> > Octlet::CreateSockets220() const
 {
-  std::vector<boost::shared_ptr<Socket220> > sockets;
+  std::vector<std::shared_ptr<Socket220> > sockets;
   const int nSockets = 8; //An octlet has 8 sockets per definition
 
   for (int i=0; i!=nSockets; ++i)
   {
-    boost::shared_ptr<Socket220> socket(new Socket220(this));
+    std::shared_ptr<Socket220> socket(new Socket220(this));
     sockets.push_back(socket);
   }
   return sockets;
 }
 //---------------------------------------------------------------------------
 
-#pragma package(smart_init)

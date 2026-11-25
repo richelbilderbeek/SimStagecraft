@@ -3,19 +3,16 @@
 #ifndef UnitControllerH
 #define UnitControllerH
 //---------------------------------------------------------------------------
-#include <boost/checked_delete.hpp>
-//---------------------------------------------------------------------------
 struct Fader;
 //---------------------------------------------------------------------------
 struct Controller
 {
   protected:
+  public:
   virtual ~Controller() {}
+  protected:
 
   private:
-  //Controller can only be deleted by boost::shared_ptr
-  //or descendants
-  friend boost::checked_delete(Controller *);
 };
 //---------------------------------------------------------------------------
 struct Dial : public Controller
@@ -32,9 +29,9 @@ struct Dial : public Controller
 
   double mPosition;
 
-  //Dial can only be deleted by boost::shared_ptr
+  public:
   virtual ~Dial() {}
-  friend boost::checked_delete(Dial *);
+  private:
 };
 //---------------------------------------------------------------------------
 struct Fader : public Controller
@@ -49,17 +46,17 @@ struct Fader : public Controller
   private:
   double mPosition;
 
-  //Fader can only be deleted by boost::shared_ptr
+  public:
   virtual ~Fader() {}
-  friend boost::checked_delete(Fader *);
+  private:
 };
 //---------------------------------------------------------------------------
 struct PushButton : public Controller
 {
   private:
-  //PushButton can only be deleted by boost::shared_ptr
+  public:
   virtual ~PushButton() {}
-  friend boost::checked_delete(PushButton *);
+  private:
 };
 //---------------------------------------------------------------------------
 struct PressButton : public Controller
@@ -72,9 +69,9 @@ struct PressButton : public Controller
   private:
   bool mIn;
 
-  //PressButton can only be deleted by boost::shared_ptr
+  public:
   virtual ~PressButton() {}
-  friend boost::checked_delete(PressButton *);
+  private:
 
 };
 //---------------------------------------------------------------------------
@@ -91,9 +88,9 @@ struct TwoSwitch : public Controller
   private:
   bool mOn;
 
-  //TwoSwitch can only be deleted by boost::shared_ptr
+  public:
   virtual ~TwoSwitch() {}
-  friend boost::checked_delete(TwoSwitch *);
+  private:
 
 };
 //---------------------------------------------------------------------------

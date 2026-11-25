@@ -1,7 +1,6 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
+#include <cassert>
 #include "UnitConnector.h"
 
 //---------------------------------------------------------------------------
@@ -165,4 +164,3 @@ const bool XlrMale::CanConnect(const Connector * const otherConnector) const
 }
 //---------------------------------------------------------------------------
 
-#pragma package(smart_init)

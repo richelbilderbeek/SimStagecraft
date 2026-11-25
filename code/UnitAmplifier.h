@@ -4,7 +4,7 @@
 #define UnitAmplifierH
 //---------------------------------------------------------------------------
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitMachine.h"
 //Use
 struct Dial;
@@ -17,7 +17,7 @@ struct SpeakonFemale;
 //Display
 struct Led;
 //Misc
-struct TFormEasyAmp;
+class FormEasyAmp;
 //---------------------------------------------------------------------------
 struct Amplifier : public Machine
 {
@@ -37,13 +37,12 @@ struct Amplifier : public Machine
   virtual const bool HasPower() const = 0;
 
   protected:
-  //Amplifier can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   virtual ~Amplifier() {}
-  friend boost::checked_delete(Amplifier *);
+  protected:
 
   //Misc
-  const std::vector<boost::shared_ptr<Fader> > CreateFaders(const int n) const;
+  const std::vector<std::shared_ptr<Fader> > CreateFaders(const int n) const;
 };
 //---------------------------------------------------------------------------
 struct EasyAmp : public Amplifier
@@ -64,26 +63,26 @@ struct EasyAmp : public Amplifier
 
   private:
 
-  //Amplifier can only be deleted by boost::shared_ptr
+  public:
   ~EasyAmp() {}
-  friend boost::checked_delete(EasyAmp*);
+  private:
 
   //View
   //Use
-  boost::shared_ptr<TwoSwitch> mPowerSwitch;
-  boost::shared_ptr<Dial> mGain;
+  std::shared_ptr<TwoSwitch> mPowerSwitch;
+  std::shared_ptr<Dial> mGain;
   //Connect
-  boost::shared_ptr<EuroMale> mEuroPower;
-  boost::shared_ptr<JackXlrFemale> mJackXlrL;
-  boost::shared_ptr<JackXlrFemale> mJackXlrR;
-  boost::shared_ptr<SpeakonFemale> mSpeakonL;
-  boost::shared_ptr<SpeakonFemale> mSpeakonR;
-  boost::shared_ptr<InternalConnection> mConnectionLedPower;
+  std::shared_ptr<EuroMale> mEuroPower;
+  std::shared_ptr<JackXlrFemale> mJackXlrL;
+  std::shared_ptr<JackXlrFemale> mJackXlrR;
+  std::shared_ptr<SpeakonFemale> mSpeakonL;
+  std::shared_ptr<SpeakonFemale> mSpeakonR;
+  std::shared_ptr<InternalConnection> mConnectionLedPower;
   //Display
-  boost::shared_ptr<Led> mLedPower;
+  std::shared_ptr<Led> mLedPower;
 
 
-  friend TFormEasyAmp;
+  friend class FormEasyAmp;
 };
 //---------------------------------------------------------------------------
 

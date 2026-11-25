@@ -1,75 +1,69 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
 
+#include <cassert>
 #include "UnitConnectorControl.h"
 #include "UnitControllerControl.h"
 #include "UnitDisplayControl.h"
 #include "UnitLightTable.h"
 #include "UnitFormSimpleShine2.h"
-#include "UnitVcl.h"
+#include "UnitImage.h"
 #include "UnitFormSimStagecraftMain.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma link "UnitFormMachine"
-#pragma resource "*.dfm"
-TFormSimpleShine2 *FormSimpleShine2;
 //---------------------------------------------------------------------------
-__fastcall TFormSimpleShine2::TFormSimpleShine2(TComponent* Owner,
-    TFormSimStagecraftMain * const formParent)
-  : TFormMachine(Owner,formParent),
+FormSimpleShine2::FormSimpleShine2(FormSimStagecraftMain * const formParent)
+  : FormMachine(formParent,DesignClientWidth,DesignClientHeight),
   mImageFaders(this->GetImageFaders()),
   mLabels(this->GetLabels()),
   mChannelFaders(24),
-  mSimpleShine2(boost::shared_ptr<SimpleShine2>(new SimpleShine2))
+  mSimpleShine2(std::shared_ptr<SimpleShine2>(new SimpleShine2))
 {
   //Control
   for (int i=0; i!=24; ++i)
   {
-    mChannelFaders[i] = boost::shared_ptr<FaderControl>(
+    mChannelFaders[i] = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine2->mFaders[i],mImageFaders[i]));
   }
-  mMasterFader = boost::shared_ptr<FaderControl>(
+  mMasterFader = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine2->mFaderMaster,ImageFaderMaster));
-  mCrossfaderA = boost::shared_ptr<FaderControl>(
+  mCrossfaderA = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine2->mCrossfaderA,ImageCrossfaderA));
-  mCrossfaderB = boost::shared_ptr<FaderControl>(
+  mCrossfaderB = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSimpleShine2->mCrossfaderB,ImageCrossfaderB));
   //Connect
-  mDmxFemaleOut = boost::shared_ptr<DmxFemaleControl>(
+  mDmxFemaleOut = std::shared_ptr<DmxFemaleControl>(
     new DmxFemaleControl(this,mSimpleShine2->mDmxFemaleOut,ImageDmxFemaleOut));
-  mEuroMalePower = boost::shared_ptr<EuroMaleControl>(
+  mEuroMalePower = std::shared_ptr<EuroMaleControl>(
     new EuroMaleControl(this,mSimpleShine2->mEuroMalePower,ImageEuroMalePower));
   //Display
-  mLedPower = boost::shared_ptr<LedControl>(new LedControl(
+  mLedPower = std::shared_ptr<LedControl>(new LedControl(
     mSimpleShine2->mLedPower,ImageLedPower));
-  mLedA = boost::shared_ptr<LedControl>(new LedControl(
+  mLedA = std::shared_ptr<LedControl>(new LedControl(
     mSimpleShine2->mLedA,ImageLedA));
-  mLedB = boost::shared_ptr<LedControl>(new LedControl(
+  mLedB = std::shared_ptr<LedControl>(new LedControl(
     mSimpleShine2->mLedB,ImageLedB));
 
 
   CreateWatermark(ImageView,ImageWatermark);
-  OnResize(0);
+  Resize();
 
   //Manually set the faders
   const int nFaders = mChannelFaders.size();
   for (int i=0; i!=nFaders; ++i)
   {
-    mChannelFaders[i]->OnMouseDown(0,mImageFaders[i]->Height - 1);
+    mChannelFaders[i]->OnMouseDown(0,mImageFaders[i]->height - 1);
 
   }
-  mMasterFader->OnMouseDown(0,ImageFaderMaster->Height - 1);
-  mCrossfaderA->OnMouseDown(0,ImageCrossfaderA->Height - 1);
-  mCrossfaderB->OnMouseDown(0,ImageCrossfaderB->Height - 1);
+  mMasterFader->OnMouseDown(0,ImageFaderMaster->height - 1);
+  mCrossfaderA->OnMouseDown(0,ImageCrossfaderA->height - 1);
+  mCrossfaderB->OnMouseDown(0,ImageCrossfaderB->height - 1);
 }
 //---------------------------------------------------------------------------
-void TFormSimpleShine2::UpdateBuffer()
+void FormSimpleShine2::UpdateBuffer()
 {
   switch (mDisplayMode)
   {
     case modeView:
-      ImageBuffer->Canvas->Draw(0,0,ImageView->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageView);
       break;
     case modeUse:
       //Update displays
@@ -77,7 +71,7 @@ void TFormSimpleShine2::UpdateBuffer()
       mLedA->Update();
       mLedB->Update();
       //Start drawing
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       DrawOnBuffer( mLabels);
       //Controllers
@@ -91,7 +85,7 @@ void TFormSimpleShine2::UpdateBuffer()
       DrawOnBuffer(ImageLedB);
       break;
     case modeConnect:
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       DrawOnBuffer(LabelConnectPower);
       DrawOnBuffer(LabelConnectDmxOut);
@@ -104,7 +98,7 @@ void TFormSimpleShine2::UpdateBuffer()
   DrawBorderAroundBuffer();
 }
 //---------------------------------------------------------------------------
-void TFormSimpleShine2::OnMouseDown(const int x, const int y)
+void FormSimpleShine2::OnMouseDown(const int x, const int y)
 {
   switch (mDisplayMode)
   {
@@ -115,12 +109,12 @@ void TFormSimpleShine2::OnMouseDown(const int x, const int y)
         const int nFaders = mImageFaders.size();
         for (int i=0; i!=nFaders; ++i)
         {
-          TImage * const image = mImageFaders[i];
+          Image * const image = mImageFaders[i];
           if (OnImage(x,y,image))
           {
             mChannelFaders[i]->OnMouseDown(
-              x - image->Left,
-              y - image->Top);
+              x - image->left,
+              y - image->top);
             return;
           }
 
@@ -129,20 +123,20 @@ void TFormSimpleShine2::OnMouseDown(const int x, const int y)
       if (OnImage(x,y,ImageFaderMaster))
       {
         mMasterFader->OnMouseDown(
-          x - ImageFaderMaster->Left,
-          y - ImageFaderMaster->Top);
+          x - ImageFaderMaster->left,
+          y - ImageFaderMaster->top);
       }
       else if (OnImage(x,y,ImageCrossfaderA))
       {
         mCrossfaderA->OnMouseDown(
-          x - ImageCrossfaderA->Left,
-          y - ImageCrossfaderA->Top);
+          x - ImageCrossfaderA->left,
+          y - ImageCrossfaderA->top);
       }
       else if (OnImage(x,y,ImageCrossfaderB))
       {
         mCrossfaderB->OnMouseDown(
-          x - ImageCrossfaderB->Left,
-          y - ImageCrossfaderB->Top);
+          x - ImageCrossfaderB->left,
+          y - ImageCrossfaderB->top);
       }
 
 
@@ -157,46 +151,45 @@ void TFormSimpleShine2::OnMouseDown(const int x, const int y)
   }
 }
 //---------------------------------------------------------------------------
-void TFormSimpleShine2::OnAfterResize()
+void FormSimpleShine2::OnAfterResize()
 {
   //Note: all indices in this function are y-x ordered
   //Use
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,20,12));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),20,12));
     //Resize bitmaps
     //Note: indices are y-x ordered
-    SetSize(ImageFader1->Picture->Bitmap ,MergeRects(v[2][ 1],v[5][ 1]));
-    SetSize(ImageFader2->Picture->Bitmap ,MergeRects(v[2][ 2],v[5][ 2]));
-    SetSize(ImageFader3->Picture->Bitmap ,MergeRects(v[2][ 3],v[5][ 3]));
-    SetSize(ImageFader4->Picture->Bitmap ,MergeRects(v[2][ 4],v[5][ 4]));
-    SetSize(ImageFader5->Picture->Bitmap ,MergeRects(v[2][ 5],v[5][ 5]));
-    SetSize(ImageFader6->Picture->Bitmap ,MergeRects(v[2][ 6],v[5][ 6]));
-    SetSize(ImageFader7->Picture->Bitmap ,MergeRects(v[2][ 8],v[5][ 8]));
-    SetSize(ImageFader8->Picture->Bitmap ,MergeRects(v[2][ 9],v[5][ 9]));
-    SetSize(ImageFader9->Picture->Bitmap ,MergeRects(v[2][10],v[5][10]));
-    SetSize(ImageFader10->Picture->Bitmap,MergeRects(v[2][11],v[5][11]));
-    SetSize(ImageFader11->Picture->Bitmap,MergeRects(v[2][12],v[5][12]));
-    SetSize(ImageFader12->Picture->Bitmap,MergeRects(v[2][13],v[5][13]));
-    SetSize(ImageFader13->Picture->Bitmap,MergeRects(v[7][ 1],v[10][ 1]));
-    SetSize(ImageFader14->Picture->Bitmap,MergeRects(v[7][ 2],v[10][ 2]));
-    SetSize(ImageFader15->Picture->Bitmap,MergeRects(v[7][ 3],v[10][ 3]));
-    SetSize(ImageFader16->Picture->Bitmap,MergeRects(v[7][ 4],v[10][ 4]));
-    SetSize(ImageFader17->Picture->Bitmap,MergeRects(v[7][ 5],v[10][ 5]));
-    SetSize(ImageFader18->Picture->Bitmap,MergeRects(v[7][ 6],v[10][ 6]));
-    SetSize(ImageFader19->Picture->Bitmap,MergeRects(v[7][ 8],v[10][ 8]));
-    SetSize(ImageFader20->Picture->Bitmap,MergeRects(v[7][ 9],v[10][ 9]));
-    SetSize(ImageFader21->Picture->Bitmap,MergeRects(v[7][10],v[10][10]));
-    SetSize(ImageFader22->Picture->Bitmap,MergeRects(v[7][11],v[10][11]));
-    SetSize(ImageFader23->Picture->Bitmap,MergeRects(v[7][12],v[10][12]));
-    SetSize(ImageFader24->Picture->Bitmap,MergeRects(v[7][13],v[10][13]));
-    SetSize(ImageCrossfaderA->Picture->Bitmap,MergeRects(v[7][15],v[10][15]));
-    SetSize(ImageCrossfaderB->Picture->Bitmap,MergeRects(v[7][16],v[10][16]));
-    SetSize(ImageFaderMaster->Picture->Bitmap,MergeRects(v[7][18],v[10][18]));
+    SetPictureSize(ImageFader1,MergeRects(v[2][ 1],v[5][ 1]));
+    SetPictureSize(ImageFader2,MergeRects(v[2][ 2],v[5][ 2]));
+    SetPictureSize(ImageFader3,MergeRects(v[2][ 3],v[5][ 3]));
+    SetPictureSize(ImageFader4,MergeRects(v[2][ 4],v[5][ 4]));
+    SetPictureSize(ImageFader5,MergeRects(v[2][ 5],v[5][ 5]));
+    SetPictureSize(ImageFader6,MergeRects(v[2][ 6],v[5][ 6]));
+    SetPictureSize(ImageFader7,MergeRects(v[2][ 8],v[5][ 8]));
+    SetPictureSize(ImageFader8,MergeRects(v[2][ 9],v[5][ 9]));
+    SetPictureSize(ImageFader9,MergeRects(v[2][10],v[5][10]));
+    SetPictureSize(ImageFader10,MergeRects(v[2][11],v[5][11]));
+    SetPictureSize(ImageFader11,MergeRects(v[2][12],v[5][12]));
+    SetPictureSize(ImageFader12,MergeRects(v[2][13],v[5][13]));
+    SetPictureSize(ImageFader13,MergeRects(v[7][ 1],v[10][ 1]));
+    SetPictureSize(ImageFader14,MergeRects(v[7][ 2],v[10][ 2]));
+    SetPictureSize(ImageFader15,MergeRects(v[7][ 3],v[10][ 3]));
+    SetPictureSize(ImageFader16,MergeRects(v[7][ 4],v[10][ 4]));
+    SetPictureSize(ImageFader17,MergeRects(v[7][ 5],v[10][ 5]));
+    SetPictureSize(ImageFader18,MergeRects(v[7][ 6],v[10][ 6]));
+    SetPictureSize(ImageFader19,MergeRects(v[7][ 8],v[10][ 8]));
+    SetPictureSize(ImageFader20,MergeRects(v[7][ 9],v[10][ 9]));
+    SetPictureSize(ImageFader21,MergeRects(v[7][10],v[10][10]));
+    SetPictureSize(ImageFader22,MergeRects(v[7][11],v[10][11]));
+    SetPictureSize(ImageFader23,MergeRects(v[7][12],v[10][12]));
+    SetPictureSize(ImageFader24,MergeRects(v[7][13],v[10][13]));
+    SetPictureSize(ImageCrossfaderA,MergeRects(v[7][15],v[10][15]));
+    SetPictureSize(ImageCrossfaderB,MergeRects(v[7][16],v[10][16]));
+    SetPictureSize(ImageFaderMaster,MergeRects(v[7][18],v[10][18]));
     //Refresh all faders
     const int nFaders = mImageFaders.size();
     for (int i=0; i!=nFaders; ++i)
     {
-      mImageFaders[i]->Refresh();
     }
     //Place bitmaps
     //Labels
@@ -276,7 +269,7 @@ void TFormSimpleShine2::OnAfterResize()
   }
   //Connect
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,2,2));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),2,2));
     //Labels
     PlaceInCenter(LabelConnectPower ,v[0][0]);
     PlaceInCenter(LabelConnectDmxOut,v[0][1]);
@@ -286,10 +279,10 @@ void TFormSimpleShine2::OnAfterResize()
   }
 }
 //---------------------------------------------------------------------------
-const std::vector<TImage*> TFormSimpleShine2::GetImageFaders() const
+const std::vector<Image*> FormSimpleShine2::GetImageFaders() const
 {
-  //std::vector<TImage*> v(24,0);
-  std::vector<TImage*> v(24);
+  //std::vector<Image*> v(24,0);
+  std::vector<Image*> v(24);
   v[ 0] =  ImageFader1;
   v[ 1] =  ImageFader2;
   v[ 2] =  ImageFader3;
@@ -317,10 +310,10 @@ const std::vector<TImage*> TFormSimpleShine2::GetImageFaders() const
   return v;
 }
 //---------------------------------------------------------------------------
-const std::vector<TImage*> TFormSimpleShine2::GetLabels() const
+const std::vector<Image*> FormSimpleShine2::GetLabels() const
 {
-  //std::vector<TImage*> v(39,0);
-  std::vector<TImage*> v(39);
+  //std::vector<Image*> v(39,0);
+  std::vector<Image*> v(39);
   v[ 0] =  LabelUse1_1;
   v[ 1] =  LabelUse1_2;
   v[ 2] =  LabelUse1_3;

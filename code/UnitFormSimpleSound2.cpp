@@ -1,7 +1,6 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
 
+#include <cassert>
 #include "UnitConnectorControl.h"
 #include "UnitControllerControl.h"
 #include "UnitDisplayControl.h"
@@ -9,77 +8,72 @@
 #include "UnitFormSimpleSound2.h"
 #include "UnitFormMachine.h"
 #include "UnitFormSimStagecraftMain.h"
-#include "UnitVcl.h"
+#include "UnitImage.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma resource "*.dfm"
-TFormSimpleSound2 *FormSimpleSound2;
-//---------------------------------------------------------------------------
-__fastcall TFormSimpleSound2::TFormSimpleSound2(TComponent* Owner,
-    TFormSimStagecraftMain * const formParent)
-  : TFormMachine(Owner,formParent),
-    mSoundTable(boost::shared_ptr<SimpleSound2>(new SimpleSound2))
+FormSimpleSound2::FormSimpleSound2(FormSimStagecraftMain * const formParent)
+  : FormMachine(formParent,DesignClientWidth,DesignClientHeight),
+    mSoundTable(std::shared_ptr<SimpleSound2>(new SimpleSound2))
 {
 
   //Control
-  mFaderControl1 = boost::shared_ptr<FaderControl>(
+  mFaderControl1 = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSoundTable->mFader1,ImageFader1));
-  mFaderControl2 = boost::shared_ptr<FaderControl>(
+  mFaderControl2 = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSoundTable->mFader2,ImageFader2));
-  mPressButtonControl1 = boost::shared_ptr<PressButtonControl>(
+  mPressButtonControl1 = std::shared_ptr<PressButtonControl>(
     new PressButtonControl(this,mSoundTable->mPressButton1,ImagePressButton1));
-  mPressButtonControl2 = boost::shared_ptr<PressButtonControl>(
+  mPressButtonControl2 = std::shared_ptr<PressButtonControl>(
     new PressButtonControl(this,mSoundTable->mPressButton2,ImagePressButton2));
-  mDialControl1 = boost::shared_ptr<DialControl>(
+  mDialControl1 = std::shared_ptr<DialControl>(
     new DialControl(this,mSoundTable->mDial1,ImageDial1));
-  mDialControl2 = boost::shared_ptr<DialControl>(
+  mDialControl2 = std::shared_ptr<DialControl>(
     new DialControl(this,mSoundTable->mDial2,ImageDial2));
-  mFaderControlMaster = boost::shared_ptr<FaderControl>(
+  mFaderControlMaster = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSoundTable->mFaderMaster,ImageFaderMaster));
   //Connect
-  mEuroMalePower = boost::shared_ptr<EuroMaleControl>(
+  mEuroMalePower = std::shared_ptr<EuroMaleControl>(
     new EuroMaleControl(this,mSoundTable->mPower,ImageEuroMalePower));
-  mXlrFemaleMic1 = boost::shared_ptr<XlrFemaleControl>(
+  mXlrFemaleMic1 = std::shared_ptr<XlrFemaleControl>(
     new XlrFemaleControl(this,mSoundTable->mMic1,ImageXlrFemaleMic1));
-  mXlrFemaleMic2 = boost::shared_ptr<XlrFemaleControl>(
+  mXlrFemaleMic2 = std::shared_ptr<XlrFemaleControl>(
     new XlrFemaleControl(this,mSoundTable->mMic2,ImageXlrFemaleMic2));
-  mXlrMaleMasterLeft = boost::shared_ptr<XlrMaleControl>(
+  mXlrMaleMasterLeft = std::shared_ptr<XlrMaleControl>(
     new XlrMaleControl(this,mSoundTable->mMasterL,ImageXlrMaleMasterLeft));
-  mXlrMaleMasterRight = boost::shared_ptr<XlrMaleControl>(
+  mXlrMaleMasterRight = std::shared_ptr<XlrMaleControl>(
     new XlrMaleControl(this,mSoundTable->mMasterR,ImageXlrMaleMasterRight));
   //Display
-  mAudioSignalDisplay = boost::shared_ptr<AudioSignalControl>(
+  mAudioSignalDisplay = std::shared_ptr<AudioSignalControl>(
     new AudioSignalControl(mSoundTable->mAudioSignalDisplay,ImageAudioSignal));
 
   CreateWatermark(ImageView,ImageWatermark);
 
-  OnResize(0);
+  Resize();
   //Manually set the faders
-  mFaderControl1->OnMouseDown(0,ImageFader1->Picture->Bitmap->Height - 1);
-  mFaderControl2->OnMouseDown(0,ImageFader2->Picture->Bitmap->Height - 1);
-  mFaderControlMaster->OnMouseDown(0,ImageFaderMaster->Picture->Bitmap->Height - 1);
+  mFaderControl1->OnMouseDown(0,ImageFader1->picture.height() - 1);
+  mFaderControl2->OnMouseDown(0,ImageFader2->picture.height() - 1);
+  mFaderControlMaster->OnMouseDown(0,ImageFaderMaster->picture.height() - 1);
   //Press buttons in and out
-  mPressButtonControl1->OnMouseDown(0,ImagePressButton1->Picture->Bitmap->Height - 1);
-  mPressButtonControl2->OnMouseDown(0,ImagePressButton2->Picture->Bitmap->Height - 1);
-  mPressButtonControl1->OnMouseDown(0,ImagePressButton1->Picture->Bitmap->Height - 1);
-  mPressButtonControl2->OnMouseDown(0,ImagePressButton2->Picture->Bitmap->Height - 1);
+  mPressButtonControl1->OnMouseDown(0,ImagePressButton1->picture.height() - 1);
+  mPressButtonControl2->OnMouseDown(0,ImagePressButton2->picture.height() - 1);
+  mPressButtonControl1->OnMouseDown(0,ImagePressButton1->picture.height() - 1);
+  mPressButtonControl2->OnMouseDown(0,ImagePressButton2->picture.height() - 1);
   //Set the gains to 0.0
   mDialControl1->OnMouseDown(5,17);
   mDialControl2->OnMouseDown(5,17);
 }
 //---------------------------------------------------------------------------
-void TFormSimpleSound2::UpdateBuffer()
+void FormSimpleSound2::UpdateBuffer()
 {
   switch (mDisplayMode)
   {
     case modeView:
-      ImageBuffer->Canvas->Draw(0,0,ImageView->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageView);
       break;
     case modeUse:
       //Update displays
       mAudioSignalDisplay->Update();
       //Draw
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       DrawOnBuffer(LabelUse1);
       DrawOnBuffer(LabelUse2);
@@ -99,7 +93,7 @@ void TFormSimpleSound2::UpdateBuffer()
       DrawOnBuffer(ImageAudioSignal);
       break;
     case modeConnect:
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       DrawOnBuffer(LabelConnectMic1);
       DrawOnBuffer(LabelConnectMic2);
@@ -122,7 +116,7 @@ void TFormSimpleSound2::UpdateBuffer()
   DrawBorderAroundBuffer();
 }
 //---------------------------------------------------------------------------
-void TFormSimpleSound2::OnMouseDown(const int x, const int y)
+void FormSimpleSound2::OnMouseDown(const int x, const int y)
 {
   switch (mDisplayMode)
   {
@@ -132,44 +126,44 @@ void TFormSimpleSound2::OnMouseDown(const int x, const int y)
       if (OnImage(x,y,ImageFader1))
       {
         mFaderControl1->OnMouseDown(
-          x - ImageFader1->Left,
-          y - ImageFader1->Top);
+          x - ImageFader1->left,
+          y - ImageFader1->top);
       }
       else if (OnImage(x,y,ImageFader2))
       {
         mFaderControl2->OnMouseDown(
-          x - ImageFader2->Left,
-          y - ImageFader2->Top);
+          x - ImageFader2->left,
+          y - ImageFader2->top);
       }
       else if (OnImage(x,y,ImagePressButton1))
       {
         mPressButtonControl1->OnMouseDown(
-          x - ImagePressButton1->Left,
-          y - ImagePressButton1->Top);
+          x - ImagePressButton1->left,
+          y - ImagePressButton1->top);
       }
       else if (OnImage(x,y,ImagePressButton2))
       {
         mPressButtonControl2->OnMouseDown(
-          x - ImagePressButton2->Left,
-          y - ImagePressButton2->Top);
+          x - ImagePressButton2->left,
+          y - ImagePressButton2->top);
       }
       else if (OnImage(x,y,ImageDial1))
       {
         mDialControl1->OnMouseDown(
-          x - ImageDial1->Left,
-          y - ImageDial1->Top);
+          x - ImageDial1->left,
+          y - ImageDial1->top);
       }
       else if (OnImage(x,y,ImageDial2))
       {
         mDialControl2->OnMouseDown(
-          x - ImageDial2->Left,
-          y - ImageDial2->Top);
+          x - ImageDial2->left,
+          y - ImageDial2->top);
       }
       else if (OnImage(x,y,ImageFaderMaster))
       {
         mFaderControlMaster->OnMouseDown(
-          x - ImageFaderMaster->Left,
-          y - ImageFaderMaster->Top);
+          x - ImageFaderMaster->left,
+          y - ImageFaderMaster->top);
       }
       break;
     case modeConnect:
@@ -187,18 +181,15 @@ void TFormSimpleSound2::OnMouseDown(const int x, const int y)
   }
 }
 //---------------------------------------------------------------------------
-void TFormSimpleSound2::OnAfterResize()
+void FormSimpleSound2::OnAfterResize()
 {
   //Use
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,7,7));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),7,7));
     //Resize bitmaps
-    ImageFader1->Picture->Bitmap->Height      = MergeRects(v[3][2],v[5][2]).Height();
-    ImageFader2->Picture->Bitmap->Height      = MergeRects(v[3][3],v[5][3]).Height();
-    ImageFaderMaster->Picture->Bitmap->Height = MergeRects(v[3][4],v[5][5]).Height();
-    ImageFader1->Refresh();
-    ImageFader2->Refresh();
-    ImageFaderMaster->Refresh();
+    SetPictureHeight(ImageFader1,MergeRects(v[3][2],v[5][2]).height());
+    SetPictureHeight(ImageFader2,MergeRects(v[3][3],v[5][3]).height());
+    SetPictureHeight(ImageFaderMaster,MergeRects(v[3][4],v[5][5]).height());
     //Place bitmaps
     //Labels
     PlaceInCenter(LabelUse1,v[0][2]);
@@ -220,7 +211,7 @@ void TFormSimpleSound2::OnAfterResize()
   }
   //Connect
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,5,3));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),5,3));
     //Labels
     PlaceInCenter(LabelConnectMic1  ,v[0][0]);
     PlaceInCenter(LabelConnect1     ,v[1][0]);

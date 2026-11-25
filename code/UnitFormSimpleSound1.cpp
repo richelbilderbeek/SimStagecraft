@@ -1,7 +1,6 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
 
+#include <cassert>
 #include "UnitConnectorControl.h"
 #include "UnitControllerControl.h"
 #include "UnitDisplayControl.h"
@@ -9,54 +8,49 @@
 #include "UnitFormSimpleSound1.h"
 #include "UnitFormMachine.h"
 #include "UnitFormSimStagecraftMain.h"
-#include "UnitVcl.h"
+#include "UnitImage.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma resource "*.dfm"
-TFormSimpleSound1 *FormSimpleSound1;
-//---------------------------------------------------------------------------
-__fastcall TFormSimpleSound1::TFormSimpleSound1(TComponent* Owner,
-    TFormSimStagecraftMain * const formParent)
-  : TFormMachine(Owner,formParent),
-    mSoundTable(boost::shared_ptr<SimpleSound1>(new SimpleSound1))
+FormSimpleSound1::FormSimpleSound1(FormSimStagecraftMain * const formParent)
+  : FormMachine(formParent,DesignClientWidth,DesignClientHeight),
+    mSoundTable(std::shared_ptr<SimpleSound1>(new SimpleSound1))
 {
 
   //Control
-  mFaderControlMaster = boost::shared_ptr<FaderControl>(
+  mFaderControlMaster = std::shared_ptr<FaderControl>(
     new FaderControl(this,mSoundTable->mFaderMaster,ImageFaderMaster));
   //Connect
-  mEuroMalePower = boost::shared_ptr<EuroMaleControl>(
+  mEuroMalePower = std::shared_ptr<EuroMaleControl>(
     new EuroMaleControl(this,mSoundTable->mPower,ImageEuroMalePower));
-  mXlrFemaleMic1 = boost::shared_ptr<XlrFemaleControl>(
+  mXlrFemaleMic1 = std::shared_ptr<XlrFemaleControl>(
     new XlrFemaleControl(this,mSoundTable->mMic1,ImageXlrFemaleMic1));
-  mXlrMaleMasterLeft = boost::shared_ptr<XlrMaleControl>(
+  mXlrMaleMasterLeft = std::shared_ptr<XlrMaleControl>(
     new XlrMaleControl(this,mSoundTable->mMasterL,ImageXlrMaleMasterLeft));
-  mXlrMaleMasterRight = boost::shared_ptr<XlrMaleControl>(
+  mXlrMaleMasterRight = std::shared_ptr<XlrMaleControl>(
     new XlrMaleControl(this,mSoundTable->mMasterR,ImageXlrMaleMasterRight));
   //Display
-  mAudioSignalDisplay = boost::shared_ptr<AudioSignalControl>(
+  mAudioSignalDisplay = std::shared_ptr<AudioSignalControl>(
     new AudioSignalControl(mSoundTable->mAudioSignalDisplay,ImageAudioSignal));
 
   CreateWatermark(ImageView,ImageWatermark);
 
   //Make some images transparent
-  OnResize(0);
+  Resize();
   //Manually set the faders
-  mFaderControlMaster->OnMouseDown(0,ImageFaderMaster->Picture->Bitmap->Height - 1);
+  mFaderControlMaster->OnMouseDown(0,ImageFaderMaster->picture.height() - 1);
 }
 //---------------------------------------------------------------------------
-void TFormSimpleSound1::UpdateBuffer()
+void FormSimpleSound1::UpdateBuffer()
 {
   switch (mDisplayMode)
   {
     case modeView:
-      ImageBuffer->Canvas->Draw(0,0,ImageView->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageView);
       break;
     case modeUse:
       //Update displays
       mAudioSignalDisplay->Update();
       //Draw
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       DrawOnBuffer(LabelUseMaster);
       DrawOnBuffer(LabelUseSimpleSound1);
@@ -66,7 +60,7 @@ void TFormSimpleSound1::UpdateBuffer()
       DrawOnBuffer(ImageAudioSignal);
       break;
     case modeConnect:
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       DrawOnBuffer(ImageXlrFemaleMic1);
       DrawOnBuffer(ImageXlrMaleMasterLeft);
       DrawOnBuffer(ImageXlrMaleMasterRight);
@@ -84,7 +78,7 @@ void TFormSimpleSound1::UpdateBuffer()
   DrawBorderAroundBuffer();
 }
 //---------------------------------------------------------------------------
-void TFormSimpleSound1::OnMouseDown(const int x, const int y)
+void FormSimpleSound1::OnMouseDown(const int x, const int y)
 {
   switch (mDisplayMode)
   {
@@ -94,8 +88,8 @@ void TFormSimpleSound1::OnMouseDown(const int x, const int y)
       if (OnImage(x,y,ImageFaderMaster))
       {
         mFaderControlMaster->OnMouseDown(
-          x - ImageFaderMaster->Left,
-          y - ImageFaderMaster->Top);
+          x - ImageFaderMaster->left,
+          y - ImageFaderMaster->top);
       }
       break;
     case modeConnect:
@@ -111,14 +105,13 @@ void TFormSimpleSound1::OnMouseDown(const int x, const int y)
   }
 }
 //---------------------------------------------------------------------------
-void TFormSimpleSound1::OnAfterResize()
+void FormSimpleSound1::OnAfterResize()
 {
   //Use
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,2,5));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),2,5));
     //Resize images
-    ImageFaderMaster->Picture->Bitmap->Height = MergeRects(v[1][0],v[3][0]).Height();
-    ImageFaderMaster->Refresh();
+    SetPictureHeight(ImageFaderMaster,MergeRects(v[1][0],v[3][0]).height());
     //Placement
     PlaceInCenter(LabelUseMaster,v[0][0]);
     PlaceInCenter(LabelUseSimpleSound1,v[0][1]);
@@ -127,7 +120,7 @@ void TFormSimpleSound1::OnAfterResize()
   }
   //Connect
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,4,6));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),4,6));
     PlaceInCenter(ImageConnectMic   ,v[1][0]);
     PlaceInCenter(ImageConnect1     ,v[2][0]);
     PlaceInCenter(ImageConnectMaster,MergeRects(v[1][1],v[1][2]));

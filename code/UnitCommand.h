@@ -3,7 +3,7 @@
 #ifndef UnitCommandH
 #define UnitCommandH
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
+#include <memory>
 //---------------------------------------------------------------------------
 // From http://www.richelbilderbeek.nl/CppCommandDesignPattern.htm
 //---------------------------------------------------------------------------
@@ -12,11 +12,11 @@ struct Command
 {
   typedef void (*FunctionPointer)(T& target);
 
-  Command(boost::shared_ptr<T> target, const FunctionPointer functionPointer)
+  Command(std::shared_ptr<T> target, const FunctionPointer functionPointer)
     : mTarget(target), mFunction(functionPointer) { }
   void Execute() { mFunction( *( mTarget.get() ) ); }
   private:
-  boost::shared_ptr<T> mTarget;
+  std::shared_ptr<T> mTarget;
   FunctionPointer mFunction;
 };
 //---------------------------------------------------------------------------

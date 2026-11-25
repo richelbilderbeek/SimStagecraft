@@ -3,7 +3,7 @@
 #ifndef UnitSoundTableH
 #define UnitSoundTableH
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitMachine.h"
 //#include "UnitEnumMachineType.h"
 struct Fader;
@@ -15,8 +15,8 @@ struct XlrMale;
 struct XlrFemale;
 struct InternalConnection;
 struct AudioSignalDisplay;
-struct TFormSimpleSound1;
-struct TFormSimpleSound2;
+class FormSimpleSound1;
+class FormSimpleSound2;
 //---------------------------------------------------------------------------
 struct SoundTable : public Machine
 {
@@ -36,10 +36,9 @@ struct SoundTable : public Machine
   virtual const bool HasPower() const = 0;
 
   protected:
-  //SoundTable can only be deleted by boost::shared_ptr
-  //or its descendants
+  public:
   virtual ~SoundTable() {}
-  friend boost::checked_delete(SoundTable *);
+  protected:
 };
 //---------------------------------------------------------------------------
 #endif

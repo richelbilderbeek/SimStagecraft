@@ -1,14 +1,13 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
+#include <cassert>
 #include "UnitTapButtonControl.h"
 //---------------------------------------------------------------------------
 /*
-export template <class T>
-TapButtonControl<T>::TapButtonControl(TFormMachine * const formParent,
-  const boost::shared_ptr<TapButton<T> > tapButton,
-  Extctrls::TImage * const image)
+template <class T>
+TapButtonControl<T>::TapButtonControl(FormMachine * const formParent,
+  const std::shared_ptr<TapButton<T> > tapButton,
+  Image * const image)
   : ControllerControl(formParent,image),
     mTapButton(tapButton),
     mImage(image)
@@ -17,11 +16,11 @@ TapButtonControl<T>::TapButtonControl(TFormMachine * const formParent,
   assert(mImage != 0);
 }
 //---------------------------------------------------------------------------
-export template <class T>
+template <class T>
 void TapButtonControl<T>::OnMouseDown(const int, const int y)
 {
-  const int midX = mImage->Width / 2;
-  const int midY = mImage->Height / 2;
+  const int midX = mImage->width / 2;
+  const int midY = mImage->height / 2;
   const double angle
     = GetAngle( static_cast<double>(x - midX),
         static_cast<double>(y - midY));
@@ -39,4 +38,3 @@ void TapButtonControl<T>::OnMouseDown(const int, const int y)
 }
 //---------------------------------------------------------------------------
 */
-#pragma package(smart_init)

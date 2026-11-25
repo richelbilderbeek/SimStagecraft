@@ -1,144 +1,84 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
+#include <QKeyEvent>
+#include <QTimer>
+#include <QVBoxLayout>
 
-#include <cmath>
-#include <boost/scoped_ptr.hpp>
-#include "UnitVcl.h"
+#include "UnitImage.h"
 #include "UnitFormSimStagecraftMenu.h"
 #include "UnitFormSimStagecraftSelect.h"
 #include "UnitFormSimStagecraftAbout.h"
+#include "UnitSurfaceWidget.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma resource "*.dfm"
-TFormSimStagecraftMenu *FormSimStagecraftMenu;
-//---------------------------------------------------------------------------
-__fastcall TFormSimStagecraftMenu::TFormSimStagecraftMenu(TComponent* Owner)
-  : TForm(Owner), mImages(this->GetImages()), mBorderSize(8)
+FormSimStagecraftMenu::FormSimStagecraftMenu(QWidget * const parent)
+  : QDialog(parent),
+    mSurface(new SurfaceWidget(this)),
+    TimerBackground(new QTimer(this)),
+    mImages(GetImages()),
+    mBorderSize(8)
 {
-  OnResize(0);
+  setWindowTitle(QString::fromUtf8(DesignCaption));
+  setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+  setStyleSheet("background-color: black;");
+  QVBoxLayout * const layout = new QVBoxLayout(this);
+  layout->setContentsMargins(0,0,0,0);
+  layout->addWidget(mSurface);
+  resize(DesignClientWidth,DesignClientHeight);
+
+  ImageBuffer->left = mBorderSize;
+  ImageBuffer->top = mBorderSize;
+  mSurface->buffer = ImageBuffer;
+  mSurface->onMouseDown = [this](int x, int y) { FormMouseDown(x,y); };
+  mSurface->onResize = [this]() { FormResize(); };
+
+  connect(TimerBackground, &QTimer::timeout, this,
+    [this]() { TickBackground(ImageBackground); DrawScreen(); });
+
+  FormResize();
   DrawScreen();
+  TimerBackground->start(50);
 }
 //---------------------------------------------------------------------------
-void TFormSimStagecraftMenu::DrawScreen()
+void FormSimStagecraftMenu::DrawScreen()
 {
   //Draw background
-  ImageBuffer->Canvas->Draw(0,0,ImageBackground->Picture->Graphic);
-
+  DrawImage(ImageBuffer,0,0,ImageBackground);
   //Draw images
-  typedef std::vector<TImage*>::const_iterator Iterator;
-  const Iterator j = mImages.end();
-  for (Iterator i = mImages.begin(); i!=j; ++i)
+  for (const Image * const image: mImages)
   {
-    ImageBuffer->Canvas->Draw( (*i)->Left, (*i)->Top, (*i)->Picture->Graphic);
+    DrawImage(ImageBuffer,image->left,image->top,image);
   }
-
   //Put buffer on screen
-  this->Canvas->Draw(mBorderSize,mBorderSize,ImageBuffer->Picture->Graphic);
+  mSurface->update();
 }
 //---------------------------------------------------------------------------
-void TFormSimStagecraftMenu::PaintBackground()
+void FormSimStagecraftMenu::FormResize()
 {
-  TImage * const image = ImageBackground;
-
-  assert(image!=0);
-  assert(image->Picture->Bitmap != 0);
-  assert(image->Picture->Bitmap->PixelFormat == pf24bit);
-
-  const int maxx = image->Picture->Bitmap->Width;
-  const int maxy = image->Picture->Bitmap->Height;
-  for (int y = 0; y != maxy; ++y)
-  {
-    unsigned char * const myLine
-      = static_cast<unsigned char*>(image->Picture->Bitmap->ScanLine[y]);
-    const double yD = static_cast<double>(y);
-
-    for (int x = 0; x != maxx; ++x)
-    {
-      const double xD = static_cast<double>(x);
-      //Range z: -3 , +3
-      const double zD
-        = std::cos(xD / 30.0)
-        + std::sin(yD / 45.0)
-        - std::sin( (xD + yD) / 60.0);
-      const int grey = static_cast<int>( (zD + 3.0) * (256.0 / 6.0) );
-      assert(grey >=   0);
-      assert(grey <  256);
-      myLine[x*3+2] = grey; //Red
-      myLine[x*3+1] = grey; //Green
-      myLine[x*3+0] = grey; //Blue
-    }
-  }
-}
-//---------------------------------------------------------------------------}
-void TFormSimStagecraftMenu::TickBackground()
-{
-  TImage * const image = ImageBackground;
-
-  assert(image!=0);
-  assert(image->Picture->Bitmap != 0);
-  assert(image->Picture->Bitmap->PixelFormat == pf24bit);
-
-  const int maxx = image->Picture->Bitmap->Width;
-  const int maxy = image->Picture->Bitmap->Height;
-  for (int y = 0; y != maxy; ++y)
-  {
-    unsigned char * const myLine
-      = static_cast<unsigned char*>(image->Picture->Bitmap->ScanLine[y]);
-    for (int x = 0; x != maxx; ++x)
-    {
-      ++myLine[x*3+2]; //Red
-      ++myLine[x*3+1]; //Green
-      ++myLine[x*3+0]; //Blue
-    }
-  }
-}
-//---------------------------------------------------------------------------}
-
-void __fastcall TFormSimStagecraftMenu::FormResize(TObject *Sender)
-{
-  ImageBackground->Picture->Bitmap->Width  = ClientWidth - (mBorderSize * 2);
-  ImageBackground->Picture->Bitmap->Height = ClientHeight - (mBorderSize * 2);
-  ImageBuffer->Picture->Bitmap->Width  = ClientWidth - (mBorderSize * 2);
-  ImageBuffer->Picture->Bitmap->Height = ClientHeight - (mBorderSize * 2);
-  PaintBackground();
+  const int width  = std::max(1,mSurface->width()  - (mBorderSize * 2));
+  const int height = std::max(1,mSurface->height() - (mBorderSize * 2));
+  SetPictureSize(ImageBackground,width,height);
+  SetPictureSize(ImageBuffer,width,height);
+  PaintWavyBackground(ImageBackground);
 }
 //---------------------------------------------------------------------------
-
-void __fastcall TFormSimStagecraftMenu::TimerBackgroundTimer(TObject *Sender)
+const std::vector<Image*> FormSimStagecraftMenu::GetImages() const
 {
-  TickBackground();
-  DrawScreen();
+  return {
+    ImageStart, ImageAbout, ImageQuit, ImageTitle,
+    Image1, Image2, Image3, Image4, Image5, Image6
+  };
 }
 //---------------------------------------------------------------------------
-const std::vector<TImage*> TFormSimStagecraftMenu::GetImages() const
-{
-  std::vector<TImage*> v;
-  v.push_back(ImageStart);
-  v.push_back(ImageAbout);
-  v.push_back(ImageQuit);
-  v.push_back(ImageTitle);
-  v.push_back(Image1);
-  v.push_back(Image2);
-  v.push_back(Image3);
-  v.push_back(Image4);
-  v.push_back(Image5);
-  v.push_back(Image6);
-  return v;
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormSimStagecraftMenu::FormMouseDown(TObject *Sender,
-      TMouseButton Button, TShiftState Shift, int X, int Y)
+void FormSimStagecraftMenu::FormMouseDown(const int X, const int Y)
 {
   if (OnImage(X,Y,ImageStart) == true
    || OnImage(X,Y,Image1    ) == true
    || OnImage(X,Y,Image4    ) == true)
   {
     //Start game
-    TimerBackground->Enabled = false;
-    boost::scoped_ptr<TFormSimStagecraftSelect> form(new TFormSimStagecraftSelect(0));
-    form->ShowModal();
-    TimerBackground->Enabled = true;
+    TimerBackground->stop();
+    FormSimStagecraftSelect form(this);
+    form.exec();
+    TimerBackground->start();
   }
   else
   if (OnImage(X,Y,ImageAbout) == true
@@ -146,41 +86,35 @@ void __fastcall TFormSimStagecraftMenu::FormMouseDown(TObject *Sender,
    || OnImage(X,Y,Image5    ) == true)
   {
     //About screen
-    TimerBackground->Enabled = false;
-    boost::scoped_ptr<TFormSimStagecraftAbout> form(new TFormSimStagecraftAbout(0));
-    form->ShowModal();
-    TimerBackground->Enabled = true;
+    TimerBackground->stop();
+    FormSimStagecraftAbout form(this);
+    form.exec();
+    TimerBackground->start();
   }
   else
   if (OnImage(X,Y,ImageQuit) == true
    || OnImage(X,Y,Image3   ) == true
    || OnImage(X,Y,Image6   ) == true)
   {
-    Close();
+    close();
   }
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormSimStagecraftMenu::FormKeyDown(TObject *Sender,
-      WORD &Key, TShiftState Shift)
+void FormSimStagecraftMenu::keyPressEvent(QKeyEvent * e)
 {
-  switch (Key)
+  switch (e->key())
   {
-    case 'S': case 's': case '1': case VK_F1:
-      FormMouseDown(0,TMouseButton(),TShiftState(),
-        ImageStart->Left, ImageStart->Top);
+    case Qt::Key_S: case Qt::Key_1: case Qt::Key_F1:
+      FormMouseDown(ImageStart->left, ImageStart->top);
       break;
-    case 'A': case 'a': case '2': case VK_F2:
-      FormMouseDown(0,TMouseButton(),TShiftState(),
-        ImageAbout->Left, ImageAbout->Top);
+    case Qt::Key_A: case Qt::Key_2: case Qt::Key_F2:
+      FormMouseDown(ImageAbout->left, ImageAbout->top);
       break;
-    case 'Q':
-    case '3': case VK_F3:
-      FormMouseDown(0,TMouseButton(),TShiftState(),
-        ImageQuit->Left, ImageQuit->Top);
+    case Qt::Key_Q: case Qt::Key_3: case Qt::Key_F3:
+      FormMouseDown(ImageQuit->left, ImageQuit->top);
       break;
+    default:
+      QDialog::keyPressEvent(e);
   }
-
 }
 //---------------------------------------------------------------------------
-
-

@@ -4,7 +4,7 @@
 #define UnitCdPlayerH
 //---------------------------------------------------------------------------
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitController.h"
 #include "UnitMachine.h"
 #include "UnitTapButton.h"
@@ -17,7 +17,7 @@ struct LcdSymbol;
 struct Led;
 struct Plug220;
 struct PressButton;
-struct TFormCdPlayer;
+class FormCdPlayer;
 //---------------------------------------------------------------------------
 struct CdPlayer : public Machine
 {
@@ -57,30 +57,30 @@ struct CdPlayer : public Machine
   const std::vector<double> CreateCdR() const;
 
 
+  public:
   ~CdPlayer() {}
-  //CdPlayer can only be deleted by boost::shared_ptr
-  friend boost::checked_delete(CdPlayer *);
+  private:
 
   //View
   //Use
-  boost::shared_ptr< TapButton<CdPlayer> > mButtonPower;
-  boost::shared_ptr< TapButton<CdPlayer> > mButtonStop;
-  boost::shared_ptr< TapButton<CdPlayer> > mButtonPlay;
+  std::shared_ptr< TapButton<CdPlayer> > mButtonPower;
+  std::shared_ptr< TapButton<CdPlayer> > mButtonStop;
+  std::shared_ptr< TapButton<CdPlayer> > mButtonPlay;
   //Connect
-  boost::shared_ptr<CinchWhiteFemale> mCinchFemaleOutL;
-  boost::shared_ptr<CinchRedFemale> mCinchFemaleOutR;
-  boost::shared_ptr<Plug220> mPlug220Power;
-  boost::shared_ptr<InternalConnection> mConnectionAudioSignalL;
-  boost::shared_ptr<InternalConnection> mConnectionAudioSignalR;
-  boost::shared_ptr<InternalConnection> mConnectionLcdSymbolPlay;
-  boost::shared_ptr<InternalConnection> mConnectionLedPower;
+  std::shared_ptr<CinchWhiteFemale> mCinchFemaleOutL;
+  std::shared_ptr<CinchRedFemale> mCinchFemaleOutR;
+  std::shared_ptr<Plug220> mPlug220Power;
+  std::shared_ptr<InternalConnection> mConnectionAudioSignalL;
+  std::shared_ptr<InternalConnection> mConnectionAudioSignalR;
+  std::shared_ptr<InternalConnection> mConnectionLcdSymbolPlay;
+  std::shared_ptr<InternalConnection> mConnectionLedPower;
   //Display
-  boost::shared_ptr<AudioSignalDisplay> mAudioSignalDisplayL;
-  boost::shared_ptr<AudioSignalDisplay> mAudioSignalDisplayR;
-  boost::shared_ptr<LcdSymbol> mLcdSymbolPlay;
-  boost::shared_ptr<Led> mLedPower;
+  std::shared_ptr<AudioSignalDisplay> mAudioSignalDisplayL;
+  std::shared_ptr<AudioSignalDisplay> mAudioSignalDisplayR;
+  std::shared_ptr<LcdSymbol> mLcdSymbolPlay;
+  std::shared_ptr<Led> mLedPower;
 
-  friend TFormCdPlayer;
+  friend class FormCdPlayer;
 };
 //---------------------------------------------------------------------------
 #endif

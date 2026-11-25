@@ -1,16 +1,11 @@
 //---------------------------------------------------------------------------
-
-#include <vcl.h>
-#pragma hdrstop
-
 #include "UnitFormSimStagecraftOtherLicences.h"
+#include "UnitTextDialog.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma resource "*.dfm"
-TFormSimStagecraftOtherLicences *FormSimStagecraftOtherLicences;
-//---------------------------------------------------------------------------
-__fastcall TFormSimStagecraftOtherLicences::TFormSimStagecraftOtherLicences(TComponent* Owner)
-        : TForm(Owner)
+FormSimStagecraftOtherLicences::FormSimStagecraftOtherLicences(QWidget * const parent)
+  : QDialog(parent)
 {
+  SetupTextDialog(this, "Other licences",
+    ":/FormSimStagecraftOtherLicences/RichEdit.txt");
 }
 //---------------------------------------------------------------------------

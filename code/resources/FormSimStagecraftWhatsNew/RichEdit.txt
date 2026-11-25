@@ -1,0 +1,9 @@
+Version 1.1:
+- Added SimpleShine2 light table
+- Added 'What's new' button in 'About' screen
+- Added 'Other licences' button in 'About' screen
+- Added EasyAmp amplifier
+- Added RCF Event 3000 passive speaker
+
+Version 1.0:
+- Initial version

@@ -4,14 +4,14 @@
 #define UnitOctletH
 //---------------------------------------------------------------------------
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitMachine.h"
 //---------------------------------------------------------------------------
 struct TwoSwitch;
 struct Connector;
 struct Plug220;
 struct Socket220;
-struct TFormOctlet;
+class FormOctlet;
 //---------------------------------------------------------------------------
 struct Octlet : public Machine
 {
@@ -34,19 +34,19 @@ struct Octlet : public Machine
   private:
   //View
   //Use
-  boost::shared_ptr<TwoSwitch> mPowerSwitch;
+  std::shared_ptr<TwoSwitch> mPowerSwitch;
   //Connect
-  boost::shared_ptr<Plug220> mPlug;
-  std::vector<boost::shared_ptr<Socket220> > mSockets220;
+  std::shared_ptr<Plug220> mPlug;
+  std::vector<std::shared_ptr<Socket220> > mSockets220;
 
 
-  friend TFormOctlet;
+  friend class FormOctlet;
 
-  const std::vector<boost::shared_ptr<Socket220> > CreateSockets220() const;
+  const std::vector<std::shared_ptr<Socket220> > CreateSockets220() const;
 
-  //Octlet can only be deleted by boost::shared_ptr
+  public:
   ~Octlet() {}
-  friend boost::checked_delete(Octlet *);
+  private:
 
 };
 //---------------------------------------------------------------------------

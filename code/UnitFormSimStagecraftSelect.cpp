@@ -1,58 +1,86 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
-
-#include <cmath>
 #include <cassert>
 #include <stdexcept>
-#include <boost/scoped_ptr.hpp>
+
+#include <QKeyEvent>
+#include <QPlainTextEdit>
+#include <QStringList>
+#include <QTimer>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+
 #include "UnitFormSimStagecraftMain.h"
 #include "UnitFormSimStagecraftSelect.h"
+#include "UnitImage.h"
+#include "UnitSurfaceWidget.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma resource "*.dfm"
-TFormSimStagecraftSelect *FormSimStagecraftSelect;
-//---------------------------------------------------------------------------
-__fastcall TFormSimStagecraftSelect::TFormSimStagecraftSelect(TComponent* Owner)
-  : TForm(Owner), mBorderSize(8), mLevel(1)
+FormSimStagecraftSelect::FormSimStagecraftSelect(QWidget * const parent)
+  : QDialog(parent),
+    mSurface(new SurfaceWidget(this)),
+    RichEdit(new QPlainTextEdit(this)),
+    TimerMain(new QTimer(this)),
+    mLevel(1),
+    mBorderSize(8)
 {
-  mImages.push_back(ImageSelectLevel);
-  mImages.push_back(ImageArrowLeft);
-  mImages.push_back(ImageArrowRight);
-  mImages.push_back(ImageSelectLeft);
-  mImages.push_back(ImageSelectRight);
-  mImages.push_back(ImageStart);
-  mImages.push_back(ImageQuit);
-  mImages.push_back(ImageLed1);
-  mImages.push_back(ImageLed2);
-  mImages.push_back(ImageLed3);
-  mImages.push_back(ImageLed4);
+  setWindowTitle(QString::fromUtf8(DesignCaption));
+  setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+  setStyleSheet("QDialog { background-color: black; }");
+  RichEdit->setReadOnly(true);
+  RichEdit->setFocusPolicy(Qt::NoFocus);
+  RichEdit->setFixedHeight(185);
+  QVBoxLayout * const layout = new QVBoxLayout(this);
+  layout->setContentsMargins(0,0,0,mBorderSize);
+  layout->addWidget(mSurface,1);
+  {
+    QHBoxLayout * const textLayout = new QHBoxLayout;
+    textLayout->setContentsMargins(mBorderSize,0,mBorderSize,0);
+    textLayout->addWidget(RichEdit);
+    layout->addLayout(textLayout);
+  }
+  resize(DesignClientWidth,DesignClientHeight);
 
-  OnResize(0);
+  mImages = {
+    ImageSelectLevel,
+    ImageArrowLeft,
+    ImageArrowRight,
+    ImageSelectLeft,
+    ImageSelectRight,
+    ImageStart,
+    ImageQuit,
+    ImageLed1,
+    ImageLed2,
+    ImageLed3,
+    ImageLed4
+  };
+
+  ImageBuffer->left = mBorderSize;
+  ImageBuffer->top = mBorderSize;
+  mSurface->buffer = ImageBuffer;
+  mSurface->onMouseDown = [this](int x, int y) { FormMouseDown(x,y); };
+  mSurface->onResize = [this]() { FormResize(); };
+  connect(TimerMain, &QTimer::timeout, this,
+    [this]() { TickBackground(ImageBackground); DrawScreen(); });
+
+  FormResize();
   UpdateText();
+  DrawScreen();
+  TimerMain->start(50);
 }
 //---------------------------------------------------------------------------
-void TFormSimStagecraftSelect::DrawScreen()
+void FormSimStagecraftSelect::DrawScreen()
 {
   //Draw background on buffer
-  ImageBuffer->Canvas->Draw(0,0,ImageBackground->Picture->Graphic);
-
+  DrawImage(ImageBuffer,0,0,ImageBackground);
   //Draw all sprites on buffer
-  typedef std::vector<TImage*>::iterator Iterator;
-  const Iterator j = mImages.end();
-  for (Iterator i = mImages.begin(); i!=j; ++i)
+  for (const Image * const image: mImages)
   {
-    ImageBuffer->Canvas->Draw(
-      (*i)->Left,
-      (*i)->Top,
-      (*i)->Picture->Graphic);
+    DrawImage(ImageBuffer,image->left,image->top,image);
   }
-
   //Draw buffer on screen
-  this->Canvas->Draw(mBorderSize,mBorderSize,ImageBuffer->Picture->Graphic);
+  mSurface->update();
 }
 //---------------------------------------------------------------------------
-TImage * const TFormSimStagecraftSelect::GetImage(const int value) const
+Image * const FormSimStagecraftSelect::GetImage(const int value) const
 {
   switch (value)
   {
@@ -68,292 +96,209 @@ TImage * const TFormSimStagecraftSelect::GetImage(const int value) const
     case 9: return Image9;
   }
   assert(!"Should not get here");
-  throw std::logic_error("Unhandled value in TFormSimStagecraftSelect::GetImage");
+  throw std::logic_error("Unhandled value in FormSimStagecraftSelect::GetImage");
 }
 //---------------------------------------------------------------------------
-const bool TFormSimStagecraftSelect::OnImage(const int x, const int y,
-  const TImage * const image) const
+void FormSimStagecraftSelect::FormResize()
 {
-  return ( x >= image->Left
-    && x < image->Left + image->Width
-    && y >= image->Top
-    && y < image->Top + image->Height);
+  const int width  = std::max(1,mSurface->width()  - (mBorderSize * 2));
+  const int height = std::max(1,mSurface->height() - (mBorderSize * 2));
+  SetPictureSize(ImageBackground,width,height);
+  SetPictureSize(ImageBuffer,width,height);
+  PaintWavyBackground(ImageBackground);
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormSimStagecraftSelect::FormResize(TObject *Sender)
-{
-  ImageBackground->Picture->Bitmap->Width
-    = ClientWidth  - (mBorderSize * 2);
-  ImageBackground->Picture->Bitmap->Height
-    = RichEdit->Top - (mBorderSize * 2);
-  ImageBuffer->Picture->Bitmap->Width
-    = ClientWidth  - (mBorderSize * 2);
-  ImageBuffer->Picture->Bitmap->Height
-    = RichEdit->Top - (mBorderSize * 2);
-  PaintBackground();
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormSimStagecraftSelect::FormMouseDown(TObject *Sender,
-      TMouseButton Button, TShiftState Shift, int X, int Y)
+void FormSimStagecraftSelect::FormMouseDown(const int X, const int Y)
 {
   if (OnImage(X,Y,ImageStart)==true)
   {
     //Turn timer off temporarily
-    TimerMain->Enabled = false;
-    boost::scoped_ptr<TFormSimStagecraftMain> form(
-      new TFormSimStagecraftMain(0,IntToStr(mLevel)));
-    form->ShowModal();
-
+    TimerMain->stop();
+    {
+      FormSimStagecraftMain form(this,mLevel);
+      form.exec();
+    }
     //And turn it back on
-    TimerMain->Enabled = true;
+    TimerMain->start();
   }
   else if (OnImage(X,Y,ImageArrowLeft)==true && mLevel > 1)
   {
     --mLevel;
-    ImageSelectLeft->Picture  = GetImage(mLevel / 10)->Picture;
-    ImageSelectRight->Picture = GetImage(mLevel % 10)->Picture;
-
+    ImageSelectLeft->AssignPicture(GetImage(mLevel / 10));
+    ImageSelectRight->AssignPicture(GetImage(mLevel % 10));
     UpdateText();
     DrawScreen();
   }
   else if (OnImage(X,Y,ImageArrowRight)==true && mLevel < 99)
   {
     ++mLevel;
-    ImageSelectLeft->Picture  = GetImage(mLevel / 10)->Picture;
-    ImageSelectRight->Picture = GetImage(mLevel % 10)->Picture;
+    ImageSelectLeft->AssignPicture(GetImage(mLevel / 10));
+    ImageSelectRight->AssignPicture(GetImage(mLevel % 10));
     UpdateText();
     DrawScreen();
   }
   else if (OnImage(X,Y,ImageQuit)==true)
   {
-    Close();
+    close();
   }
 }
 //---------------------------------------------------------------------------
-void TFormSimStagecraftSelect::UpdateText()
+void FormSimStagecraftSelect::UpdateText()
 {
-  RichEdit->Clear();
+  QStringList lines;
   switch (mLevel)
   {
     case 1:
-      RichEdit->Lines->Add("Level 1: Connect a lamp to a socket");
-      RichEdit->Lines->Add("");
-      RichEdit->Lines->Add("Equipment:");
-      RichEdit->Lines->Add("- Fresnel");
-      RichEdit->Lines->Add("- Wall socket, 220 Volts");
+      lines << "Level 1: Connect a lamp to a socket";
+      lines << "";
+      lines << "Equipment:";
+      lines << "- Fresnel";
+      lines << "- Wall socket, 220 Volts";
       break;
     case 2:
-      RichEdit->Lines->Add("Level 2: Connect a microphone to an active speaker");
-      RichEdit->Lines->Add("");
-      RichEdit->Lines->Add("Equipment:");
-      RichEdit->Lines->Add("- Microphone, ShureSm58");
-      RichEdit->Lines->Add("- Active speaker, RCF322A");
-      RichEdit->Lines->Add("- Wall socket, 220 Volts");
+      lines << "Level 2: Connect a microphone to an active speaker";
+      lines << "";
+      lines << "Equipment:";
+      lines << "- Microphone, ShureSm58";
+      lines << "- Active speaker, RCF322A";
+      lines << "- Wall socket, 220 Volts";
       break;
     case 3:
-      RichEdit->Lines->Add("Level 3: Connect and use a simple sound table");
-      RichEdit->Lines->Add("");
-      RichEdit->Lines->Add("Equipment:");
-      RichEdit->Lines->Add("- Microphone, ShureSm58");
-      RichEdit->Lines->Add("- Active speaker, RCF322A");
-      RichEdit->Lines->Add("- Soundtable, SimpleSound1");
-      RichEdit->Lines->Add("- Triplet, 220 Volts");
-      RichEdit->Lines->Add("- Wall socket, 220 Volts");
+      lines << "Level 3: Connect and use a simple sound table";
+      lines << "";
+      lines << "Equipment:";
+      lines << "- Microphone, ShureSm58";
+      lines << "- Active speaker, RCF322A";
+      lines << "- Soundtable, SimpleSound1";
+      lines << "- Triplet, 220 Volts";
+      lines << "- Wall socket, 220 Volts";
       break;
     case 4:
-      RichEdit->Lines->Add("Level 4: Connect and use a simple light table");
-      RichEdit->Lines->Add("");
-      RichEdit->Lines->Add("Equipment:");
-      RichEdit->Lines->Add("- Lighttable, SimpleShine");
-      RichEdit->Lines->Add("- Dimmerpack, Dimblock V3");
-      RichEdit->Lines->Add("- 5x fresnel");
-      RichEdit->Lines->Add("- Wall socket, 220 Volts");
-      RichEdit->Lines->Add("- Wall socket, power current");
+      lines << "Level 4: Connect and use a simple light table";
+      lines << "";
+      lines << "Equipment:";
+      lines << "- Lighttable, SimpleShine";
+      lines << "- Dimmerpack, Dimblock V3";
+      lines << "- 5x fresnel";
+      lines << "- Wall socket, 220 Volts";
+      lines << "- Wall socket, power current";
       break;
     case 5:
-      RichEdit->Lines->Add("Level 5: Connect and use a more advanced sound table");
-      RichEdit->Lines->Add("");
-      RichEdit->Lines->Add("Equipment:");
-      RichEdit->Lines->Add("- 2x microphone, ShureSm58");
-      RichEdit->Lines->Add("- 2x active speaker, RCF322A");
-      RichEdit->Lines->Add("- Soundtable, SimpleSound2");
-      RichEdit->Lines->Add("- Triplet, 220 Volts");
-      RichEdit->Lines->Add("- Wall socket, 220 Volts");
+      lines << "Level 5: Connect and use a more advanced sound table";
+      lines << "";
+      lines << "Equipment:";
+      lines << "- 2x microphone, ShureSm58";
+      lines << "- 2x active speaker, RCF322A";
+      lines << "- Soundtable, SimpleSound2";
+      lines << "- Triplet, 220 Volts";
+      lines << "- Wall socket, 220 Volts";
       break;
     case 6:
-      RichEdit->Lines->Add("Level 6: Send sound using AUX");
-      RichEdit->Lines->Add("");
-      RichEdit->Lines->Add("Equipment:");
-      RichEdit->Lines->Add("- Microphone, ShureSm58");
-      RichEdit->Lines->Add("- Active speaker, RCF322A");
-      RichEdit->Lines->Add("- Soundtable, SimpleSound3");
-      RichEdit->Lines->Add("- Triplet, 220 Volts");
-      RichEdit->Lines->Add("- Wall socket, 220 Volts");
+      lines << "Level 6: Send sound using AUX";
+      lines << "";
+      lines << "Equipment:";
+      lines << "- Microphone, ShureSm58";
+      lines << "- Active speaker, RCF322A";
+      lines << "- Soundtable, SimpleSound3";
+      lines << "- Triplet, 220 Volts";
+      lines << "- Wall socket, 220 Volts";
       break;
     case 7:
-      RichEdit->Lines->Add("Level 7: Serve three singers, send sound to PA and monitors");
-      RichEdit->Lines->Add("");
-      RichEdit->Lines->Add("Equipment:");
-      RichEdit->Lines->Add("- 3x microphone, ShureSm58");
-      RichEdit->Lines->Add("- 4x active speaker, RCF322A");
-      RichEdit->Lines->Add("- Soundtable, SimpleSound3");
-      RichEdit->Lines->Add("- Octet, 220 Volts");
-      RichEdit->Lines->Add("- Wall socket, 220 Volts");
+      lines << "Level 7: Serve three singers, send sound to PA and monitors";
+      lines << "";
+      lines << "Equipment:";
+      lines << "- 3x microphone, ShureSm58";
+      lines << "- 4x active speaker, RCF322A";
+      lines << "- Soundtable, SimpleSound3";
+      lines << "- Octet, 220 Volts";
+      lines << "- Wall socket, 220 Volts";
       break;
     case 8:
-      RichEdit->Lines->Add("Level 8: Connect a CD player to speakers");
-      RichEdit->Lines->Add("  using a transition piece");
-      RichEdit->Lines->Add("");
-      RichEdit->Lines->Add("Equipment:");
-      RichEdit->Lines->Add("- Active speaker, RCF322A");
-      RichEdit->Lines->Add("- CD player");
-      RichEdit->Lines->Add("- Transition piece: jack male to 2x cinch female");
-      RichEdit->Lines->Add("- Octet, 220 Volts");
-      RichEdit->Lines->Add("- Wall socket, 220 Volts");
+      lines << "Level 8: Connect a CD player to speakers";
+      lines << "  using a transition piece";
+      lines << "";
+      lines << "Equipment:";
+      lines << "- Active speaker, RCF322A";
+      lines << "- CD player";
+      lines << "- Transition piece: jack male to 2x cinch female";
+      lines << "- Octet, 220 Volts";
+      lines << "- Wall socket, 220 Volts";
       break;
     case 9:
-      RichEdit->Lines->Add("Level 9: Connect a CD player to speakers");
-      RichEdit->Lines->Add("  using a sound table");
-      RichEdit->Lines->Add("");
-      RichEdit->Lines->Add("Equipment:");
-      RichEdit->Lines->Add("- Active speaker, RCF322A");
-      RichEdit->Lines->Add("- CD player");
-      RichEdit->Lines->Add("- Soundtable, SimpleSound4");
-      RichEdit->Lines->Add("- Octet, 220 Volts");
-      RichEdit->Lines->Add("- Wall socket, 220 Volts");
+      lines << "Level 9: Connect a CD player to speakers";
+      lines << "  using a sound table";
+      lines << "";
+      lines << "Equipment:";
+      lines << "- Active speaker, RCF322A";
+      lines << "- CD player";
+      lines << "- Soundtable, SimpleSound4";
+      lines << "- Octet, 220 Volts";
+      lines << "- Wall socket, 220 Volts";
       break;
     case 10:
-      RichEdit->Lines->Add("Level 10: Record an MD from CD");
-      RichEdit->Lines->Add("");
-      RichEdit->Lines->Add("Equipment:");
-      RichEdit->Lines->Add("- CD player");
-      RichEdit->Lines->Add("- MD player");
-      RichEdit->Lines->Add("- Transition piece: jack male to 2x cinch female");
-      RichEdit->Lines->Add("- Active speaker, RCF322A");
-      RichEdit->Lines->Add("- Octet, 220 Volts");
-      RichEdit->Lines->Add("- Wall socket, 220 Volts");
+      lines << "Level 10: Record an MD from CD";
+      lines << "";
+      lines << "Equipment:";
+      lines << "- CD player";
+      lines << "- MD player";
+      lines << "- Transition piece: jack male to 2x cinch female";
+      lines << "- Active speaker, RCF322A";
+      lines << "- Octet, 220 Volts";
+      lines << "- Wall socket, 220 Volts";
       break;
     case 11:
-      RichEdit->Lines->Add("Level 11: Record an MD from CD and microphone");
-      RichEdit->Lines->Add("");
-      RichEdit->Lines->Add("Equipment:");
-      RichEdit->Lines->Add("- Microphone, ShureSm58");
-      RichEdit->Lines->Add("- MD player");
-      RichEdit->Lines->Add("- Transition piece: jack male to 2x cinch female");
-      RichEdit->Lines->Add("- Soundtable, SimpleSound4");
-      RichEdit->Lines->Add("- Active speaker, RCF322A");
-      RichEdit->Lines->Add("- Octet, 220 Volts");
-      RichEdit->Lines->Add("- Wall socket, 220 Volts");
+      lines << "Level 11: Record an MD from CD and microphone";
+      lines << "";
+      lines << "Equipment:";
+      lines << "- Microphone, ShureSm58";
+      lines << "- MD player";
+      lines << "- Transition piece: jack male to 2x cinch female";
+      lines << "- Soundtable, SimpleSound4";
+      lines << "- Active speaker, RCF322A";
+      lines << "- Octet, 220 Volts";
+      lines << "- Wall socket, 220 Volts";
       break;
     case 12:
-      RichEdit->Lines->Add("Level 12: Learn to use the crossfader");
-      RichEdit->Lines->Add("");
-      RichEdit->Lines->Add("Equipment:");
-      RichEdit->Lines->Add("- Lighttable, SimpleShine2");
-      RichEdit->Lines->Add("- Dimmerpack, Dimblock V3");
-      RichEdit->Lines->Add("- 5x fresnel");
-      RichEdit->Lines->Add("- Wall socket, 220 Volts");
-      RichEdit->Lines->Add("- Wall socket, power current");
+      lines << "Level 12: Learn to use the crossfader";
+      lines << "";
+      lines << "Equipment:";
+      lines << "- Lighttable, SimpleShine2";
+      lines << "- Dimmerpack, Dimblock V3";
+      lines << "- 5x fresnel";
+      lines << "- Wall socket, 220 Volts";
+      lines << "- Wall socket, power current";
       break;
     case 13:
-      RichEdit->Lines->Add("Level 13: Connect a microphone to a passive speaker");
-      RichEdit->Lines->Add("");
-      RichEdit->Lines->Add("Equipment:");
-      RichEdit->Lines->Add("- Microphone, ShureSm58");
-      RichEdit->Lines->Add("- Passive speaker, RCF Event 3000");
-      RichEdit->Lines->Add("- Amplifier, EasyAmp");
-      RichEdit->Lines->Add("- Wall socket, 220 Volts");
+      lines << "Level 13: Connect a microphone to a passive speaker";
+      lines << "";
+      lines << "Equipment:";
+      lines << "- Microphone, ShureSm58";
+      lines << "- Passive speaker, RCF Event 3000";
+      lines << "- Amplifier, EasyAmp";
+      lines << "- Wall socket, 220 Volts";
       break;
+  }
+  RichEdit->setPlainText(lines.join("\n"));
+}
+//---------------------------------------------------------------------------
+void FormSimStagecraftSelect::keyPressEvent(QKeyEvent * e)
+{
+  switch (e->key())
+  {
+    case Qt::Key_S: case Qt::Key_1: case Qt::Key_F1:
+      FormMouseDown(ImageStart->left, ImageStart->top);
+      break;
+    case Qt::Key_Minus: case Qt::Key_Left:
+      FormMouseDown(ImageArrowLeft->left, ImageArrowLeft->top);
+      break;
+    case Qt::Key_Plus: case Qt::Key_Right:
+      FormMouseDown(ImageArrowRight->left, ImageArrowRight->top);
+      break;
+    case Qt::Key_Q: case Qt::Key_2: case Qt::Key_F2:
+      FormMouseDown(ImageQuit->left, ImageQuit->top);
+      break;
+    default:
+      QDialog::keyPressEvent(e);
   }
 }
 //---------------------------------------------------------------------------
-void TFormSimStagecraftSelect::PaintBackground()
-{
-  TImage * const image = ImageBackground;
-
-  assert(image!=0);
-  assert(image->Picture->Bitmap != 0);
-  assert(image->Picture->Bitmap->PixelFormat == pf24bit);
-
-  const int maxx = image->Picture->Bitmap->Width;
-  const int maxy = image->Picture->Bitmap->Height;
-  for (int y = 0; y != maxy; ++y)
-  {
-    unsigned char * const myLine
-      = static_cast<unsigned char*>(image->Picture->Bitmap->ScanLine[y]);
-    const double yD = static_cast<double>(y);
-
-    for (int x = 0; x != maxx; ++x)
-    {
-      const double xD = static_cast<double>(x);
-      //Range z: -3 , +3
-      const double zD
-        = std::cos(xD / 30.0)
-        + std::sin(yD / 45.0)
-        - std::sin( (xD + yD) / 60.0);
-      const int grey = static_cast<int>( (zD + 3.0) * (256.0 / 6.0) );
-      assert(grey >=   0);
-      assert(grey <  256);
-      myLine[x*3+2] = grey; //Red
-      myLine[x*3+1] = grey; //Green
-      myLine[x*3+0] = grey; //Blue
-    }
-  }
-}
-//---------------------------------------------------------------------------}
-void TFormSimStagecraftSelect::TickBackground()
-{
-  TImage * const image = ImageBackground;
-
-  assert(image!=0);
-  assert(image->Picture->Bitmap != 0);
-  assert(image->Picture->Bitmap->PixelFormat == pf24bit);
-
-  const int maxx = image->Picture->Bitmap->Width;
-  const int maxy = image->Picture->Bitmap->Height;
-  for (int y = 0; y != maxy; ++y)
-  {
-    unsigned char * const myLine
-      = static_cast<unsigned char*>(image->Picture->Bitmap->ScanLine[y]);
-    for (int x = 0; x != maxx; ++x)
-    {
-      ++myLine[x*3+2]; //Red
-      ++myLine[x*3+1]; //Green
-      ++myLine[x*3+0]; //Blue
-    }
-  }
-}
-//---------------------------------------------------------------------------}
-void __fastcall TFormSimStagecraftSelect::TimerMainTimer(TObject *Sender)
-{
-  TickBackground();
-  DrawScreen();
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TFormSimStagecraftSelect::FormKeyDown(TObject *Sender,
-      WORD &Key, TShiftState Shift)
-{
-  switch (Key)
-  {
-    case 'S': case 's': case '1': case VK_F1:
-      FormMouseDown(0,TMouseButton(),TShiftState(),
-        ImageStart->Left, ImageStart->Top);
-      break;
-    case '-': case VK_LEFT:
-      FormMouseDown(0,TMouseButton(),TShiftState(),
-        ImageArrowLeft->Left, ImageArrowLeft->Top);
-      break;
-    case '+': case VK_RIGHT:
-      FormMouseDown(0,TMouseButton(),TShiftState(),
-        ImageArrowRight->Left, ImageArrowRight->Top);
-      break;
-    case 'Q': case '2': case VK_F2:
-      FormMouseDown(0,TMouseButton(),TShiftState(),
-        ImageQuit->Left, ImageQuit->Top);
-      break;
-  }
-}
-//---------------------------------------------------------------------------
-
-

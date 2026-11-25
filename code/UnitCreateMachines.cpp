@@ -1,7 +1,4 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
-//---------------------------------------------------------------------------
 #include "UnitFormCdPlayer.h"
 #include "UnitFormDimblockV3.h"
 #include "UnitFormEasyAmp.h"
@@ -25,29 +22,29 @@
 //---------------------------------------------------------------------------
 #include "UnitCreateMachines.h"
 //---------------------------------------------------------------------------
-std::vector<boost::shared_ptr<TFormMachine> > CreateMachines(
-  TFormSimStagecraftMain * const formParent,
+std::vector<std::shared_ptr<FormMachine> > CreateMachines(
+  FormSimStagecraftMain * const formParent,
   const int level)
 {
-  std::vector<boost::shared_ptr<TFormMachine> > machines;
+  std::vector<std::shared_ptr<FormMachine> > machines;
 
   switch (level)
   {
     case 1:
     {
-      boost::shared_ptr<TFormMachine> m1(
-          new TFormWallSocket220(0,formParent));
-      boost::shared_ptr<TFormMachine> m2(
-          new TFormPar64(0,formParent));
+      std::shared_ptr<FormMachine> m1(
+          new FormWallSocket220(formParent));
+      std::shared_ptr<FormMachine> m2(
+          new FormPar64(formParent));
       machines.push_back(m1);
       machines.push_back(m2);
     }
     break;
     case 2:
     {
-      boost::shared_ptr<TFormMachine> wallSocket220(new TFormWallSocket220(0,formParent));
-      boost::shared_ptr<TFormMachine> speaker(new TFormRcf322A(0,formParent));
-      boost::shared_ptr<TFormMachine> mic(new TFormShureSm58(0,formParent));
+      std::shared_ptr<FormMachine> wallSocket220(new FormWallSocket220(formParent));
+      std::shared_ptr<FormMachine> speaker(new FormRcf322A(formParent));
+      std::shared_ptr<FormMachine> mic(new FormShureSm58(formParent));
       machines.push_back(mic);
       machines.push_back(speaker);
       machines.push_back(wallSocket220);
@@ -55,12 +52,12 @@ std::vector<boost::shared_ptr<TFormMachine> > CreateMachines(
     break;
     case 3:
     {
-      boost::shared_ptr<TFormMachine> wallSocket220(new TFormWallSocket220(0,formParent));
-      boost::shared_ptr<TFormMachine> speaker1(new TFormRcf322A(0,formParent));
-      boost::shared_ptr<TFormMachine> speaker2(new TFormRcf322A(0,formParent));
-      boost::shared_ptr<TFormMachine> mic(new TFormShureSm58(0,formParent));
-      boost::shared_ptr<TFormMachine> triplet(new TFormTriplet(0,formParent));
-      boost::shared_ptr<TFormMachine> soundTable(new TFormSimpleSound1(0,formParent));
+      std::shared_ptr<FormMachine> wallSocket220(new FormWallSocket220(formParent));
+      std::shared_ptr<FormMachine> speaker1(new FormRcf322A(formParent));
+      std::shared_ptr<FormMachine> speaker2(new FormRcf322A(formParent));
+      std::shared_ptr<FormMachine> mic(new FormShureSm58(formParent));
+      std::shared_ptr<FormMachine> triplet(new FormTriplet(formParent));
+      std::shared_ptr<FormMachine> soundTable(new FormSimpleSound1(formParent));
       machines.push_back(speaker1);
       machines.push_back(mic);
       machines.push_back(speaker2);
@@ -71,15 +68,15 @@ std::vector<boost::shared_ptr<TFormMachine> > CreateMachines(
     break;
     case 4:
     {
-      boost::shared_ptr<TFormMachine> dimmerpack(new TFormDimblockV3(0,formParent));
-      boost::shared_ptr<TFormMachine> lighttable(new TFormSimpleShine1(0,formParent));
-      boost::shared_ptr<TFormMachine> wallSocketPower(new TFormWallSocketPower(0,formParent));
-      boost::shared_ptr<TFormMachine> wallSocket220(new TFormWallSocket220(0,formParent));
-      boost::shared_ptr<TFormMachine> par64_1(new TFormPar64(0,formParent));
-      boost::shared_ptr<TFormMachine> par64_2(new TFormPar64(0,formParent));
-      boost::shared_ptr<TFormMachine> par64_3(new TFormPar64(0,formParent));
-      boost::shared_ptr<TFormMachine> par64_4(new TFormPar64(0,formParent));
-      boost::shared_ptr<TFormMachine> par64_5(new TFormPar64(0,formParent));
+      std::shared_ptr<FormMachine> dimmerpack(new FormDimblockV3(formParent));
+      std::shared_ptr<FormMachine> lighttable(new FormSimpleShine1(formParent));
+      std::shared_ptr<FormMachine> wallSocketPower(new FormWallSocketPower(formParent));
+      std::shared_ptr<FormMachine> wallSocket220(new FormWallSocket220(formParent));
+      std::shared_ptr<FormMachine> par64_1(new FormPar64(formParent));
+      std::shared_ptr<FormMachine> par64_2(new FormPar64(formParent));
+      std::shared_ptr<FormMachine> par64_3(new FormPar64(formParent));
+      std::shared_ptr<FormMachine> par64_4(new FormPar64(formParent));
+      std::shared_ptr<FormMachine> par64_5(new FormPar64(formParent));
       machines.push_back(wallSocketPower);
       machines.push_back(dimmerpack);
       machines.push_back(wallSocket220);
@@ -93,13 +90,13 @@ std::vector<boost::shared_ptr<TFormMachine> > CreateMachines(
     break;
     case 5:
     {
-      boost::shared_ptr<TFormMachine> wallSocket220(new TFormWallSocket220(0,formParent));
-      boost::shared_ptr<TFormMachine> speaker1(new TFormRcf322A(0,formParent));
-      boost::shared_ptr<TFormMachine> speaker2(new TFormRcf322A(0,formParent));
-      boost::shared_ptr<TFormMachine> mic1(new TFormShureSm58(0,formParent));
-      boost::shared_ptr<TFormMachine> mic2(new TFormShureSm58(0,formParent));
-      boost::shared_ptr<TFormMachine> triplet(new TFormTriplet(0,formParent));
-      boost::shared_ptr<TFormMachine> soundTable(new TFormSimpleSound2(0,formParent));
+      std::shared_ptr<FormMachine> wallSocket220(new FormWallSocket220(formParent));
+      std::shared_ptr<FormMachine> speaker1(new FormRcf322A(formParent));
+      std::shared_ptr<FormMachine> speaker2(new FormRcf322A(formParent));
+      std::shared_ptr<FormMachine> mic1(new FormShureSm58(formParent));
+      std::shared_ptr<FormMachine> mic2(new FormShureSm58(formParent));
+      std::shared_ptr<FormMachine> triplet(new FormTriplet(formParent));
+      std::shared_ptr<FormMachine> soundTable(new FormSimpleSound2(formParent));
       machines.push_back(mic1);
       machines.push_back(triplet);
       machines.push_back(mic2);
@@ -111,11 +108,11 @@ std::vector<boost::shared_ptr<TFormMachine> > CreateMachines(
     break;
     case 6:
     {
-      boost::shared_ptr<TFormMachine> wallSocket220(new TFormWallSocket220(0,formParent));
-      boost::shared_ptr<TFormMachine> mic1(new TFormShureSm58(0,formParent));
-      boost::shared_ptr<TFormMachine> speaker1(new TFormRcf322A(0,formParent));
-      boost::shared_ptr<TFormMachine> triplet(new TFormTriplet(0,formParent));
-      boost::shared_ptr<TFormMachine> soundTable3(new TFormSimpleSound3(0,formParent));
+      std::shared_ptr<FormMachine> wallSocket220(new FormWallSocket220(formParent));
+      std::shared_ptr<FormMachine> mic1(new FormShureSm58(formParent));
+      std::shared_ptr<FormMachine> speaker1(new FormRcf322A(formParent));
+      std::shared_ptr<FormMachine> triplet(new FormTriplet(formParent));
+      std::shared_ptr<FormMachine> soundTable3(new FormSimpleSound3(formParent));
       machines.push_back(mic1);
       machines.push_back(speaker1);
       machines.push_back(wallSocket220);
@@ -125,16 +122,16 @@ std::vector<boost::shared_ptr<TFormMachine> > CreateMachines(
     break;
     case 7:
     {
-      boost::shared_ptr<TFormMachine> wallSocket220(new TFormWallSocket220(0,formParent));
-      boost::shared_ptr<TFormMachine> mic1(new TFormShureSm58(0,formParent));
-      boost::shared_ptr<TFormMachine> mic2(new TFormShureSm58(0,formParent));
-      boost::shared_ptr<TFormMachine> mic3(new TFormShureSm58(0,formParent));
-      boost::shared_ptr<TFormMachine> speaker1(new TFormRcf322A(0,formParent));
-      boost::shared_ptr<TFormMachine> speaker2(new TFormRcf322A(0,formParent));
-      boost::shared_ptr<TFormMachine> speaker3(new TFormRcf322A(0,formParent));
-      boost::shared_ptr<TFormMachine> speaker4(new TFormRcf322A(0,formParent));
-      boost::shared_ptr<TFormMachine> octlet(new TFormOctlet(0,formParent));
-      boost::shared_ptr<TFormMachine> soundTable3(new TFormSimpleSound3(0,formParent));
+      std::shared_ptr<FormMachine> wallSocket220(new FormWallSocket220(formParent));
+      std::shared_ptr<FormMachine> mic1(new FormShureSm58(formParent));
+      std::shared_ptr<FormMachine> mic2(new FormShureSm58(formParent));
+      std::shared_ptr<FormMachine> mic3(new FormShureSm58(formParent));
+      std::shared_ptr<FormMachine> speaker1(new FormRcf322A(formParent));
+      std::shared_ptr<FormMachine> speaker2(new FormRcf322A(formParent));
+      std::shared_ptr<FormMachine> speaker3(new FormRcf322A(formParent));
+      std::shared_ptr<FormMachine> speaker4(new FormRcf322A(formParent));
+      std::shared_ptr<FormMachine> octlet(new FormOctlet(formParent));
+      std::shared_ptr<FormMachine> soundTable3(new FormSimpleSound3(formParent));
       machines.push_back(mic1);
       machines.push_back(mic2);
       machines.push_back(mic3);
@@ -150,12 +147,12 @@ std::vector<boost::shared_ptr<TFormMachine> > CreateMachines(
     case 8:
     {
       //Put a CD on speakers without using a soundtable
-      boost::shared_ptr<TFormMachine> wallSocket220(new TFormWallSocket220(0,formParent));
-      boost::shared_ptr<TFormMachine> speaker1(new TFormRcf322A(0,formParent));
-      boost::shared_ptr<TFormMachine> octlet(new TFormOctlet(0,formParent));
-      boost::shared_ptr<TFormCdPlayer> cdPlayer(new TFormCdPlayer(0,formParent));
-      boost::shared_ptr<TFormTransitionPieceJackMaleTwoCinchFemale> transitionPiece(
-        new TFormTransitionPieceJackMaleTwoCinchFemale(0,formParent));
+      std::shared_ptr<FormMachine> wallSocket220(new FormWallSocket220(formParent));
+      std::shared_ptr<FormMachine> speaker1(new FormRcf322A(formParent));
+      std::shared_ptr<FormMachine> octlet(new FormOctlet(formParent));
+      std::shared_ptr<FormCdPlayer> cdPlayer(new FormCdPlayer(formParent));
+      std::shared_ptr<FormTransitionPieceJackMaleTwoCinchFemale> transitionPiece(
+        new FormTransitionPieceJackMaleTwoCinchFemale(formParent));
       machines.push_back(octlet);
       machines.push_back(speaker1);
       machines.push_back(wallSocket220);
@@ -166,11 +163,11 @@ std::vector<boost::shared_ptr<TFormMachine> > CreateMachines(
     case 9:
     {
       //Put a CD on speakers with using a soundtable
-      boost::shared_ptr<TFormMachine> wallSocket220(new TFormWallSocket220(0,formParent));
-      boost::shared_ptr<TFormMachine> speaker1(new TFormRcf322A(0,formParent));
-      boost::shared_ptr<TFormMachine> octlet(new TFormOctlet(0,formParent));
-      boost::shared_ptr<TFormCdPlayer> cdPlayer(new TFormCdPlayer(0,formParent));
-      boost::shared_ptr<TFormMachine> soundTable4(new TFormSimpleSound4(0,formParent));
+      std::shared_ptr<FormMachine> wallSocket220(new FormWallSocket220(formParent));
+      std::shared_ptr<FormMachine> speaker1(new FormRcf322A(formParent));
+      std::shared_ptr<FormMachine> octlet(new FormOctlet(formParent));
+      std::shared_ptr<FormCdPlayer> cdPlayer(new FormCdPlayer(formParent));
+      std::shared_ptr<FormMachine> soundTable4(new FormSimpleSound4(formParent));
       machines.push_back(octlet);
       machines.push_back(speaker1);
       machines.push_back(cdPlayer);
@@ -181,14 +178,14 @@ std::vector<boost::shared_ptr<TFormMachine> > CreateMachines(
     case 10:
     {
       //Record a CD on MD play
-      boost::shared_ptr<TFormMachine> wallSocket220(new TFormWallSocket220(0,formParent));
-      boost::shared_ptr<TFormMachine> speaker1(new TFormRcf322A(0,formParent));
-      boost::shared_ptr<TFormMachine> octlet(new TFormOctlet(0,formParent));
-      //boost::shared_ptr<TFormMachine> soundTable4(new TFormSimpleSound4(0,formParent));
-      boost::shared_ptr<TFormMdPlayer> mdPlayer(new TFormMdPlayer(0,formParent));
-      boost::shared_ptr<TFormCdPlayer> cdPlayer(new TFormCdPlayer(0,formParent));
-      boost::shared_ptr<TFormTransitionPieceJackMaleTwoCinchFemale> transitionPiece(
-        new TFormTransitionPieceJackMaleTwoCinchFemale(0,formParent));
+      std::shared_ptr<FormMachine> wallSocket220(new FormWallSocket220(formParent));
+      std::shared_ptr<FormMachine> speaker1(new FormRcf322A(formParent));
+      std::shared_ptr<FormMachine> octlet(new FormOctlet(formParent));
+      //std::shared_ptr<FormMachine> soundTable4(new FormSimpleSound4(formParent));
+      std::shared_ptr<FormMdPlayer> mdPlayer(new FormMdPlayer(formParent));
+      std::shared_ptr<FormCdPlayer> cdPlayer(new FormCdPlayer(formParent));
+      std::shared_ptr<FormTransitionPieceJackMaleTwoCinchFemale> transitionPiece(
+        new FormTransitionPieceJackMaleTwoCinchFemale(formParent));
       machines.push_back(octlet);
       machines.push_back(speaker1);
       machines.push_back(wallSocket220);
@@ -201,15 +198,15 @@ std::vector<boost::shared_ptr<TFormMachine> > CreateMachines(
     case 11:
     {
       //Record a CD and microphone on MD play
-      boost::shared_ptr<TFormMachine> mic1(new TFormShureSm58(0,formParent));
-      boost::shared_ptr<TFormMachine> wallSocket220(new TFormWallSocket220(0,formParent));
-      boost::shared_ptr<TFormMachine> speaker1(new TFormRcf322A(0,formParent));
-      boost::shared_ptr<TFormMachine> octlet(new TFormOctlet(0,formParent));
-      boost::shared_ptr<TFormMachine> soundTable4(new TFormSimpleSound4(0,formParent));
-      boost::shared_ptr<TFormMdPlayer> mdPlayer(new TFormMdPlayer(0,formParent));
-      //boost::shared_ptr<TFormCdPlayer> cdPlayer(new TFormCdPlayer(0,formParent));
-      boost::shared_ptr<TFormTransitionPieceJackMaleTwoCinchFemale> transitionPiece(
-        new TFormTransitionPieceJackMaleTwoCinchFemale(0,formParent));
+      std::shared_ptr<FormMachine> mic1(new FormShureSm58(formParent));
+      std::shared_ptr<FormMachine> wallSocket220(new FormWallSocket220(formParent));
+      std::shared_ptr<FormMachine> speaker1(new FormRcf322A(formParent));
+      std::shared_ptr<FormMachine> octlet(new FormOctlet(formParent));
+      std::shared_ptr<FormMachine> soundTable4(new FormSimpleSound4(formParent));
+      std::shared_ptr<FormMdPlayer> mdPlayer(new FormMdPlayer(formParent));
+      //std::shared_ptr<FormCdPlayer> cdPlayer(new FormCdPlayer(formParent));
+      std::shared_ptr<FormTransitionPieceJackMaleTwoCinchFemale> transitionPiece(
+        new FormTransitionPieceJackMaleTwoCinchFemale(formParent));
       machines.push_back(wallSocket220);
       machines.push_back(speaker1);
       machines.push_back(octlet);
@@ -223,15 +220,15 @@ std::vector<boost::shared_ptr<TFormMachine> > CreateMachines(
     case 12:
     {
       //Level 12: Learn to use the crossfader
-      boost::shared_ptr<TFormMachine> dimmerpack(new TFormDimblockV3(0,formParent));
-      boost::shared_ptr<TFormMachine> lighttable(new TFormSimpleShine2(0,formParent));
-      boost::shared_ptr<TFormMachine> wallSocketPower(new TFormWallSocketPower(0,formParent));
-      boost::shared_ptr<TFormMachine> wallSocket220(new TFormWallSocket220(0,formParent));
-      boost::shared_ptr<TFormMachine> par64_1(new TFormPar64(0,formParent));
-      boost::shared_ptr<TFormMachine> par64_2(new TFormPar64(0,formParent));
-      boost::shared_ptr<TFormMachine> par64_3(new TFormPar64(0,formParent));
-      boost::shared_ptr<TFormMachine> par64_4(new TFormPar64(0,formParent));
-      boost::shared_ptr<TFormMachine> par64_5(new TFormPar64(0,formParent));
+      std::shared_ptr<FormMachine> dimmerpack(new FormDimblockV3(formParent));
+      std::shared_ptr<FormMachine> lighttable(new FormSimpleShine2(formParent));
+      std::shared_ptr<FormMachine> wallSocketPower(new FormWallSocketPower(formParent));
+      std::shared_ptr<FormMachine> wallSocket220(new FormWallSocket220(formParent));
+      std::shared_ptr<FormMachine> par64_1(new FormPar64(formParent));
+      std::shared_ptr<FormMachine> par64_2(new FormPar64(formParent));
+      std::shared_ptr<FormMachine> par64_3(new FormPar64(formParent));
+      std::shared_ptr<FormMachine> par64_4(new FormPar64(formParent));
+      std::shared_ptr<FormMachine> par64_5(new FormPar64(formParent));
       machines.push_back(wallSocketPower);
       machines.push_back(dimmerpack);
       machines.push_back(wallSocket220);
@@ -245,10 +242,10 @@ std::vector<boost::shared_ptr<TFormMachine> > CreateMachines(
     break;
     case 13:
     {
-      boost::shared_ptr<TFormMachine> wallSocket220(new TFormWallSocket220(0,formParent));
-      boost::shared_ptr<TFormMachine> mic(new TFormShureSm58(0,formParent));
-      boost::shared_ptr<TFormMachine> speaker(new TFormRcfEvent3000(0,formParent));
-      boost::shared_ptr<TFormMachine> amplifier(new TFormEasyAmp(0,formParent));
+      std::shared_ptr<FormMachine> wallSocket220(new FormWallSocket220(formParent));
+      std::shared_ptr<FormMachine> mic(new FormShureSm58(formParent));
+      std::shared_ptr<FormMachine> speaker(new FormRcfEvent3000(formParent));
+      std::shared_ptr<FormMachine> amplifier(new FormEasyAmp(formParent));
       machines.push_back(mic);
       machines.push_back(speaker);
       machines.push_back(wallSocket220);
@@ -262,4 +259,3 @@ std::vector<boost::shared_ptr<TFormMachine> > CreateMachines(
   return machines;
 }
 //---------------------------------------------------------------------------
-#pragma package(smart_init)

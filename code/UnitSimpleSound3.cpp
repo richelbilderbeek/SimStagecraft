@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
+#include <algorithm>
+#include <cassert>
 #include "UnitSimpleSound3.h"
 //---------------------------------------------------------------------------
 #include <stdexcept>
@@ -12,32 +12,32 @@
 SimpleSound3::SimpleSound3()
   : //View
     //Use
-    mFader1(boost::shared_ptr<Fader>(new Fader)),
-    mFader2(boost::shared_ptr<Fader>(new Fader)),
-    mFader3(boost::shared_ptr<Fader>(new Fader)),
-    mDialGain1(boost::shared_ptr<Dial>(new Dial)),
-    mDialGain2(boost::shared_ptr<Dial>(new Dial)),
-    mDialGain3(boost::shared_ptr<Dial>(new Dial)),
-    mDialAux1_1(boost::shared_ptr<Dial>(new Dial)),
-    mDialAux1_2(boost::shared_ptr<Dial>(new Dial)),
-    mDialAux1_3(boost::shared_ptr<Dial>(new Dial)),
-    mPressButtonPfl1(boost::shared_ptr<PressButton>(new PressButton)),
-    mPressButtonPfl2(boost::shared_ptr<PressButton>(new PressButton)),
-    mPressButtonPfl3(boost::shared_ptr<PressButton>(new PressButton)),
-    mDialSendAux1(boost::shared_ptr<Dial>(new Dial)),
-    mFaderMaster(boost::shared_ptr<Fader>(new Fader)),
+    mFader1(std::shared_ptr<Fader>(new Fader)),
+    mFader2(std::shared_ptr<Fader>(new Fader)),
+    mFader3(std::shared_ptr<Fader>(new Fader)),
+    mDialGain1(std::shared_ptr<Dial>(new Dial)),
+    mDialGain2(std::shared_ptr<Dial>(new Dial)),
+    mDialGain3(std::shared_ptr<Dial>(new Dial)),
+    mDialAux1_1(std::shared_ptr<Dial>(new Dial)),
+    mDialAux1_2(std::shared_ptr<Dial>(new Dial)),
+    mDialAux1_3(std::shared_ptr<Dial>(new Dial)),
+    mPressButtonPfl1(std::shared_ptr<PressButton>(new PressButton)),
+    mPressButtonPfl2(std::shared_ptr<PressButton>(new PressButton)),
+    mPressButtonPfl3(std::shared_ptr<PressButton>(new PressButton)),
+    mDialSendAux1(std::shared_ptr<Dial>(new Dial)),
+    mFaderMaster(std::shared_ptr<Fader>(new Fader)),
     //Connect
-    mMic1(boost::shared_ptr<XlrFemale>(new XlrFemale(this))),
-    mMic2(boost::shared_ptr<XlrFemale>(new XlrFemale(this))),
-    mMic3(boost::shared_ptr<XlrFemale>(new XlrFemale(this))),
-    mAux1(boost::shared_ptr<JackFemale>(new JackFemale(this))),
-    mMasterL(boost::shared_ptr<XlrMale>(new XlrMale(this))),
-    mMasterR(boost::shared_ptr<XlrMale>(new XlrMale(this))),
-    mPower(boost::shared_ptr<EuroMale>(new EuroMale(this))),
+    mMic1(std::shared_ptr<XlrFemale>(new XlrFemale(this))),
+    mMic2(std::shared_ptr<XlrFemale>(new XlrFemale(this))),
+    mMic3(std::shared_ptr<XlrFemale>(new XlrFemale(this))),
+    mAux1(std::shared_ptr<JackFemale>(new JackFemale(this))),
+    mMasterL(std::shared_ptr<XlrMale>(new XlrMale(this))),
+    mMasterR(std::shared_ptr<XlrMale>(new XlrMale(this))),
+    mPower(std::shared_ptr<EuroMale>(new EuroMale(this))),
     mConnectionAudioSignal(
-     boost::shared_ptr<InternalConnection>(new InternalConnection(this)))
+     std::shared_ptr<InternalConnection>(new InternalConnection(this)))
 {
-  mAudioSignalDisplay = boost::shared_ptr<AudioSignalDisplay>(
+  mAudioSignalDisplay = std::shared_ptr<AudioSignalDisplay>(
     new AudioSignalDisplay(mConnectionAudioSignal.get()));
 
 }
@@ -185,7 +185,7 @@ const double SimpleSound3::AudioSignalInputStrength(
   std::vector<const Connector*> prevConnectors,
   const int channel) const
 {
-  boost::shared_ptr<Connector> channelConnector;
+  std::shared_ptr<Connector> channelConnector;
   switch (channel)
   {
     case 1: channelConnector = this->mMic1; break;
@@ -215,7 +215,7 @@ const double SimpleSound3::AudioSignalInputStrength(
   const double audioInput = inputMachine->AudioSignalStrength(
     inputConnection,prevConnectors);
 
-  boost::shared_ptr<Dial> dialGain;
+  std::shared_ptr<Dial> dialGain;
   switch (channel)
   {
     case 1: dialGain = this->mDialGain1; break;
@@ -240,7 +240,7 @@ const double SimpleSound3::AudioSignalMasterOutputStrength(
 
   const double masterThroughput = 2.0 * this->mFaderMaster->GetRelPosition();
 
-  boost::shared_ptr<Fader> fader;
+  std::shared_ptr<Fader> fader;
   switch (channel)
   {
     case 1: fader = this->mFader1; break;
@@ -266,7 +266,7 @@ const double SimpleSound3::AudioSignalAuxOutputStrength(
 
   const double sendAux1throughput = 2.0 * this->mDialSendAux1->GetRelPosition();
 
-  boost::shared_ptr<Dial> dial;
+  std::shared_ptr<Dial> dial;
   switch (channel)
   {
     case 1: dial = this->mDialAux1_1; break;
@@ -299,4 +299,3 @@ const bool SimpleSound3::HasPower() const
 }
 //---------------------------------------------------------------------------
 
-#pragma package(smart_init)

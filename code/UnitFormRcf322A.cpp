@@ -1,7 +1,6 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
 
+#include <cassert>
 #include <cmath>
 #include <stdexcept>
 #include "UnitControllerControl.h"
@@ -9,67 +8,62 @@
 #include "UnitDisplayControl.h"
 #include "UnitMachine.h"
 #include "UnitSpeaker.h"
-#include "UnitVcl.h"
+#include "UnitImage.h"
 #include "UnitFormRcf322A.h"
 #include "UnitFormMachine.h"
 #include "UnitFormSprites.h"
 
 #include "UnitFormSimStagecraftMain.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma link "UnitFormMachine"
-#pragma resource "*.dfm"
-TFormRcf322A *FormRcf322A;
 //---------------------------------------------------------------------------
-__fastcall TFormRcf322A::TFormRcf322A(TComponent* Owner,
-    TFormSimStagecraftMain * const formParent)
-  : TFormMachine(Owner,formParent),
-    mSpeaker(boost::shared_ptr<Rcf322A>(new Rcf322A))
+FormRcf322A::FormRcf322A(FormSimStagecraftMain * const formParent)
+  : FormMachine(formParent,DesignClientWidth,DesignClientHeight),
+    mSpeaker(std::shared_ptr<Rcf322A>(new Rcf322A))
 {
   //Control
-  mPowerSwitch = boost::shared_ptr<TwoSwitchControl>(
+  mPowerSwitch = std::shared_ptr<TwoSwitchControl>(
     new TwoSwitchControl(this,
       mSpeaker->mPowerSwitch,ImageTwoSwitchPower));
-  mVolumeDial = boost::shared_ptr<DialControl>(
+  mVolumeDial = std::shared_ptr<DialControl>(
     new DialControl(this,
       mSpeaker->mVolumeDial,ImageVolumeDial));
   //Connect
-  mEuroMale = boost::shared_ptr<EuroMaleControl>(
+  mEuroMale = std::shared_ptr<EuroMaleControl>(
     new EuroMaleControl(this,mSpeaker->mEuroMalePower,ImageEuroMale));
-  mXlrFemale = boost::shared_ptr<XlrFemaleControl>(
+  mXlrFemale = std::shared_ptr<XlrFemaleControl>(
     new XlrFemaleControl(this,mSpeaker->mXlrInput,ImageXlrFemale));
-  mXlrMale = boost::shared_ptr<XlrMaleControl>(
+  mXlrMale = std::shared_ptr<XlrMaleControl>(
     new XlrMaleControl(this,mSpeaker->mXlrDaisyChain,ImageXlrMale));
-  mJackFemale = boost::shared_ptr<JackFemaleControl>(
+  mJackFemale = std::shared_ptr<JackFemaleControl>(
     new JackFemaleControl(this,mSpeaker->mJackInput,ImageJackFemale));
   //Display
-  mLedPower = boost::shared_ptr<LedControl>(new LedControl(
+  mLedPower = std::shared_ptr<LedControl>(new LedControl(
     mSpeaker->mLedPower,ImageLedPower));
-  mLedLimProt = boost::shared_ptr<LedControl>(new LedControl(
+  mLedLimProt = std::shared_ptr<LedControl>(new LedControl(
     mSpeaker->mLedLimProt,ImageLedLimProt));
 
 
   CreateWatermark(ImageView,ImageWatermark);
 
-  ImageVolumeDial->Picture->Bitmap->Width  = 50;
-  ImageVolumeDial->Picture->Bitmap->Height = 50;
-  ImageVolumeDial->Transparent = true;
+  SetPictureWidth(ImageVolumeDial,50);
+  SetPictureHeight(ImageVolumeDial,50);
+  ImageVolumeDial->transparent = true;
 
-  OnResize(0);
+  Resize();
 
   //Set controls by clicking virtually
   mVolumeDial->OnMouseDown(
-    1 * ImageVolumeDial->Picture->Bitmap->Width  / 4,
-    3 * ImageVolumeDial->Picture->Bitmap->Height / 4);
+    1 * ImageVolumeDial->picture.width()  / 4,
+    3 * ImageVolumeDial->picture.height() / 4);
   mPowerSwitch->OnMouseDown(0,0);
 }
 //---------------------------------------------------------------------------
-void TFormRcf322A::UpdateBuffer()
+void FormRcf322A::UpdateBuffer()
 {
   switch (mDisplayMode)
   {
     case modeView:
-      ImageBuffer->Canvas->Draw(0,0,ImageView->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageView);
       break;
     case modeUse:
       //Update all
@@ -77,7 +71,7 @@ void TFormRcf322A::UpdateBuffer()
       mLedLimProt->Update();
       DrawAudioSignal(ImageSound,mSpeaker->GetSoundLevel());
       //Start drawing
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       DrawOnBuffer(LabelUseVolume);
       DrawOnBuffer(LabelUsePowerOn);
@@ -90,7 +84,7 @@ void TFormRcf322A::UpdateBuffer()
       DrawOnBuffer(ImageLedLimProt);
       break;
     case modeConnect:
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       //Labels
       DrawOnBuffer(LabelConnectBalanced);
       DrawOnBuffer(LabelConnectMains);
@@ -106,7 +100,7 @@ void TFormRcf322A::UpdateBuffer()
   DrawBorderAroundBuffer();
 }
 //---------------------------------------------------------------------------
-void TFormRcf322A::OnMouseDown(const int x, const int y)
+void FormRcf322A::OnMouseDown(const int x, const int y)
 {
   switch (mDisplayMode)
   {
@@ -116,14 +110,14 @@ void TFormRcf322A::OnMouseDown(const int x, const int y)
       if (OnImage(x,y,ImageVolumeDial))
       {
         mVolumeDial->OnMouseDown(
-          x - ImageVolumeDial->Left,
-          y - ImageVolumeDial->Top);
+          x - ImageVolumeDial->left,
+          y - ImageVolumeDial->top);
       }
       else if (OnImage(x,y,ImageTwoSwitchPower))
       {
         mPowerSwitch->OnMouseDown(
-          x - ImageTwoSwitchPower->Left,
-          y - ImageTwoSwitchPower->Top);
+          x - ImageTwoSwitchPower->left,
+          y - ImageTwoSwitchPower->top);
       }
       break;
     case modeConnect:
@@ -135,14 +129,14 @@ void TFormRcf322A::OnMouseDown(const int x, const int y)
   }
 }
 //---------------------------------------------------------------------------
-void TFormRcf322A::OnAfterResize()
+void FormRcf322A::OnAfterResize()
 {
   //Use
   {
-    //Get y-x-ordered vector of TRects
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,2,6));
+    //Get y-x-ordered vector of QRects
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),2,6));
     //Resize bitmaps
-      //ImageFader1->Picture->Bitmap->Height      = MergeRects(v[3][2],v[5][2]).Height();
+      //SetPictureHeight(ImageFader1,MergeRects(v[3][2],v[5][2]).height());
       //ImageFader1->Refresh();
     //Place bitmaps
     //Labels
@@ -159,7 +153,7 @@ void TFormRcf322A::OnAfterResize()
   }
   //Connect
   {
-    const std::vector<std::vector<TRect> > v(GetRectsGrid(ClientRect,1,6));
+    const std::vector<std::vector<QRect> > v(GetRectsGrid(ClientRect(),1,6));
     //Labels
     PlaceInCenter(LabelConnectBalanced  ,v[0][0]);
     PlaceInCenter(LabelConnectMains     ,v[4][0]);

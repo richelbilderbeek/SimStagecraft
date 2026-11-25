@@ -3,7 +3,7 @@
 #ifndef UnitSimpleSound1H
 #define UnitSimpleSound1H
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "UnitSoundTable.h"
 struct Fader;
 struct PressButton;
@@ -14,7 +14,7 @@ struct XlrMale;
 struct XlrFemale;
 struct InternalConnection;
 struct AudioSignalDisplay;
-struct TFormSimpleSound1;
+class FormSimpleSound1;
 //---------------------------------------------------------------------------
 struct SimpleSound1 : public SoundTable
 {
@@ -33,23 +33,23 @@ struct SimpleSound1 : public SoundTable
 
   private:
 
+  public:
   ~SimpleSound1() {}
-  //SimpleSound1 can only be deleted by boost::shared_ptr
-  friend boost::checked_delete(SimpleSound1 *);
+  private:
 
   //View
   //Use
-  boost::shared_ptr<Fader> mFaderMaster;
+  std::shared_ptr<Fader> mFaderMaster;
   //Connect
-  boost::shared_ptr<XlrFemale> mMic1;
-  boost::shared_ptr<XlrMale> mMasterL;
-  boost::shared_ptr<XlrMale> mMasterR;
-  boost::shared_ptr<EuroMale> mPower;
-  boost::shared_ptr<InternalConnection> mConnectionAudioSignal;
+  std::shared_ptr<XlrFemale> mMic1;
+  std::shared_ptr<XlrMale> mMasterL;
+  std::shared_ptr<XlrMale> mMasterR;
+  std::shared_ptr<EuroMale> mPower;
+  std::shared_ptr<InternalConnection> mConnectionAudioSignal;
   //Display
-  boost::shared_ptr<AudioSignalDisplay> mAudioSignalDisplay;
+  std::shared_ptr<AudioSignalDisplay> mAudioSignalDisplay;
 
-  friend TFormSimpleSound1;
+  friend class FormSimpleSound1;
 };
 //---------------------------------------------------------------------------
 #endif

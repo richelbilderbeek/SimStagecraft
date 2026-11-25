@@ -4,7 +4,6 @@
 #define UnitMachineH
 //---------------------------------------------------------------------------
 #include <vector>
-#include <boost/checked_delete.hpp>
 //---------------------------------------------------------------------------
 struct Connector;
 //---------------------------------------------------------------------------
@@ -29,10 +28,9 @@ struct Machine
   virtual const bool HasPower() const = 0;
 
   protected:
-  //Machine can only be deleted by boost::shared_ptr
-  //or descendants
+  public:
   virtual ~Machine() {}
-  friend boost::checked_delete(Machine *);
+  protected:
 };
 //---------------------------------------------------------------------------
 #endif

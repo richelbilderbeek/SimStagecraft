@@ -1,13 +1,11 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
 #include "UnitConnector.h"
 #include "UnitLamp.h"
 #include <cassert>
 //---------------------------------------------------------------------------
 Par64::Par64()
-  : mPlug220(boost::shared_ptr<Plug220>(new Plug220(this)))
+  : mPlug220(std::shared_ptr<Plug220>(new Plug220(this)))
 {
   assert(mPlug220.get() != 0);
 }
@@ -34,4 +32,3 @@ const double Par64::GetLightIntensity() const
     std::vector<const Connector*>());
 }
 //---------------------------------------------------------------------------
-#pragma package(smart_init)

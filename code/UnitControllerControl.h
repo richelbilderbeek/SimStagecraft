@@ -3,109 +3,108 @@
 #ifndef UnitControllerControlH
 #define UnitControllerControlH
 //---------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
+#include <memory>
 //#include "UnitEnumControllerType.h"
 //struct Controller;
-struct TFormMachine;
+class FormMachine;
 
 struct Dial;
 struct Fader;
 struct PressButton;
 struct PushButton;
 struct TwoSwitch;
-namespace Extctrls { struct TImage; }
+struct Image;
 //---------------------------------------------------------------------------
 //Handles the GUI of a Controller
 //An XControl manages the GUI of an X
 struct ControllerControl
 {
-  ControllerControl(TFormMachine * const formParent,
-    Extctrls::TImage * const image);
+  ControllerControl(FormMachine * const formParent,
+    Image * const image);
   //The x and y are the coordinats on mImage itself,
-  //independent of its TImage::Left and TImage::Top properties
+  //independent of its Image::Left and Image::Top properties
   virtual void OnMouseDown(const int x, const int y) = 0;
 
   protected:
-  Extctrls::TImage * const mImage;
-  TFormMachine * const mFormParent;
+  Image * const mImage;
+  FormMachine * const mFormParent;
 
-  //ControllerControl can only be deleted by boost::shared_ptr
-  //or descendants
+  public:
   virtual ~ControllerControl() {}
-  friend boost::checked_delete(ControllerControl *);
+  protected:
 
 };
 //---------------------------------------------------------------------------
 struct DialControl : public ControllerControl
 {
-  DialControl(TFormMachine * const formParent,
-    const boost::shared_ptr<Dial> dial,
-    Extctrls::TImage * const image);
+  DialControl(FormMachine * const formParent,
+    const std::shared_ptr<Dial> dial,
+    Image * const image);
 
   void OnMouseDown(const int x, const int y);
 
   private:
-  const boost::shared_ptr<Dial> mDial;
+  const std::shared_ptr<Dial> mDial;
 
-  //DialControl can only be deleted by boost::shared_ptr
+  public:
   ~DialControl() {}
-  friend boost::checked_delete(DialControl *);
+  private:
 };
 //---------------------------------------------------------------------------
 struct FaderControl : public ControllerControl
 {
-  FaderControl(TFormMachine * const formParent,
-    const boost::shared_ptr<Fader> fader,
-    Extctrls::TImage * const image);
+  FaderControl(FormMachine * const formParent,
+    const std::shared_ptr<Fader> fader,
+    Image * const image);
 
   void OnMouseDown(const int x, const int y);
 
   private:
-  const boost::shared_ptr<Fader> mFader;
+  const std::shared_ptr<Fader> mFader;
 
-  //FaderControl can only be deleted by boost::shared_ptr
+  public:
   ~FaderControl() {}
-  friend boost::checked_delete(FaderControl *);
+  private:
 };
 //---------------------------------------------------------------------------
 struct PressButtonControl : public ControllerControl
 {
-  PressButtonControl(TFormMachine * const formParent,
-    const boost::shared_ptr<PressButton> pressButton,
-    Extctrls::TImage * const image);
+  PressButtonControl(FormMachine * const formParent,
+    const std::shared_ptr<PressButton> pressButton,
+    Image * const image);
 
   void OnMouseDown(const int, const int);
 
   private:
 
-  const boost::shared_ptr<PressButton> mPressButton;
-  const Extctrls::TImage * const mImageIn;
-  const Extctrls::TImage * const mImageOut;
+  const std::shared_ptr<PressButton> mPressButton;
+  const Image * const mImageIn;
+  const Image * const mImageOut;
 
-  //PressButtonControl can only be deleted by boost::shared_ptr
+  public:
   ~PressButtonControl() {}
-  friend boost::checked_delete(PressButtonControl *);
+  private:
 };
 //---------------------------------------------------------------------------
 // TabButtonControl has been moved to UnitTapButtonControl.h
 //---------------------------------------------------------------------------
 struct TwoSwitchControl : public ControllerControl
 {
-  TwoSwitchControl(TFormMachine * const formParent,
-    const boost::shared_ptr<TwoSwitch> twoSwitch,
-    Extctrls::TImage * const image);
+  TwoSwitchControl(FormMachine * const formParent,
+    const std::shared_ptr<TwoSwitch> twoSwitch,
+    Image * const image);
 
   void OnMouseDown(const int x, const int y);
 
   private:
 
-  const boost::shared_ptr<TwoSwitch> mTwoSwitch;
-  const Extctrls::TImage * const mImageOn;
-  const Extctrls::TImage * const mImageOff;
+  const std::shared_ptr<TwoSwitch> mTwoSwitch;
+  const Image * const mImageOn;
+  const Image * const mImageOff;
 
-  //TwoSwitchControl can only be deleted by boost::shared_ptr
+  public:
   ~TwoSwitchControl() {}
-  friend boost::checked_delete(TwoSwitchControl *);
+  private:
 };
 //---------------------------------------------------------------------------
 

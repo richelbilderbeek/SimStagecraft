@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
+#include <algorithm>
+#include <cassert>
 #include "UnitSimpleSound2.h"
 //---------------------------------------------------------------------------
 #include "UnitDisplay.h"
@@ -11,23 +11,23 @@
 SimpleSound2::SimpleSound2()
   : //View
     //Use
-    mFader1(boost::shared_ptr<Fader>(new Fader)),
-    mFader2(boost::shared_ptr<Fader>(new Fader)),
-    mDial1(boost::shared_ptr<Dial>(new Dial)),
-    mDial2(boost::shared_ptr<Dial>(new Dial)),
-    mPressButton1(boost::shared_ptr<PressButton>(new PressButton)),
-    mPressButton2(boost::shared_ptr<PressButton>(new PressButton)),
-    mFaderMaster(boost::shared_ptr<Fader>(new Fader)),
+    mFader1(std::shared_ptr<Fader>(new Fader)),
+    mFader2(std::shared_ptr<Fader>(new Fader)),
+    mDial1(std::shared_ptr<Dial>(new Dial)),
+    mDial2(std::shared_ptr<Dial>(new Dial)),
+    mPressButton1(std::shared_ptr<PressButton>(new PressButton)),
+    mPressButton2(std::shared_ptr<PressButton>(new PressButton)),
+    mFaderMaster(std::shared_ptr<Fader>(new Fader)),
     //Connect
-    mMic1(boost::shared_ptr<XlrFemale>(new XlrFemale(this))),
-    mMic2(boost::shared_ptr<XlrFemale>(new XlrFemale(this))),
-    mMasterL(boost::shared_ptr<XlrMale>(new XlrMale(this))),
-    mMasterR(boost::shared_ptr<XlrMale>(new XlrMale(this))),
-    mPower(boost::shared_ptr<EuroMale>(new EuroMale(this))),
+    mMic1(std::shared_ptr<XlrFemale>(new XlrFemale(this))),
+    mMic2(std::shared_ptr<XlrFemale>(new XlrFemale(this))),
+    mMasterL(std::shared_ptr<XlrMale>(new XlrMale(this))),
+    mMasterR(std::shared_ptr<XlrMale>(new XlrMale(this))),
+    mPower(std::shared_ptr<EuroMale>(new EuroMale(this))),
     mConnectionAudioSignal(
-     boost::shared_ptr<InternalConnection>(new InternalConnection(this)))
+     std::shared_ptr<InternalConnection>(new InternalConnection(this)))
 {
-  mAudioSignalDisplay = boost::shared_ptr<AudioSignalDisplay>(
+  mAudioSignalDisplay = std::shared_ptr<AudioSignalDisplay>(
     new AudioSignalDisplay(mConnectionAudioSignal.get()));
 
 }
@@ -147,4 +147,3 @@ const bool SimpleSound2::HasPower() const
 }
 //---------------------------------------------------------------------------
 
-#pragma package(smart_init)

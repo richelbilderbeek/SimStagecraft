@@ -1,17 +1,17 @@
 //---------------------------------------------------------------------------
-#include <vcl.h> //For precompiled header
-#pragma hdrstop
 
+#include <algorithm>
+#include <cassert>
 #include "UnitController.h"
 #include "UnitConnector.h"
 
 #include "UnitTriplet.h"
 //---------------------------------------------------------------------------
 Triplet::Triplet()
-  : mPlug(boost::shared_ptr<Plug220>(new Plug220(this))),
-    mSocket220_1(boost::shared_ptr<Socket220>(new Socket220(this))),
-    mSocket220_2(boost::shared_ptr<Socket220>(new Socket220(this))),
-    mSocket220_3(boost::shared_ptr<Socket220>(new Socket220(this)))
+  : mPlug(std::shared_ptr<Plug220>(new Plug220(this))),
+    mSocket220_1(std::shared_ptr<Socket220>(new Socket220(this))),
+    mSocket220_2(std::shared_ptr<Socket220>(new Socket220(this))),
+    mSocket220_3(std::shared_ptr<Socket220>(new Socket220(this)))
 {
 
 }
@@ -48,4 +48,3 @@ const bool Triplet::HasPower() const
     connectedTo,std::vector<const Connector*>()) > 0.0 ? true : false);
 }
 //---------------------------------------------------------------------------
-#pragma package(smart_init)

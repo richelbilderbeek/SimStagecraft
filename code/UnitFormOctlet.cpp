@@ -1,26 +1,20 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
 
+#include <cassert>
 #include <stdexcept>
 #include "UnitControllerControl.h"
 #include "UnitConnectorControl.h"
 #include "UnitMachine.h"
 #include "UnitOctlet.h"
-#include "UnitVcl.h"
+#include "UnitImage.h"
 #include "UnitFormOctlet.h"
 #include "UnitFormMachine.h"
 #include "UnitFormSimStagecraftMain.h"
 //---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma link "UnitFormMachine"
-#pragma resource "*.dfm"
-TFormOctlet *FormOctlet;
 //---------------------------------------------------------------------------
-__fastcall TFormOctlet::TFormOctlet(TComponent* Owner,
-    TFormSimStagecraftMain * const formParent)
-  : TFormMachine(Owner,formParent),
-    mOctlet(boost::shared_ptr<Octlet>(new Octlet))
+FormOctlet::FormOctlet(FormSimStagecraftMain * const formParent)
+  : FormMachine(formParent,DesignClientWidth,DesignClientHeight),
+    mOctlet(std::shared_ptr<Octlet>(new Octlet))
 {
   mImageSockets220.push_back(ImageSocket220_1);
   mImageSockets220.push_back(ImageSocket220_2);
@@ -34,34 +28,34 @@ __fastcall TFormOctlet::TFormOctlet(TComponent* Owner,
 
 
   //Control
-  mTwoSwitchPower = boost::shared_ptr<TwoSwitchControl>(
+  mTwoSwitchPower = std::shared_ptr<TwoSwitchControl>(
     new TwoSwitchControl(this,mOctlet->mPowerSwitch,ImageTwoSwitchPower));
   //Connect
-  mPlug220 = boost::shared_ptr<Plug220Control>(
+  mPlug220 = std::shared_ptr<Plug220Control>(
     new Plug220Control(this,mOctlet->mPlug,ImagePlug220));
   mSocket220Controls = this->CreateSocket220Controls();
 
   CreateWatermark(ImageView,ImageWatermark);
 
-  OnResize(0);
+  Resize();
 
   //Turn power off by default
   mTwoSwitchPower->OnMouseDown(0,0); //Top of powerswitch turns off
 }
 //---------------------------------------------------------------------------
-void TFormOctlet::UpdateBuffer()
+void FormOctlet::UpdateBuffer()
 {
   switch (mDisplayMode)
   {
     case modeView:
-      ImageBuffer->Canvas->Draw(0,0,ImageView->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageView);
       break;
     case modeUse:
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       DrawOnBuffer(ImageTwoSwitchPower);
       break;
     case modeConnect:
-      ImageBuffer->Canvas->Draw(0,0,ImageWatermark->Picture->Graphic);
+      DrawImage(ImageBuffer,0,0,ImageWatermark);
       DrawOnBuffer(ImagePlug220);
       {
         const int nSockets = mSocket220Controls.size();
@@ -77,7 +71,7 @@ void TFormOctlet::UpdateBuffer()
   DrawBorderAroundBuffer();
 }
 //---------------------------------------------------------------------------
-void TFormOctlet::OnMouseDown(const int x, const int y)
+void FormOctlet::OnMouseDown(const int x, const int y)
 {
   switch (mDisplayMode)
   {
@@ -87,8 +81,8 @@ void TFormOctlet::OnMouseDown(const int x, const int y)
       if (OnImage(x,y,ImageTwoSwitchPower))
       {
         mTwoSwitchPower->OnMouseDown(
-          x - ImageTwoSwitchPower->Left,
-          y - ImageTwoSwitchPower->Top);
+          x - ImageTwoSwitchPower->left,
+          y - ImageTwoSwitchPower->top);
       }
       break;
     case modeConnect:
@@ -106,13 +100,13 @@ void TFormOctlet::OnMouseDown(const int x, const int y)
   }
 }
 //---------------------------------------------------------------------------
-void TFormOctlet::OnAfterResize()
+void FormOctlet::OnAfterResize()
 {
-  const std::vector<TRect> v(GetRectsHorizontal(ClientRect,5));
-  const std::vector<TRect> v0(GetRectsVertical(v[0],2));
-  const std::vector<TRect> v1(GetRectsVertical(v[1],2));
-  const std::vector<TRect> v2(GetRectsVertical(v[2],2));
-  const std::vector<TRect> v3(GetRectsVertical(v[3],2));
+  const std::vector<QRect> v(GetRectsHorizontal(ClientRect(),5));
+  const std::vector<QRect> v0(GetRectsVertical(v[0],2));
+  const std::vector<QRect> v1(GetRectsVertical(v[1],2));
+  const std::vector<QRect> v2(GetRectsVertical(v[2],2));
+  const std::vector<QRect> v3(GetRectsVertical(v[3],2));
   PlaceInCenter(mImageSockets220[0],v0[0]);
   PlaceInCenter(mImageSockets220[1],v1[0]);
   PlaceInCenter(mImageSockets220[2],v2[0]);
@@ -123,20 +117,20 @@ void TFormOctlet::OnAfterResize()
   PlaceInCenter(mImageSockets220[7],v3[1]);
   PlaceInCenter(ImagePlug220    ,v[4]);
 
-  PlaceInCenter(ImageTwoSwitchPower,ClientRect);
+  PlaceInCenter(ImageTwoSwitchPower,ClientRect());
 }
 //---------------------------------------------------------------------------
-const std::vector<boost::shared_ptr<Socket220Control> >
-  TFormOctlet::CreateSocket220Controls()
+const std::vector<std::shared_ptr<Socket220Control> >
+  FormOctlet::CreateSocket220Controls()
 {
-  std::vector<boost::shared_ptr<Socket220Control> > sockets;
+  std::vector<std::shared_ptr<Socket220Control> > sockets;
 
   const int nSockets = mImageSockets220.size();
   assert(mOctlet->mSockets220.size() == mImageSockets220.size() );
 
   for (int i=0; i!=nSockets; ++i)
   {
-    boost::shared_ptr<Socket220Control> socket(new Socket220Control(
+    std::shared_ptr<Socket220Control> socket(new Socket220Control(
       this, mOctlet->mSockets220[i], mImageSockets220[i] ));
     sockets.push_back(socket);
 

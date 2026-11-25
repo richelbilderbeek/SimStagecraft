@@ -28,3 +28,6 @@
 *.app
 
 site/
+
+# CMake build folders
+build/
