@@ -47,6 +47,8 @@ jobs:
           pip install aqtinstall
           # --autodesktop also installs the desktop Qt, needed for the Qt build tools
           aqt install-qt all_os wasm ${QT_VERSION} wasm_singlethread --autodesktop -O ${HOME}/Qt
+          # The all_os package does not keep the executable bits
+          chmod +x ${HOME}/Qt/${QT_VERSION}/wasm_singlethread/bin/*
 
       - name: Build WebAssembly version
         run: |
