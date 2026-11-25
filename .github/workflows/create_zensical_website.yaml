@@ -30,9 +30,6 @@ env:
 
 jobs:
   create_zensical_website:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/configure-pages@v5
@@ -87,5 +84,15 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
+
+  # A separate job: when deploying in the same job as the upload,
+  # the artifact is often not found yet
+  deploy_zensical_website:
+    needs: create_zensical_website
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-24.04
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
