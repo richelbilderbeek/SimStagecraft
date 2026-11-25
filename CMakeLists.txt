@@ -29,8 +29,11 @@ qt_add_executable(SimStagecraft WIN32 MACOSX_BUNDLE
 )
 target_link_libraries(SimStagecraft PRIVATE simstagecraft_lib)
 
-include(CTest)
-if(BUILD_TESTING)
+# No tests in the WebAssembly version
+if(NOT EMSCRIPTEN)
+  include(CTest)
+endif()
+if(BUILD_TESTING AND NOT EMSCRIPTEN)
   add_executable(test_simstagecraft code/tests/TestSimStagecraft.cpp)
   target_link_libraries(test_simstagecraft PRIVATE simstagecraft_lib)
   add_test(NAME test_simstagecraft COMMAND test_simstagecraft)

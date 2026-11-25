@@ -7,6 +7,7 @@
 #include "UnitFormSimStagecraftMenu.h"
 #include "UnitFormSimStagecraftSelect.h"
 #include "UnitFormSimStagecraftAbout.h"
+#include "UnitShowModal.h"
 #include "UnitSurfaceWidget.h"
 //---------------------------------------------------------------------------
 FormSimStagecraftMenu::FormSimStagecraftMenu(QWidget * const parent)
@@ -76,9 +77,8 @@ void FormSimStagecraftMenu::FormMouseDown(const int X, const int Y)
   {
     //Start game
     TimerBackground->stop();
-    FormSimStagecraftSelect form(this);
-    form.exec();
-    TimerBackground->start();
+    ShowModal(new FormSimStagecraftSelect(this), this,
+      [this]() { TimerBackground->start(); });
   }
   else
   if (OnImage(X,Y,ImageAbout) == true
@@ -87,9 +87,8 @@ void FormSimStagecraftMenu::FormMouseDown(const int X, const int Y)
   {
     //About screen
     TimerBackground->stop();
-    FormSimStagecraftAbout form(this);
-    form.exec();
-    TimerBackground->start();
+    ShowModal(new FormSimStagecraftAbout(this), this,
+      [this]() { TimerBackground->start(); });
   }
   else
   if (OnImage(X,Y,ImageQuit) == true

@@ -12,6 +12,7 @@
 #include "UnitFormSimStagecraftMain.h"
 #include "UnitFormSimStagecraftSelect.h"
 #include "UnitImage.h"
+#include "UnitShowModal.h"
 #include "UnitSurfaceWidget.h"
 //---------------------------------------------------------------------------
 FormSimStagecraftSelect::FormSimStagecraftSelect(QWidget * const parent)
@@ -114,12 +115,9 @@ void FormSimStagecraftSelect::FormMouseDown(const int X, const int Y)
   {
     //Turn timer off temporarily
     TimerMain->stop();
-    {
-      FormSimStagecraftMain form(this,mLevel);
-      form.exec();
-    }
-    //And turn it back on
-    TimerMain->start();
+    //And turn it back on when the game is closed
+    ShowModal(new FormSimStagecraftMain(this,mLevel), this,
+      [this]() { TimerMain->start(); });
   }
   else if (OnImage(X,Y,ImageArrowLeft)==true && mLevel > 1)
   {

@@ -12,6 +12,7 @@
 #include "UnitFormSimStagecraftAbout.h"
 #include "UnitFormSimStagecraftWhatsNew.h"
 #include "UnitFormSimStagecraftOtherLicences.h"
+#include "UnitShowModal.h"
 #include "UnitSurfaceWidget.h"
 //---------------------------------------------------------------------------
 namespace {
@@ -69,12 +70,12 @@ FormSimStagecraftAbout::FormSimStagecraftAbout(QWidget * const parent)
   QPushButton * const buttonOtherLicences = new QPushButton("Other licences",this);
   buttonOtherLicences->setGeometry(8,288,121,25);
   connect(buttonOtherLicences, &QPushButton::clicked, this,
-    [this]() { FormSimStagecraftOtherLicences f(this); f.exec(); });
+    [this]() { ShowModal(new FormSimStagecraftOtherLicences(this), this); });
 
   QPushButton * const buttonWhatsNew = new QPushButton("What's new?",this);
   buttonWhatsNew->setGeometry(216,288,99,25);
   connect(buttonWhatsNew, &QPushButton::clicked, this,
-    [this]() { FormSimStagecraftWhatsNew f(this); f.exec(); });
+    [this]() { ShowModal(new FormSimStagecraftWhatsNew(this), this); });
 
   QPlainTextEdit * const richEditLicence = new QPlainTextEdit(this);
   richEditLicence->setGeometry(0,320,591,89);

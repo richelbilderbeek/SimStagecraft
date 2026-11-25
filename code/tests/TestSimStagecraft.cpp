@@ -16,6 +16,7 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QPixmap>
+#include <QPushButton>
 
 #include "UnitFormSimStagecraftAbout.h"
 #include "UnitFormSimStagecraftMain.h"
@@ -122,6 +123,35 @@ int main(int argc, char * argv[])
     FormSimStagecraftMenu form;
     form.show();
     Save(&form, "menu");
+    //Menu -> Select -> Main, all opened without blocking
+    PressKey(&form, Qt::Key_S);
+    FormSimStagecraftSelect * select = nullptr;
+    for (QDialog * const d: form.findChildren<QDialog*>())
+    {
+      if (auto * const s = dynamic_cast<FormSimStagecraftSelect*>(d)) select = s;
+    }
+    if (!select || !select->isVisible()) { std::cerr << "Select not shown\n"; return 1; }
+    PressKey(select, Qt::Key_S);
+    FormSimStagecraftMain * game = nullptr;
+    for (QDialog * const d: select->findChildren<QDialog*>())
+    {
+      if (auto * const g = dynamic_cast<FormSimStagecraftMain*>(d)) game = g;
+    }
+    if (!game || !game->isVisible()) { std::cerr << "Game not shown\n"; return 1; }
+    game->close();
+    select->close();
+    //About and its two sub dialogs
+    PressKey(&form, Qt::Key_A);
+    FormSimStagecraftAbout * about = nullptr;
+    for (QDialog * const d: form.findChildren<QDialog*>())
+    {
+      if (auto * const a = dynamic_cast<FormSimStagecraftAbout*>(d)) about = a;
+    }
+    if (!about || !about->isVisible()) { std::cerr << "About not shown\n"; return 1; }
+    for (QPushButton * const button: about->findChildren<QPushButton*>()) button->click();
+    QApplication::processEvents();
+    about->close();
+    QApplication::processEvents();
   }
   {
     FormSimStagecraftSelect form;

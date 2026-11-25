@@ -1,35 +1,76 @@
 # Adapted from https://zensical.org/docs/publish-your-site/#with-github-actions
+#
+# Builds the WebAssembly version of SimStagecraft
+# and puts it on the website, at the 'Run' page
 name: Create Zensical website
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - main
     paths:
       - .github/workflows/create_zensical_website.yaml
       - 'docs/**'
       - zensical.toml
+      - 'code/**'
+      - CMakeLists.txt
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
+env:
+  # Each Qt minor version needs one specific Emscripten version,
+  # see https://doc.qt.io/qt-6.8/wasm.html
+  QT_VERSION: 6.8.3
+  EMSDK_VERSION: 3.1.56
+
 jobs:
   create_zensical_website:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/configure-pages@v5
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x
+
+      # WebAssembly version
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: ${{ env.EMSDK_VERSION }}
+
+      - name: Install Qt for WebAssembly
+        run: |
+          pip install aqtinstall
+          # --autodesktop also installs the desktop Qt, needed for the Qt build tools
+          aqt install-qt all_os wasm ${QT_VERSION} wasm_singlethread --autodesktop -O ${HOME}/Qt
+
+      - name: Build WebAssembly version
+        run: |
+          ${HOME}/Qt/${QT_VERSION}/wasm_singlethread/bin/qt-cmake \
+            -S . -B build_wasm \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DQT_HOST_PATH=${HOME}/Qt/${QT_VERSION}/gcc_64
+          cmake --build build_wasm --target SimStagecraft --parallel
+          ls -l build_wasm
+
+      # Website
       - run: pip install zensical
       - run: zensical build --clean --strict
+
+      - name: Put WebAssembly version on website
+        run: |
+          mkdir -p site/app
+          cp build_wasm/SimStagecraft.html build_wasm/SimStagecraft.js build_wasm/SimStagecraft.wasm build_wasm/qtloader.js site/app/
+          cp build_wasm/qtlogo.svg site/app/ || true
+          ls -l site/app
+
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
