@@ -30,6 +30,9 @@ env:
 
 jobs:
   create_zensical_website:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/configure-pages@v5
@@ -77,23 +80,8 @@ jobs:
           playwright install --with-deps chromium
           python3 scripts/check_wasm_in_browser.py site
 
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: wasm_screenshot
-          path: wasm_screenshot.png
-          if-no-files-found: ignore
-
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
-
-  deploy_zensical_website:
-    needs: create_zensical_website
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-24.04
-    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
