@@ -34,7 +34,11 @@ def main(site_dir):
         # Wait for Qt to create its screen
         started = False
         for _ in range(60):
-            if page.evaluate("() => document.querySelector('.qt-screen, canvas') !== null"):
+            # The default Qt page shows #screen when the app is loaded
+            if page.evaluate("""() => {
+                const s = document.querySelector('#screen');
+                return s !== null && getComputedStyle(s).display !== 'none';
+            }"""):
                 started = True
                 break
             time.sleep(1)
@@ -47,13 +51,16 @@ def main(site_dir):
         page.keyboard.press("s")
         time.sleep(5)
         page.screenshot(path="wasm_screenshot.png")
+        status = page.evaluate(
+            "() => (document.querySelector('#qtstatus') || {}).innerText || ''")
         browser.close()
     server.shutdown()
 
     print("Console messages:")
     for m in messages:
         print("  " + m)
-    if not started:
+    print("Qt status text: " + status)
+    if not started or "exit" in status.lower() or "exception" in status.lower():
         print("FAIL: Qt did not start")
         return 1
     fatal = errors + [m for m in messages
