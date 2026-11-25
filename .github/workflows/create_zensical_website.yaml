@@ -72,6 +72,9 @@ jobs:
           mkdir -p site/app
           cp build_wasm/SimStagecraft.html build_wasm/SimStagecraft.js build_wasm/SimStagecraft.wasm build_wasm/qtloader.js site/app/
           cp build_wasm/qtlogo.svg site/app/ || true
+          # The linker makes SimStagecraft.js executable,
+          # GitHub Pages fails to deploy (HTTP 500) with executable files
+          chmod -R u=rwX,go=rX site
           ls -l site/app
 
       - name: Check that the WebAssembly version starts in a browser
@@ -80,8 +83,6 @@ jobs:
           playwright install --with-deps chromium
           python3 scripts/check_wasm_in_browser.py site
 
-      # TEMPORARY: deploy without the app, to find the cause of HTTP 500
-      - run: rm -rf site/app
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
