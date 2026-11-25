@@ -70,6 +70,19 @@ jobs:
           cp build_wasm/qtlogo.svg site/app/ || true
           ls -l site/app
 
+      - name: Check that the WebAssembly version starts in a browser
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+          python3 scripts/check_wasm_in_browser.py site
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wasm_screenshot
+          path: wasm_screenshot.png
+          if-no-files-found: ignore
+
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
