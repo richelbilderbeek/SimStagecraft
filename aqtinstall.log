@@ -1,2 +1,0 @@
-2026-11-25 13:00:29,522 - aqt.metadata - DEBUG - metadata 139809350117184 Connection to 'https://download.qt.io' failed. Retrying with fallback 'https://mirrors.aliyun.com/qt/'.
-2026-11-25 13:00:34,187 - aqt.main - ERROR - installer 139809350117184 Failure to connect to https://mirrors.aliyun.com/qt/online/qtsdkrepository/all_os/wasm/: ProxyError

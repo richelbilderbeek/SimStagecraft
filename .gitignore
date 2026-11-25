@@ -31,3 +31,6 @@ site/
 
 # CMake build folders
 build/
+
+# aqtinstall
+aqtinstall.log
