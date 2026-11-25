@@ -5,9 +5,10 @@ This is the Qt version of SimStagecraft, compiled to WebAssembly.
 
 Click on the game first, so that it receives your key presses.
 
-<iframe src="../app/SimStagecraft.html" title="SimStagecraft" width="100%" height="700" style="border: 1px solid #ccc;"></iframe>
+<!-- Paths are relative to the docs folder: Zensical rewrites them for each page -->
+<iframe src="app/SimStagecraft.html" title="SimStagecraft" width="100%" height="700" style="border: 1px solid #ccc;"></iframe>
 
-<p><a href="../app/SimStagecraft.html" target="_blank">Open SimStagecraft in a full window</a></p>
+<p><a href="app/SimStagecraft.html" target="_blank">Open SimStagecraft in a full window</a></p>
 
 ## How to play
 
