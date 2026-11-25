@@ -5,7 +5,7 @@ Serves the built website, opens the app in headless Chromium,
 waits for Qt to start, then fails if the page reported an error.
 
 Usage:
-  pip install playwright && playwright install --with-deps chromium
+  pip install playwright pillow && playwright install --with-deps chromium
   python3 scripts/check_wasm_in_browser.py site
 """
 import functools
@@ -14,6 +14,7 @@ import sys
 import threading
 import time
 
+from PIL import Image
 from playwright.sync_api import sync_playwright
 
 
@@ -69,6 +70,12 @@ def main(site_dir):
         print("FAIL: errors in the page:")
         for e in fatal:
             print("  " + e)
+        return 1
+    # The screenshot must show something: the game has many colors
+    n_colors = len(set(Image.open("wasm_screenshot.png").convert("RGB").getdata()))
+    print(f"Number of colors in the screenshot: {n_colors}")
+    if n_colors < 100:
+        print("FAIL: the screenshot is (nearly) empty")
         return 1
     print("OK: SimStagecraft started in the browser")
     return 0

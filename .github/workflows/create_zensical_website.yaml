@@ -73,7 +73,7 @@ jobs:
 
       - name: Check that the WebAssembly version starts in a browser
         run: |
-          pip install playwright
+          pip install playwright pillow
           playwright install --with-deps chromium
           python3 scripts/check_wasm_in_browser.py site
 
