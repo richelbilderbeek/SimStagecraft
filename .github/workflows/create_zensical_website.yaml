@@ -72,9 +72,10 @@ jobs:
           mkdir -p site/app
           cp build_wasm/SimStagecraft.html build_wasm/SimStagecraft.js build_wasm/SimStagecraft.wasm build_wasm/qtloader.js site/app/
           cp build_wasm/qtlogo.svg site/app/ || true
-          # The linker makes SimStagecraft.js executable,
+          # The linker makes SimStagecraft.wasm executable,
           # GitHub Pages fails to deploy (HTTP 500) with executable files
-          chmod -R u=rwX,go=rX site
+          find site -type f -exec chmod 644 {} +
+          find site -type d -exec chmod 755 {} +
           ls -l site/app
 
       - name: Check that the WebAssembly version starts in a browser
